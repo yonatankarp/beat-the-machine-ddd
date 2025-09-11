@@ -1,18 +1,14 @@
 [versions]
 
 coroutines = "1.10.2"
-jooqDockerPlugin = "7.0.22"
 jvmTarget = "21"
 kotlin = "2.2.20"
 mockk = "1.14.5"
 mockkSpring = "4.0.2"
-postgres = "42.7.7"
 spotless = "7.2.1"
 springDependencyManagement = "1.1.7"
 springboot = "3.5.5"
-springdoc = "2.8.13"
 swagger = "7.15.0"
-testcontainers = "1.21.3"
 
 [libraries]
 
@@ -27,27 +23,16 @@ kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 # Spring Boot
 springboot_actuator_starter = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 springboot_jdbc_starter = { module = "org.springframework.boot:spring-boot-starter-jdbc" }
-springboot_jooq_starter = { module = "org.springframework.boot:spring-boot-starter-jooq" }
 springboot_test_starter = { module = "org.springframework.boot:spring-boot-starter-test" }
 springboot_validation_starter = { module = "org.springframework.boot:spring-boot-starter-validation" }
-springboot_web_starter = { module = "org.springframework.boot:spring-boot-starter-webflux" }
-springdoc_openapi_starter = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
-
-# Persistence
-flyway_postgres = { module = "org.flywaydb:flyway-database-postgresql" }
-hikaricp_core = { module = "com.zaxxer:HikariCP" }
-postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+springboot_webflux_starter = { module = "org.springframework.boot:spring-boot-starter-webflux" }
 
 # Testing
 mockk_core = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockk_spring = { module = "com.ninja-squad:springmockk", version.ref = "mockkSpring" }
-testcontainers_bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
-testcontainers_jupiter = { module = "org.testcontainers:junit-jupiter" }
-testcontainers_postgres = { module = "org.testcontainers:postgresql" }
 
 [plugins]
 
-jooq = { id = "dev.monosoul.jooq-docker", version.ref = "jooqDockerPlugin" }
 kotlin_jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin_spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 openapi_generator = { id = "org.openapi.generator", version.ref = "swagger" }
@@ -68,14 +53,8 @@ kotlin_all = [
 springboot_all = [
     "springboot_actuator_starter",
     "springboot_jdbc_starter",
-    "springboot_jooq_starter",
     "springboot_validation_starter",
-    "springboot_web_starter",
-]
-
-persistence_support_all = [
-    "flyway_postgres",
-    "hikaricp_core",
+    "springboot_webflux_starter",
 ]
 
 test_all = [
@@ -83,6 +62,4 @@ test_all = [
     "mockk_core",
     "mockk_spring",
     "springboot_test_starter",
-    "testcontainers_jupiter",
-    "testcontainers_postgres",
 ]

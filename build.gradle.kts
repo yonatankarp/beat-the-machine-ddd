@@ -9,7 +9,6 @@ plugins {
     alias(libs.plugins.springboot.dependency.management) apply false
     alias(libs.plugins.springboot) apply false
     alias(libs.plugins.openapi.generator) apply false
-    alias(libs.plugins.jooq) apply false
 }
 
 subprojects {

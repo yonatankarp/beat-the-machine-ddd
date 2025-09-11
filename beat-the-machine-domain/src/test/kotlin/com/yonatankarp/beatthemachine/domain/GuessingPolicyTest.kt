@@ -30,11 +30,12 @@ class GuessingPolicyTest {
         val revealed = policy.reveal(target, current, guess)
 
         // Then
-        val expected = listOf(
-            "-----" to "-----",
-            "------" to "banana",
-            "------" to "------"
-        )
+        val expected =
+            listOf(
+                "-----" to "-----",
+                "------" to "banana",
+                "------" to "------",
+            )
         assertEquals(expected, revealed)
     }
 

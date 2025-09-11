@@ -1,8 +1,9 @@
 package com.yonatankarp.beatthemachine.domain
 
 @JvmInline
-value class Word private constructor(val value: String) {
-
+value class Word private constructor(
+    val value: String,
+) {
     fun masked() = "-".repeat(value.length)
 
     companion object {

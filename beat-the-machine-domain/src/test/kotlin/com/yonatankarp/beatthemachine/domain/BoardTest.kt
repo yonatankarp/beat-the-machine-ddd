@@ -8,16 +8,18 @@ class BoardTest {
     @Test
     fun `isSolved returns true when the board is solved`() {
         // Given
-        val board = Board(
-            shown = listOf("apple", "banana", "cherry")
-        )
+        val board =
+            Board(
+                shown = listOf("apple", "banana", "cherry"),
+            )
 
         // When
-        val target = listOf(
-            Word.of("apple"),
-            Word.of("banana"),
-            Word.of("cherry")
-        )
+        val target =
+            listOf(
+                Word.of("apple"),
+                Word.of("banana"),
+                Word.of("cherry"),
+            )
 
         // Then
         assertTrue(board.isSolved(target))
@@ -26,16 +28,18 @@ class BoardTest {
     @Test
     fun `isSolved returns false when the board is not solved`() {
         // Given
-        val board = Board(
-            shown = listOf("apple", "banana", "cherry")
-        )
+        val board =
+            Board(
+                shown = listOf("apple", "banana", "cherry"),
+            )
 
         // When
-        val target = listOf(
-            Word.of("apple"),
-            Word.of("banana"),
-            Word.of("date")
-        )
+        val target =
+            listOf(
+                Word.of("apple"),
+                Word.of("banana"),
+                Word.of("date"),
+            )
 
         // Then
         assertFalse(board.isSolved(target))
@@ -44,16 +48,18 @@ class BoardTest {
     @Test
     fun `isSolved is case insensitive`() {
         // Given
-        val board = Board(
-            shown = listOf("Apple", "BANANA", "chErry")
-        )
+        val board =
+            Board(
+                shown = listOf("Apple", "BANANA", "chErry"),
+            )
 
         // When
-        val target = listOf(
-            Word.of("apple"),
-            Word.of("banana"),
-            Word.of("cherry")
-        )
+        val target =
+            listOf(
+                Word.of("apple"),
+                Word.of("banana"),
+                Word.of("cherry"),
+            )
 
         // Then
         assertTrue(board.isSolved(target))
@@ -74,16 +80,18 @@ class BoardTest {
     @Test
     fun `isSolved returns false when the board and target have different sizes`() {
         // Given
-        val board = Board(
-            shown = listOf("apple", "banana")
-        )
+        val board =
+            Board(
+                shown = listOf("apple", "banana"),
+            )
 
         // When
-        val target = listOf(
-            Word.of("apple"),
-            Word.of("banana"),
-            Word.of("cherry")
-        )
+        val target =
+            listOf(
+                Word.of("apple"),
+                Word.of("banana"),
+                Word.of("cherry"),
+            )
 
         // Then
         assertFalse(board.isSolved(target))

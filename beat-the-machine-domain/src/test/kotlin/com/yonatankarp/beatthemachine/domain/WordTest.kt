@@ -30,7 +30,7 @@ class WordTest {
     }
 
     @Test
-    fun `should throw an error if multiple words are given`(){
+    fun `should throw an error if multiple words are given`() {
         // Given
         val raw = "two words"
 

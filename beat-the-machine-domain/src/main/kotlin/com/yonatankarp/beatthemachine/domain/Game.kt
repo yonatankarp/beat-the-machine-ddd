@@ -5,9 +5,12 @@ import com.yonatankarp.beatthemachine.domain.events.GameEvent.GuessEvaluated
 
 data class Game(
     val riddle: Riddle,
-    val board: Board
+    val board: Board,
 ) {
-    fun applyGuess(guess: List<Word>, policy: GuessingPolicy): Pair<Game, GuessEvaluated> {
+    fun applyGuess(
+        guess: List<Word>,
+        policy: GuessingPolicy,
+    ): Pair<Game, GuessEvaluated> {
         val nextShown = policy.reveal(riddle.prompt, board.shown, guess)
         val revealed = nextShown.count { it.first != it.second }
         val next = copy(board = Board(nextShown.map { it.second }))
@@ -20,10 +23,13 @@ data class Game(
     }
 
     companion object {
-        fun start(riddle: Riddle, policy: GuessingPolicy): Game =
+        fun start(
+            riddle: Riddle,
+            policy: GuessingPolicy,
+        ): Game =
             Game(
                 riddle = riddle,
-                board = Board(policy.initialMask(riddle.prompt))
+                board = Board(policy.initialMask(riddle.prompt)),
             )
     }
 }

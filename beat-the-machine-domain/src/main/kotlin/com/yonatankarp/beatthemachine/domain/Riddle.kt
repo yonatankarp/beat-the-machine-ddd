@@ -3,8 +3,10 @@ package com.yonatankarp.beatthemachine.domain
 data class Riddle(
     val id: Id,
     val prompt: List<Word>,
-    val image: ImageUrl
+    val image: ImageUrl,
 ) {
     @JvmInline
-    value class Id(val value: Int)
+    value class Id(
+        val value: Int,
+    )
 }

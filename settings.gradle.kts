@@ -1,4 +1,6 @@
-rootProject.name = "spring-starter"
+rootProject.name = "beat-the-machine"
 include(
-    "spring-starter"
+    "beat-the-machine"
 )
+
+include("beat-the-machine-domain")

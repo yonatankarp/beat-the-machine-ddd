@@ -1,70 +1,19 @@
-# spring-starter
+# beat-the-machine
 
-[build-badge]: https://github.com/yonatankarp/spring-starter/actions/workflows/build.yml/badge.svg
-[build-state]: https://github.com/yonatankarp/spring-starter/actions/workflows/build.yml
-[codeql-badge]: https://github.com/yonatankarp/spring-starter/actions/workflows/codeql.yml/badge.svg
-[codeql-state]: https://github.com/yonatankarp/spring-starter/actions/workflows/codeql.yml
+[build-badge]: https://github.com/yonatankarp/beat-the-machine-ddd/actions/workflows/build.yml/badge.svg
+[build-state]: https://github.com/yonatankarp/beat-the-machine-ddd/actions/workflows/build.yml
+[codeql-badge]: https://github.com/yonatankarp/beat-the-machine-ddd/actions/workflows/codeql.yml/badge.svg
+[codeql-state]: https://github.com/yonatankarp/beat-the-machine-ddd/actions/workflows/codeql.yml
 
-[quality-badge]: https://sonarcloud.io/api/project_badges/measure?project=yonatankarp_spring-starter&metric=alert_status
-[quality-state]: https://sonarcloud.io/summary/new_code?id=yonatankarp_spring-starter
-[maintainability-badge]: https://sonarcloud.io/api/project_badges/measure?project=yonatankarp_spring-starter&metric=sqale_rating
-[maintainability-state]: https://sonarcloud.io/summary/new_code?id=yonatankarp_spring-starter
-[tech-debt-badge]: https://sonarcloud.io/api/project_badges/measure?project=yonatankarp_spring-starter&metric=sqale_index
-[tech-debt-state]: https://sonarcloud.io/summary/new_code?id=yonatankarp_spring-starter
-[security-badge]: https://sonarcloud.io/api/project_badges/measure?project=yonatankarp_spring-starter&metric=security_rating
-[security-state]: https://sonarcloud.io/summary/new_code?id=yonatankarp_spring-starter
-[vulnerabilities-badge]: https://sonarcloud.io/api/project_badges/measure?project=yonatankarp_spring-starter&metric=vulnerabilities
-[vulnerabilities-state]: https://sonarcloud.io/summary/new_code?id=yonatankarp_spring-starter
 [license-badge]: https://img.shields.io/badge/License-MIT-yellow.svg
 [license-link]: https://opensource.org/licenses/MIT
 
 | **Type**     | **Status**                                                                                                                                                                             |
 |--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | CI pipelines | [![Build][build-badge]][build-state]  [![CodeQL][codeql-badge]][codeql-state]                                                                                                          |
-| Maintenance  | [![Quality Gate Status][quality-badge]][quality-state] [![Maintainability Rating][maintainability-badge]][maintainability-state] [![Technical Debt][tech-debt-badge]][tech-debt-state] |
-| Security     | [![Security Rating][security-badge]][security-state] [![Vulnerabilities][vulnerabilities-badge]][vulnerabilities-state]                                                                |
 | License      | [![License: MIT][license-badge]][license-link]                                                                                                                                         |
 
 
-
-## Purpose
-
-This is a template to fast and easily bootstrap new spring boot web
-applications that including full build based on Gradle, CI based on GitHub
-actions, and containers based on Docker
-
-For the C4 diagram of the system visit [docs/c4/README.md](./docs/c4/README.md).
-
-## What's inside
-
-The template is a working application with a minimal setup. It contains:
-
-- application skeleton
-- setup script to prepare project
-- common plugins and libraries
-- docker & docker-compose setup
-- code quality tools already set up
-- integration with GitHub Actions
-- integration with Dependabot
-- integration with SonarCloudA
-- Integration with PostgreSQL, Flyway & Jooq
-- Integration with test containers
-- integration with [CodeQL](https://github.com/yonatankarp/spring-starter/security/code-scanning)
-- health check, readiness & liveness probs for k8s integration
-- OpenApi spec code generation & documentation
-- C4 model architecture diagrams
-- MIT license and contribution information
-
-## Setup
-
-Located in `./bin/init.sh`. Simply run and follow the explanation on how to
-execute it. This script will self-destruct when finished.
-
-### Enable All CI Pipelines
-
-- To enable all CI pipelines, set `REVIEWER_GITHUB_TOKEN` in the repository secrets both for `Action` and `Dependabot`
-- Create a new `Ruleset` for the `main` branch and for depednabot (example: [link](https://github.com/yonatankarp/spring-starter/settings/rules))
-- Enable Auto-merge on the repository for automatic merge of dependabot pull requests
 
 ## Getting Started
 
@@ -118,7 +67,7 @@ For Apple M1 processor run the following instead:
 DOCKER_BUILDKIT=0 docker compose build
 ```
 
-Run the distribution (created in `spring-starter/build/install/spring-starter`
+Run the distribution (created in `beat-the-machine/build/install/beat-the-machine`
 directory) by executing the following command:
 
 ```shell

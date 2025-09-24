@@ -34,7 +34,7 @@ This document tracks all implementation tasks organized by DDD architectural lay
   - ImageUrl optimized as @JvmInline value class
 
 ### 1. Game Aggregate Root
-- [ ] **D1.1**: Create Game entity as aggregate root in `domain/game/Game.kt`
+- [✅] **D1.1**: Create Game entity as aggregate root in `domain/game/Game.kt`
   - ✅ gameId (as Game.Id nested type)
   - ✅ riddles collection
   - ✅ currentRiddleIndex tracking

@@ -213,6 +213,7 @@ This project enforces strict code quality standards through multiple linters and
 - **Spotless** - Code formatting and style enforcement
 - **Diktat** - Kotlin code style analyzer
 - **JaCoCo** - Code coverage measurement
+- **PITest** - Mutation testing
 - **Konsist** - Architecture testing
 - **Detekt** - Static code analysis for Kotlin
 
@@ -220,6 +221,7 @@ This project enforces strict code quality standards through multiple linters and
 - **All tests must pass** (unit, integration, ATDD)
 - **JaCoCo Code Coverage**: Minimum 97% line coverage
 - **JaCoCo Branch Coverage**: Minimum 95% branch coverage
+- **Mutation Testing**: All mutations must be killed (100% mutation coverage)
 - **No Spotless violations** - Code must be properly formatted
 - **No Diktat violations** - Kotlin style guide compliance
 - **No Detekt violations** - Static analysis issues must be resolved
@@ -231,6 +233,7 @@ This project enforces strict code quality standards through multiple linters and
 All quality tools are integrated into the build pipeline. The `./gradlew check` command runs:
 - All tests (unit, integration, architecture)
 - JaCoCo coverage verification (97% line, 95% branch)
+- PITest mutation testing (100% mutation coverage)
 - Detekt static code analysis
 - Diktat Kotlin style checking
 - Konsist architecture testing

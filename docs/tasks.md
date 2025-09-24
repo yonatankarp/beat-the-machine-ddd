@@ -16,7 +16,7 @@ This document tracks all implementation tasks organized by DDD architectural lay
 - [✅] **Entity**: Riddle (with evaluation business logic)
 
 ### 1. Game Aggregate Root
-- [ ] **D1.1**: Create Game entity as aggregate root in `domain/game/Game.kt`
+- [✅] **D1.1**: Create Game entity as aggregate root in `domain/game/Game.kt`
   - Include: gameId, riddles collection, current riddle index, game state, attempt tracking
   - Business methods: startGame(), submitGuess(), nextRiddle(), isComplete(), getCurrentRiddle()
   - Enforce game rules: attempt limits, riddle progression, win/lose conditions

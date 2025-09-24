@@ -110,6 +110,7 @@ tasks.named("check") {
 pitest {
     junit5PluginVersion = "1.2.3"
     targetClasses = listOf("com.yonatankarp.beatthemachine.*")
+    avoidCallsTo = listOf("kotlin.jvm.internal")
 
     threads = 4
     outputFormats = listOf("XML", "HTML")

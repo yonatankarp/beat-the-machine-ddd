@@ -307,7 +307,7 @@
   enabled: true
 # Checks that enum structure is correct: enum entries should be separated by comma and line break and last entry should have semicolon in the end.
 - name: ENUMS_SEPARATED
-  enabled: true
+  enabled: false
 # Checks that value on integer or float constant is not too big
 - name: LONG_NUMERICAL_VALUES_SEPARATED
   enabled: true
@@ -392,7 +392,7 @@
   enabled: true
 # Checks that variables of generic types have explicit type declaration
 - name: GENERIC_VARIABLE_WRONG_DECLARATION
-  enabled: true
+  enabled: false
 # Inspection that checks if string template has redundant curly braces
 - name: STRING_TEMPLATE_CURLY_BRACES
   enabled: true

@@ -1,7 +1,5 @@
 package com.yonatankarp.beatthemachine.domain.riddle
 
-import com.yonatankarp.beatthemachine.domain.Word
-
 /**
  * Rich domain entity containing the prompt and image URL with all evaluation business logic.
  *

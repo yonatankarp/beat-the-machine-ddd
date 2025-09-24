@@ -1,7 +1,5 @@
 package com.yonatankarp.beatthemachine.domain.riddle
 
-import com.yonatankarp.beatthemachine.domain.Word
-
 /**
  * Represents a player's guess as a collection of words.
  *

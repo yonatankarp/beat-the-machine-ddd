@@ -1,4 +1,4 @@
-package com.yonatankarp.beatthemachine.domain
+package com.yonatankarp.beatthemachine.domain.riddle
 
 /**
  * Represents a single word in the domain model.
@@ -14,9 +14,10 @@ data class Word(
 ) {
     val value: String = input.lowercase()
 
+    val obfuscated: String
+        get() = "-".repeat(value.length)
+
     init {
         require(input.contains(' ').not()) { "Text must be a single word" }
     }
-
-    fun obfuscated() = "-".repeat(value.length)
 }

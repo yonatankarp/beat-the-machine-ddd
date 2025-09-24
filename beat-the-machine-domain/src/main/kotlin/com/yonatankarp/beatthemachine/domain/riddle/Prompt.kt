@@ -1,7 +1,5 @@
 package com.yonatankarp.beatthemachine.domain.riddle
 
-import com.yonatankarp.beatthemachine.domain.Word
-
 /**
  * Represents an ordered list of words that form the AI prompt used to generate an image.
  *

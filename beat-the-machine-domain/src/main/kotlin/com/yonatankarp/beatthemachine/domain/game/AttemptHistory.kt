@@ -8,9 +8,15 @@ import com.yonatankarp.beatthemachine.domain.riddle.Guess
 data class AttemptHistory(
     private val guesses: List<Guess> = emptyList(),
 ) {
-    fun isEmpty() = guesses.isEmpty()
+    val isEmpty: Boolean
+        get() = guesses.isEmpty()
+
+    val count: AttemptNumber
+        get() = AttemptNumber(guesses.size)
 
     fun addGuess(guess: Guess) = AttemptHistory(guesses + guess)
 
-    fun count() = AttemptNumber(guesses.size)
+    companion object {
+        fun empty() = AttemptHistory()
+    }
 }

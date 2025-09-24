@@ -24,18 +24,6 @@
         ]
       }
     ],
-    "PostToolUse": [
-      {
-        "matcher": "TodoWrite",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/post-todo-check.sh",
-            "timeout": 300
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "hooks": [

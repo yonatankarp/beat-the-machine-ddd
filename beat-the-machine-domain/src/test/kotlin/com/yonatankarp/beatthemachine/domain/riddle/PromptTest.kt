@@ -1,6 +1,5 @@
 package com.yonatankarp.beatthemachine.domain.riddle
 
-import com.yonatankarp.beatthemachine.domain.Word
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test

@@ -1,4 +1,4 @@
-package com.yonatankarp.beatthemachine.domain
+package com.yonatankarp.beatthemachine.domain.riddle
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -46,7 +46,7 @@ class WordTest {
         val word = Word("hello")
 
         // When
-        val obfuscated = word.obfuscated()
+        val obfuscated = word.obfuscated
 
         // Then
         obfuscated shouldBe "-----"

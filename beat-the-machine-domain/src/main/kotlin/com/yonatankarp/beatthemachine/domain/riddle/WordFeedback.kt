@@ -1,7 +1,5 @@
 package com.yonatankarp.beatthemachine.domain.riddle
 
-import com.yonatankarp.beatthemachine.domain.Word
-
 /**
  * Combines a word with its evaluation status.
  *

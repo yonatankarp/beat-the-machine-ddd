@@ -20,7 +20,22 @@ if [ -f "$todo_file" ]; then
         echo "{\"continue\":false,\"stopReason\":\"There are $incomplete incomplete TODO items. Please complete all TODOs before finishing the task.\"}"
         exit 0
     fi
+
+    # All TODOs completed - run quality checks before allowing stop
+    echo "✅ All TODOs completed! Running comprehensive quality checks..." >&2
+    echo "📊 Validating quality gates..." >&2
+
+    cd "$(dirname "$0")/.." || exit 1
+    ./gradlew check >&2
+    exit_code=$?
+
+    if [ $exit_code -ne 0 ]; then
+        echo "{\"continue\":false,\"stopReason\":\"Quality gates failed! Please fix issues: JaCoCo coverage (≥97% line, ≥95% branch), PITest mutations (100%), all tests passing, no linting violations.\"}"
+        exit 0
+    else
+        echo "✅ All quality gates passed!" >&2
+    fi
 fi
 
-# Allow continuation if no incomplete todos
+# Allow continuation if checks passed or no todos
 echo '{"continue":true}'

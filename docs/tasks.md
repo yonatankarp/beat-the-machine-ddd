@@ -30,14 +30,14 @@ This document tracks all implementation tasks organized by DDD architectural lay
 - [ ] **D2.5**: Create GameCompleted event in `domain/events/GameCompleted.kt`
 
 ### 3. Game State Management
-- [ ] **D3.1**: Create GameState enum in `domain/game/GameState.kt`
+- [✅] **D3.1**: Create GameState enum in `domain/game/GameState.kt`
   - Values: NOT_STARTED, IN_PROGRESS, COMPLETED, ABANDONED
   - Track game progression and completion status
 
 ### 4. Attempt Tracking Value Objects
-- [ ] **D4.1**: Create AttemptNumber value object in `domain/game/AttemptNumber.kt`
-- [ ] **D4.2**: Create MaxAttempts value object in `domain/game/MaxAttempts.kt`
-- [ ] **D4.3**: Create AttemptHistory value object in `domain/game/AttemptHistory.kt`
+- [✅] **D4.1**: Create AttemptNumber value object in `domain/game/AttemptNumber.kt`
+- [✅] **D4.2**: Create MaxAttempts value object in `domain/game/MaxAttempts.kt`
+- [✅] **D4.3**: Create AttemptHistory value object in `domain/game/AttemptHistory.kt`
   - Collection of all guesses made for a riddle
 
 ### 5. Repository Interfaces (Domain Layer)

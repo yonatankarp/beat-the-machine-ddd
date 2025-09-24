@@ -235,3 +235,9 @@ All quality tools are integrated into the build pipeline. The `./gradlew check` 
 - **SHOW PROGRESS VISIBILITY** to the user throughout task execution
 - Break down complex tasks into smaller, trackable steps
 - Mark tasks as in_progress, completed, or pending to provide clear status updates
+
+### Dependency Management Policy:
+- **MANDATORY**: Use the `dependency-manager` subagent for ANY dependency-related work
+- This includes: adding libraries, updating dependencies, discussing build files, mentioning any library names, configuring plugins, or ANY conversation involving build.gradle.kts, version catalogs, or dependency management
+- **NEVER work with dependencies directly** - always delegate to the dependency-manager agent first
+- This ensures proper version catalog management and follows project dependency standards

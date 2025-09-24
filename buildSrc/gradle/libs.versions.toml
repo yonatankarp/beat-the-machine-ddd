@@ -1,0 +1,15 @@
+[versions]
+
+kotlin = "2.2.20"
+spotless = "7.2.1"
+detekt = "1.23.8"
+diktat = "2.0.0"
+pitest = "1.19.0-rc.1"
+
+[libraries]
+
+kotlin_gradle_plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+spotless_gradle_plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+detekt_gradle_plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+diktat_gradle_plugin = { module = "com.saveourtool.diktat:diktat-gradle-plugin", version.ref = "diktat" }
+pitest_gradle_plugin = { module = "info.solidsoft.gradle.pitest:gradle-pitest-plugin", version.ref = "pitest" }

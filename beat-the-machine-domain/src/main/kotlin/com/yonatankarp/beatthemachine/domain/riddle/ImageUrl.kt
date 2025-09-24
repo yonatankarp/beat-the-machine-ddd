@@ -8,7 +8,8 @@ import java.net.URL
  * @property value The URL string (validated during construction)
  * @throws IllegalArgumentException if the URL format is invalid
  */
-data class ImageUrl(
+@JvmInline
+value class ImageUrl(
     val value: String,
 ) {
     init {

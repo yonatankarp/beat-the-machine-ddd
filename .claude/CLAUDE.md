@@ -32,24 +32,30 @@ Players view AI-generated images and attempt to guess the original text prompt t
 - **Red**: Word not in the original prompt
 
 ### Value Objects (Immutable)
-- **Word**: Single word with validation (no spaces), case normalization, and obfuscation capability
-- **Prompt**: Multi-word text prompt that generated the AI image, with infix functions for natural language (`prompt contains word`)
-- **ImageUrl**: Validated URL pointing to the AI-generated image
-- **GameId**: UUID-based unique identifier for game sessions
-- **Guess**: Collection of words representing a player's complete guess (supports varargs construction)
-- **WordFeedback**: Combines a word with its status (CORRECT_POSITION, WRONG_POSITION, WRONG_WORD)
-- **GuessResult**: Collection of WordFeedback representing complete evaluation of a guess
+- **Word**: Single word with validation (no spaces), case normalization, and obfuscation capability. Located in `domain` package.
+- **Prompt**: Ordered list of words representing the AI prompt, with infix functions for natural language (`prompt contains word`). Factory methods support varargs and space-separated text. Located in `domain.riddle` package.
+- **ImageUrl**: Validated URL pointing to the AI-generated image using `runCatching` for idiomatic validation. Located in `domain.riddle` package.
+- **GameId**: UUID-based unique identifier for game sessions. Located in `domain.game` package.
+- **Guess**: Collection of words representing a player's complete guess with factory methods (`of()`, `from()`). Located in `domain.riddle` package.
+- **WordFeedback**: Combines a word with its evaluation status. Contains nested `Status` enum (CORRECT_POSITION, WRONG_POSITION, WRONG_WORD). Located in `domain.riddle` package.
+- **GuessResult**: Value class wrapping list of WordFeedback. Simple data container with no business logic. Located in `domain.riddle` package.
 
 ### Entities
-- **Riddle**: Contains the prompt and image, with business logic to evaluate guesses and return detailed feedback
+- **Riddle**: Rich domain entity containing prompt and image URL. Contains ALL evaluation business logic moved from GuessResult. Evaluates guesses and returns detailed feedback. Located in `domain.riddle` package.
 - **Game**: (Planned) Aggregate root managing multiple riddles and overall game state
 
 ### Core Business Behaviors
 
 #### Riddle Evaluation
-- **Guess Processing**: Evaluates complete guesses against the original prompt
-- **Position-based Feedback**: Determines if words are correct, in wrong position, or completely wrong
-- **Rich Domain Logic**: Encapsulates all guess evaluation logic within the Riddle entity
+- **Guess Processing**: Riddle entity evaluates complete guesses against the original prompt using `riddle.evaluate(guess)` method
+- **Position-based Feedback**: Determines if words are correct position, wrong position, or completely wrong
+- **Rich Domain Logic**: ALL evaluation logic resides in Riddle entity, not in static utility methods
+- **Clean Function Structure**: Higher-level functions above lower-level ones for top-to-bottom readability
+- **Evaluation Algorithm**:
+  - `evaluate(guess)` → main business method
+  - `determineWordStatus(word, index)` → determines individual word status
+  - `isCorrectPosition(word, index)` → checks exact position match
+  - `isWrongPosition(word)` → checks if word exists in prompt
 
 #### Word Management
 - **Single Word Constraint**: Prevents multi-word inputs in individual Word objects
@@ -69,10 +75,13 @@ Players view AI-generated images and attempt to guess the original text prompt t
 
 ### Domain Invariants
 - Words are always single tokens without spaces
-- Prompts are always non-blank normalized text
+- Prompts are always non-empty collections of words (validated at creation)
+- Guesses are always non-empty collections of words (validated at creation)
 - Game sessions have unique, immutable identities
 - Riddle evaluation always returns feedback for every guessed word
 - All domain objects are properly validated upon creation
+- GuessResult is a simple value class with no business behavior
+- Evaluation logic lives exclusively in the Riddle entity
 
 ## Development Principles
 
@@ -98,7 +107,7 @@ This project MUST follow Test-Driven Development practices with strict Red-Green
 - Use Given/When/Then comments for test structure clarity
 - Use Kotest assertions (`shouldBe`, `shouldThrow`) instead of JUnit assertions
 - Prefer `.not()` over `!` for boolean negation in Kotlin for better readability
-- Remove implementation comments from tests (keep only Given/When/Then structure comments)
+- Keep Given/When/Then structure comments in tests - these are required for test readability
 
 ### Acceptance Test-Driven Development (ATDD)
 ALL features MUST be validated using ATDD:
@@ -137,13 +146,17 @@ This project strictly follows DDD principles and patterns:
 - CQRS (Command Query Responsibility Segregation) where appropriate
 
 #### DDD Implementation Guidelines:
-- **Rich Domain Models**: Avoid anemic domain models - business logic belongs in domain objects
-- **Value Objects as Kotlin Value Classes**: Use `@JvmInline value class` with private constructors when validation/transformation is needed
-- **Expressive Domain Language**: Use infix functions and extension functions for natural business language
+- **Rich Domain Models**: Avoid anemic domain models - business logic belongs in domain objects (e.g., Riddle contains evaluation logic, not GuessResult)
+- **Value Objects as Kotlin Value Classes**: Use `@JvmInline value class` for simple data containers without behavior (e.g., GuessResult)
+- **Data Classes for Rich Value Objects**: Use `data class` for value objects with validation and behavior (e.g., Word, Prompt, Guess)
+- **Expressive Domain Language**: Use infix functions and extension functions for natural business language (`prompt contains word`)
 - **Proper Dependency Direction**: Higher-level concepts should depend on lower-level ones (e.g., Prompt contains Word, not Word knows about Prompt)
 - **Domain Object Construction**: Use companion object factories when you need validation, transformation, or multiple construction patterns (like varargs)
 - **Nested Enums**: Place enums inside the classes where they make semantic sense (e.g., `WordFeedback.Status`)
 - **Business Method Naming**: Method names should reflect business operations, not technical implementations
+- **Function Organization**: Higher-level functions above lower-level ones for top-to-bottom readability
+- **Clean Return Types**: Omit obvious return types (e.g., Boolean) for cleaner code
+- **Kotlin Idiomatic Code**: Always prefer Kotlin idioms over Java patterns (e.g., prefer `runCatching` over try-catch, `.not()` over `!`, extension functions over utility classes, data classes over POJOs, etc.)
 
 ## Required Libraries and Dependencies
 
@@ -224,9 +237,12 @@ All quality tools are integrated into the build pipeline. The `./gradlew check` 
 ## Claude Code Behavior Guidelines
 
 ### Code Comments Policy:
-- **NEVER add code comments** unless explicitly requested by the user
+- **ABSOLUTELY NEVER ADD ANY CODE COMMENTS** unless explicitly requested by the user
+- **DO NOT ADD COMMENTS OF ANY KIND** - this includes implementation comments, documentation comments, TODO comments, or any other form of code comments
+- **EXCEPTION: Given/When/Then comments in tests are REQUIRED** - these structure comments must be kept in test files
+- **NEVER add comments even if you think they would be helpful** - only add them when explicitly asked
 - Code should be self-documenting through clear naming and structure
-- Comments should only be added when the user specifically asks for them
+- This is a STRICT requirement that must be followed without exception
 
 ### Task Execution and Planning:
 - **ALWAYS create and show an execution plan** before starting any multi-step task

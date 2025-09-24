@@ -20,6 +20,21 @@ This is a Spring Boot application built with Kotlin and Gradle, following Domain
 - `beat-the-machine-domain/` - Domain layer module
 - `buildSrc/` - Build configuration
 - `docs/` - Documentation
+  - `docs/tasks.md` - **Master task list organized by DDD layers (Domain, Application, Adapters)**
+
+## Task Management Agreement
+
+**IMPORTANT**: All implementation work is tracked in `docs/tasks.md`. This file contains:
+- Comprehensive task breakdown by architectural layer (Domain, Application, Adapters)
+- Status tracking for all tasks (TODO, IN_PROGRESS, DONE)
+- Task IDs for easy reference (e.g., D1.1, A2.3, AD5.2)
+
+**Workflow**:
+1. **Before starting work**: Check `docs/tasks.md` for the current task list
+2. **During work**: Update task status in `docs/tasks.md` as you progress
+3. **Add new tasks**: When discovering new requirements, add them to the appropriate section
+4. **Reference tasks**: Use task IDs when discussing specific work items
+5. **Always keep synchronized**: The task list must reflect the current project state
 
 ## Domain Model Summary
 

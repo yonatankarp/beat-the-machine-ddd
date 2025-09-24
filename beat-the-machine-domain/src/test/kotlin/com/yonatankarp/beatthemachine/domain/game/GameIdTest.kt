@@ -11,7 +11,7 @@ class GameIdTest {
         val uuid = UUID.randomUUID()
 
         // When
-        val gameId = GameId(uuid)
+        val gameId = Game.Id(uuid)
 
         // Then
         gameId.value shouldBe uuid

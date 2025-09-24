@@ -54,10 +54,27 @@ Players view AI-generated images and attempt to guess the original text prompt t
 - **Guess**: Collection of words representing a player's complete guess with factory methods (`of()`, `from()`). Located in `domain.riddle` package.
 - **WordFeedback**: Combines a word with its evaluation status. Contains nested `Status` enum (CORRECT_POSITION, WRONG_POSITION, WRONG_WORD). Located in `domain.riddle` package.
 - **GuessResult**: Value class wrapping list of WordFeedback. Simple data container with no business logic. Located in `domain.riddle` package.
+- **GameState**: Enum representing game progression states (NOT_STARTED, IN_PROGRESS, COMPLETED, ABANDONED). Located in `domain.game` package.
+- **AttemptNumber**: Value object representing the current attempt number with validation. Located in `domain.game` package.
+- **MaxAttempts**: Value object representing maximum allowed attempts with validation. Located in `domain.game` package.
+- **AttemptHistory**: Collection of all guess attempts for a riddle with factory method `empty()`. Located in `domain.game` package.
 
 ### Entities
 - **Riddle**: Rich domain entity containing prompt and image URL. Contains ALL evaluation business logic moved from GuessResult. Evaluates guesses and returns detailed feedback. Located in `domain.riddle` package.
-- **Game**: (Planned) Aggregate root managing multiple riddles and overall game state
+- **Game**: Aggregate root managing game sessions. Contains:
+  - `id: GameId` - Unique game identifier
+  - `riddles: List<Riddle>` - Collection of riddles in the game
+  - `currentRiddleIndex: Int` - Tracks current riddle (default: 0)
+  - `state: GameState` - Current game state (default: IN_PROGRESS)
+  - `attemptHistory: AttemptHistory` - History of all attempts (default: empty)
+  - Computed properties:
+    - `isComplete: Boolean` - True when currentRiddleIndex >= riddles.size
+    - `currentRiddle: Riddle` - Returns riddle at currentRiddleIndex
+  - Business methods:
+    - `start(riddles)` - Factory method to create new game with riddles
+    - `submitGuess(guess)` - Adds guess to attempt history, returns new Game
+    - `nextRiddle()` - Increments currentRiddleIndex, returns new Game
+  - Located in `domain.game` package
 
 ### Core Business Behaviors
 
@@ -117,6 +134,20 @@ This project MUST follow Test-Driven Development practices with strict Red-Green
 - **NEVER implement multiple requirements in one cycle**
 - **ALWAYS complete the refactor phase** - skipping refactoring violates TDD principles
 - ALL new functionality must be developed using the Red-Green-Refactor cycle
+
+#### QA Coverage Enforcement:
+- **ALWAYS run `qa-coverage-enforcer` after completing a feature** to verify all quality gates pass
+- **Quality gates are MANDATORY**:
+  - 97% line coverage minimum (JaCoCo)
+  - 95% branch coverage minimum (JaCoCo)
+  - 100% mutation kill rate (PITest - ALL mutations must be killed, 0 surviving mutations)
+  - All linter checks must pass (Diktat, Detekt, Spotless)
+- **If QA gates fail**, immediately add remediation tasks to TodoWrite and start a new TDD cycle:
+  1. For each surviving mutation: Create red test to kill the mutation
+  2. For uncovered lines/branches: Create red test to cover the gap
+  3. For linter violations: Fix the violations
+  4. Re-run `qa-coverage-enforcer` until ALL gates pass
+- **NEVER accept partial success** - all quality gates must pass at 100%
 
 #### Test Structure Requirements:
 - Use Given/When/Then comments for test structure clarity
@@ -219,11 +250,11 @@ This project enforces strict code quality standards through multiple linters and
 
 ### Quality Gates (ALL REQUIRED):
 - **All tests must pass** (unit, integration, ATDD)
-- **JaCoCo Code Coverage**: Minimum 97% line coverage
-- **JaCoCo Branch Coverage**: Minimum 95% branch coverage
-- **Mutation Testing**: All mutations must be killed (100% mutation coverage)
+- **JaCoCo Code Coverage**: Minimum 97% line coverage (MANDATORY)
+- **JaCoCo Branch Coverage**: Minimum 95% branch coverage (MANDATORY)
+- **Mutation Testing**: 100% mutation kill rate - ALL mutations must be killed, 0 surviving mutations allowed (MANDATORY)
 - **No Spotless violations** - Code must be properly formatted
-- **No Diktat violations** - Kotlin style guide compliance
+- **No Diktat violations** - Kotlin style guide compliance (Note: CUSTOM_GETTERS_SETTERS rule is disabled as custom getters for computed properties are idiomatic in Kotlin)
 - **No Detekt violations** - Static analysis issues must be resolved
 - **No Konsist violations** - Architecture rules must be enforced
 - **All ATDD scenarios must pass** - Feature acceptance criteria met
@@ -232,11 +263,19 @@ This project enforces strict code quality standards through multiple linters and
 ### Build Integration:
 All quality tools are integrated into the build pipeline. The `./gradlew check` command runs:
 - All tests (unit, integration, architecture)
-- JaCoCo coverage verification (97% line, 95% branch)
-- PITest mutation testing (100% mutation coverage)
+- JaCoCo coverage verification (97% line, 95% branch) - MUST PASS
+- PITest mutation testing (100% mutation kill rate, 0 surviving mutations) - MUST PASS
 - Detekt static code analysis
 - Diktat Kotlin style checking
 - Konsist architecture testing
+
+**CRITICAL**: If `./gradlew check` reports ANY quality gate failures:
+1. Create TODO list with specific remediation tasks
+2. For surviving mutations: Add test cases to kill each mutation
+3. For coverage gaps: Add test cases to cover uncovered lines/branches
+4. For linter violations: Fix the violations
+5. Re-run `./gradlew check` until ALL gates pass
+6. **DO NOT proceed** until 100% compliance is achieved
 
 ## Important Development Guidelines
 

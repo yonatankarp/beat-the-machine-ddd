@@ -2,10 +2,11 @@
 
 coroutines = "1.10.2"
 jvmTarget = "21"
+konsist = "0.17.3"
+kotest = "6.0.3"
 kotlin = "2.2.20"
 mockk = "1.14.5"
 mockkSpring = "4.0.2"
-spotless = "7.2.1"
 springDependencyManagement = "1.1.7"
 springboot = "3.5.6"
 swagger = "7.15.0"
@@ -28,17 +29,20 @@ springboot_validation_starter = { module = "org.springframework.boot:spring-boot
 springboot_webflux_starter = { module = "org.springframework.boot:spring-boot-starter-webflux" }
 
 # Testing
+konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
+kotest_assertions_core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest_extensions_spring = { module = "io.kotest:kotest-extensions-spring", version.ref = "kotest" }
+kotest_runner_junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 mockk_core = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockk_spring = { module = "com.ninja-squad:springmockk", version.ref = "mockkSpring" }
 
 [plugins]
 
-kotlin_jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin_spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 openapi_generator = { id = "org.openapi.generator", version.ref = "swagger" }
-spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 springboot = { id = "org.springframework.boot", version.ref = "springboot" }
 springboot_dependency_management = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
+
 
 [bundles]
 
@@ -58,6 +62,10 @@ springboot_all = [
 ]
 
 test_all = [
+    "konsist",
+    "kotest_assertions_core",
+    "kotest_extensions_spring",
+    "kotest_runner_junit5",
     "kotlinx_coroutines_test",
     "mockk_core",
     "mockk_spring",

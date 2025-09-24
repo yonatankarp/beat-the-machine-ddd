@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    id("beat-the-machine.kotlin-conventions")
 }
 
 repositories {
@@ -8,9 +8,5 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotest.assertions.core)
 }
-
-tasks.test {
-    useJUnitPlatform()
-}
-

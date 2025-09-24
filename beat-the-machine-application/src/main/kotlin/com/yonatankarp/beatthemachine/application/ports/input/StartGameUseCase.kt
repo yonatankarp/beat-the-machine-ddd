@@ -7,5 +7,12 @@ import com.yonatankarp.beatthemachine.domain.game.Game
  * Fetches available riddles and creates a new game session.
  */
 fun interface StartGameUseCase {
-    operator fun invoke(): Game
+    /**
+ * Starts a new game session.
+ *
+ * Invoking this use case initializes a new Game by fetching available riddles and preparing initial game state.
+ *
+ * @return The newly created Game instance representing the started session.
+ */
+operator fun invoke(): Game
 }

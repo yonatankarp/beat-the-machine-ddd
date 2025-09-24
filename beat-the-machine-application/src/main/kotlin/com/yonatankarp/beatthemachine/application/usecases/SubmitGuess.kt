@@ -15,6 +15,15 @@ class SubmitGuess(
     private val findGameById: FindGameById,
     private val saveGame: SaveGame,
 ) : SubmitGuessUseCase {
+    /**
+     * Submits a player's guess for the specified game, persists the updated game state, and
+     * returns the guess evaluation against the game's current riddle.
+     *
+     * @param gameId Identifier of the game to submit the guess to.
+     * @param guess The player's guess to evaluate.
+     * @return The result of evaluating the guess against the game's current riddle.
+     * @throws GameNotFoundException if no game exists for the given [gameId].
+     */
     override fun invoke(
         gameId: Game.Id,
         guess: Guess,

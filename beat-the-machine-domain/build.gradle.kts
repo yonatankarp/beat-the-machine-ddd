@@ -1,5 +1,6 @@
 plugins {
     id("beat-the-machine.kotlin-conventions")
+    `java-test-fixtures`
 }
 
 repositories {

@@ -48,5 +48,7 @@ data class Game(
 
     companion object {
         fun start(riddles: List<Riddle> = emptyList()) = Game(id = Id.new(), riddles = riddles)
+
+        fun start(vararg riddles: Riddle) = start(riddles = riddles.toList())
     }
 }

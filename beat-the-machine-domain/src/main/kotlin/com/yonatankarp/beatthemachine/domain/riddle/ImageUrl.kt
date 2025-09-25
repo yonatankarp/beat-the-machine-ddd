@@ -1,6 +1,6 @@
 package com.yonatankarp.beatthemachine.domain.riddle
 
-import java.net.URL
+import java.net.URI
 
 /**
  * Represents a validated URL pointing to an AI-generated image.
@@ -16,5 +16,5 @@ value class ImageUrl(
         require(isValidUrl(value)) { "Invalid URL format" }
     }
 
-    private fun isValidUrl(url: String) = runCatching { URL(url) }.isSuccess
+    private fun isValidUrl(url: String) = runCatching { URI(url).toURL() }.isSuccess
 }

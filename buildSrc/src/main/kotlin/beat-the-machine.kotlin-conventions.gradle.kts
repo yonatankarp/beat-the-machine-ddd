@@ -61,7 +61,7 @@ tasks.withType<DiktatFixTask>().configureEach {
 diktat {
     inputs {
         include("src/**/*.kt")
-        exclude("**/build/**", "**/.gradle/**")
+        exclude("**/build/**", "**/.gradle/**", "**/testFixtures/**")
     }
     reporters {
         plain()
@@ -80,10 +80,28 @@ tasks.withType<JacocoReport>().configureEach {
         xml.required.set(true)
         html.required.set(true)
     }
+    classDirectories.setFrom(
+        files(
+            classDirectories.files.map {
+                fileTree(it) {
+                    exclude("**/fixtures/**")
+                }
+            },
+        ),
+    )
 }
 
 val jacocoCoverageVerification by tasks.registering(JacocoCoverageVerification::class) {
     dependsOn(tasks.test)
+    classDirectories.setFrom(
+        files(
+            classDirectories.files.map {
+                fileTree(it) {
+                    exclude("**/fixtures/**")
+                }
+            },
+        ),
+    )
     violationRules {
         rule {
             limit {
@@ -110,6 +128,7 @@ tasks.named("check") {
 pitest {
     junit5PluginVersion = "1.2.3"
     targetClasses = listOf("com.yonatankarp.beatthemachine.*")
+    excludedClasses = listOf("**/fixtures/**")
 
     threads = 4
     outputFormats = listOf("XML", "HTML")

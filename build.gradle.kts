@@ -14,3 +14,9 @@ repositories {
 tasks.named("pitest") {
     enabled = false
 }
+
+kotlin {
+    compilerOptions {
+        allWarningsAsErrors = true
+    }
+}

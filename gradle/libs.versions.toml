@@ -9,7 +9,7 @@ mockk = "1.14.6"
 mockkSpring = "4.0.2"
 springDependencyManagement = "1.1.7"
 springboot = "3.5.7"
-swagger = "7.16.0"
+swagger = "7.17.0"
 
 [libraries]
 

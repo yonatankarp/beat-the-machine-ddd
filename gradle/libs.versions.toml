@@ -3,7 +3,7 @@
 coroutines = "1.10.2"
 jvmTarget = "21"
 konsist = "0.17.3"
-kotest = "6.0.4"
+kotest = "6.0.5"
 kotlin = "2.2.21"
 mockk = "1.14.6"
 mockkSpring = "4.0.2"

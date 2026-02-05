@@ -5,7 +5,7 @@ plugins {
     id("com.diffplug.spotless") version "8.2.1" apply false
     id("org.springframework.boot") version "4.0.2" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
-    val kotlinVersion = "2.3.0"
+    val kotlinVersion = "2.3.10"
     id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
     id("org.jetbrains.kotlin.plugin.spring") version kotlinVersion apply false
 }

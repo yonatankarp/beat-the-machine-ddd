@@ -8,7 +8,7 @@ kotlin = "2.3.10"
 mockk = "1.14.9"
 mockkSpring = "5.0.1"
 springDependencyManagement = "1.1.7"
-springboot = "4.0.2"
+springboot = "4.0.3"
 swagger = "7.20.0"
 
 [libraries]

@@ -25,7 +25,7 @@ dependencies {
         exclude("org.mockito:mockito-core")
     }
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-    testImplementation("io.mockk:mockk:1.14.9")
+    testImplementation("io.mockk:mockk:1.14.11")
     testImplementation("com.ninja-squad:springmockk:5.0.1")
 }
 

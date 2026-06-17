@@ -32,6 +32,7 @@ class MakeGuessServiceTest {
         val (updated, outcome) = service.guess(c.id, Guess("hello"))
         assertEquals(GuessOutcome.HIT, outcome)
         assertEquals(MaskedToken.Revealed("hello"), updated.maskedPrompt().tokens[0])
+        assertEquals(MaskedToken.Revealed("hello"), store[c.id]?.maskedPrompt()?.tokens?.get(0))
     }
 
     @Test

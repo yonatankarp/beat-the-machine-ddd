@@ -8,8 +8,8 @@ import com.yonatankarp.beatthemachine.domain.ChallengeId
 import com.yonatankarp.beatthemachine.domain.Lives
 import com.yonatankarp.beatthemachine.domain.Prompt
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class GetChallengeServiceTest {
     private val stored = mutableMapOf<ChallengeId, Challenge>()
@@ -35,6 +35,6 @@ class GetChallengeServiceTest {
     fun `throws ChallengeNotFound for an unknown id`() {
         val unknownId = ChallengeId.new()
 
-        assertThrows<ChallengeNotFound> { service.get(unknownId) }
+        assertFailsWith<ChallengeNotFound> { service.get(unknownId) }
     }
 }

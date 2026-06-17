@@ -912,7 +912,7 @@ git commit -m "feat(adapter): seed PromptSource and Machine from curated data"
 
 **Interfaces:**
 - Consumes: `ChallengeRepository`, `OptimisticLockConflict`, `Challenge.rehydrate`, `Challenge.secretPrompt`.
-- Produces: two `ChallengeRepository` implementations. Both enforce optimistic locking: `save` rejects when the stored `version` differs from the in-hand `version`, and persists `version + 1`. Decision: the SQLite adapter uses **Spring Data JDBC** (aggregate-oriented, the most DDD-aligned option) with a hand-written mapping between the domain `Challenge` and a `ChallengeRow`; the domain type is never annotated.
+- Produces: two `ChallengeRepository` implementations. Both enforce optimistic locking: `save` rejects when the stored `version` differs from the in-hand `version`, and persists `version + 1`. Decision (revised during Phase 4, human-approved): the SQLite adapter uses **plain Spring `JdbcTemplate`** (`spring-boot-starter-jdbc`), not Spring Data JDBC. SQLite ships no Spring Data JDBC dialect, so the aggregate-oriented path fought the framework; a hand-written conditional `UPDATE ... WHERE version = ?` (per Step 5 below) is correct and simpler. The mapping between the domain `Challenge` and a plain `ChallengeRow` is hand-written; the domain type is never annotated.
 
 - [ ] **Step 1: Failing test for optimistic locking (in-memory first)**
 

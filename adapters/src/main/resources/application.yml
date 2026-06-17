@@ -5,6 +5,16 @@ spring:
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
+  datasource:
+    url: jdbc:sqlite:${BTM_DB_PATH:beat-the-machine.db}
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+btm:
+  persistence: sqlite
 
 management:
   endpoints:

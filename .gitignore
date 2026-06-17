@@ -27,3 +27,6 @@
 /.env
 
 .DS_Store
+
+# Local SQLite database files
+*.db

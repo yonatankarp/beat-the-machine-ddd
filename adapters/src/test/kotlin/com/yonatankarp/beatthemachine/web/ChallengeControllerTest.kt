@@ -6,7 +6,9 @@ import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
 import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
+import com.yonatankarp.beatthemachine.application.port.out.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.domain.Challenge
+import com.yonatankarp.beatthemachine.domain.ChallengeAlreadyOver
 import com.yonatankarp.beatthemachine.domain.ChallengeId
 import com.yonatankarp.beatthemachine.domain.Lives
 import com.yonatankarp.beatthemachine.domain.Prompt
@@ -43,6 +45,8 @@ class ChallengeControllerTest(
             jsonPath("$.status") { value("IN_PROGRESS") }
             jsonPath("$.picture.status") { value("PENDING") }
             jsonPath("$.maskedPrompt[0].revealed") { value(false) }
+            jsonPath("$.prompt") { doesNotExist() }
+            jsonPath("$.secretPrompt") { doesNotExist() }
         }
     }
 
@@ -54,5 +58,39 @@ class ChallengeControllerTest(
                 contentType = MediaType.APPLICATION_JSON
                 content = """{"word":"hello"}"""
             }.andExpect { status { isNotFound() } }
+    }
+
+    @Test
+    fun `guessing on an already-over challenge returns 409`() {
+        every { makeGuess.guess(any(), any()) } throws ChallengeAlreadyOver(ChallengeId.new())
+        mvc
+            .post("/api/challenges/${ChallengeId.new().value}/guesses") {
+                contentType = MediaType.APPLICATION_JSON
+                content = """{"word":"hello"}"""
+            }.andExpect { status { isConflict() } }
+    }
+
+    @Test
+    fun `forfeit with concurrent modification returns 409`() {
+        every { forfeit.forfeit(any()) } throws OptimisticLockConflict(ChallengeId.new())
+        mvc
+            .post("/api/challenges/${ChallengeId.new().value}/forfeit")
+            .andExpect { status { isConflict() } }
+    }
+
+    @Test
+    fun `guessing with a blank word returns 422`() {
+        mvc
+            .post("/api/challenges/${ChallengeId.new().value}/guesses") {
+                contentType = MediaType.APPLICATION_JSON
+                content = """{"word":"   "}"""
+            }.andExpect { status { isUnprocessableEntity() } }
+    }
+
+    @Test
+    fun `invalid difficulty query param returns 422`() {
+        mvc.post("/api/challenges?difficulty=NOPE").andExpect {
+            status { isUnprocessableEntity() }
+        }
     }
 }

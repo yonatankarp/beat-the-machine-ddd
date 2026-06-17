@@ -25,5 +25,5 @@ pmd {
     toolVersion = "6.42.0"
     reportsDir = file("${layout.buildDirectory.get()}/reports/pmd")
     ruleSets = []
-    ruleSetFiles = files("config/pmd/ruleset.xml")
+    ruleSetFiles = files(rootProject.file("config/pmd/ruleset.xml"))
 }

@@ -14,6 +14,9 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":application"))
+    implementation(project(":domain"))
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
@@ -51,7 +54,7 @@ tasks.findByName("spotlessKotlin")?.dependsOn("compileTestKotlin")
 tasks.findByName("spotlessKotlin")?.dependsOn("test")
 tasks.findByName("spotlessKotlin")?.dependsOn("jacocoTestReport")
 
-/* Required for deployment to Railway - see: https://medium.com/codex/deploying-a-kotlin-app-in-railway-a-slack-bot-f1d7a2386652 */
+/* Required for deployment to Railway */
 tasks.register("stage") {
-    dependsOn("shadowJar")
+    dependsOn("build")
 }

@@ -6,7 +6,7 @@ import kotlin.test.assertIs
 class PictureTest {
     @Test
     fun `Pending is a Picture`() {
-        assertIs<Picture>(Picture.Pending)
+        assertIs<Picture.Pending>(Picture.Pending)
     }
 
     @Test
@@ -18,6 +18,6 @@ class PictureTest {
 
     @Test
     fun `Failed is a Picture`() {
-        assertIs<Picture>(Picture.Failed)
+        assertIs<Picture.Failed>(Picture.Failed)
     }
 }

@@ -5,11 +5,14 @@ import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
 import com.yonatankarp.beatthemachine.application.port.out.ChallengeRepository
+import com.yonatankarp.beatthemachine.application.port.out.Machine
 import com.yonatankarp.beatthemachine.application.port.out.PromptSource
 import com.yonatankarp.beatthemachine.application.service.ForfeitChallengeService
 import com.yonatankarp.beatthemachine.application.service.GetChallengeService
 import com.yonatankarp.beatthemachine.application.service.MakeGuessService
 import com.yonatankarp.beatthemachine.application.service.StartChallengeService
+import com.yonatankarp.beatthemachine.out.ai.SeedMachine
+import com.yonatankarp.beatthemachine.out.ai.SeedPromptSource
 import com.yonatankarp.beatthemachine.out.persistence.inmemory.InMemoryChallengeRepository
 import com.yonatankarp.beatthemachine.out.persistence.sqlite.SqliteChallengeRepository
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -26,6 +29,12 @@ class BeanConfig {
     @Bean
     @ConditionalOnProperty(name = ["btm.persistence"], havingValue = "sqlite")
     fun sqliteChallengeRepository(jdbcTemplate: JdbcTemplate): ChallengeRepository = SqliteChallengeRepository(jdbcTemplate)
+
+    @Bean
+    fun promptSource(): PromptSource = SeedPromptSource()
+
+    @Bean
+    fun machine(): Machine = SeedMachine()
 
     @Bean
     fun startChallenge(

@@ -15,6 +15,19 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
+private fun JdbcTemplate.executeSchema() {
+    val sql =
+        (
+            SqliteChallengeRepositoryIT::class.java.getResource("/schema.sql")
+                ?: error("schema.sql not found on classpath")
+        ).readText()
+    sql
+        .split(";")
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .forEach { execute(it) }
+}
+
 class SqliteChallengeRepositoryIT {
     private lateinit var repo: SqliteChallengeRepository
 
@@ -26,21 +39,7 @@ class SqliteChallengeRepositoryIT {
         val ds = SingleConnectionDataSource("jdbc:sqlite::memory:", true)
         ds.setDriverClassName("org.sqlite.JDBC")
         val jdbc = JdbcTemplate(ds)
-        jdbc.execute(
-            """
-            CREATE TABLE IF NOT EXISTS challenge (
-                id             TEXT PRIMARY KEY,
-                prompt         TEXT NOT NULL,
-                guesses        TEXT NOT NULL,
-                lives          INT  NOT NULL,
-                status         TEXT NOT NULL,
-                picture_status TEXT NOT NULL,
-                picture_url    TEXT,
-                difficulty     TEXT NOT NULL,
-                version        INT  NOT NULL
-            )
-            """.trimIndent(),
-        )
+        jdbc.executeSchema()
         repo = SqliteChallengeRepository(jdbc)
     }
 

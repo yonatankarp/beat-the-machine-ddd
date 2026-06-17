@@ -116,7 +116,7 @@ class SqliteChallengeRepository(
     private fun toDomain(row: ChallengeRow): Challenge {
         val picture =
             when (row.pictureStatus) {
-                "READY" -> Picture.Ready(row.pictureUrl ?: "")
+                "READY" -> Picture.Ready(row.pictureUrl ?: throw IllegalStateException("READY picture row ${row.id} has null url"))
                 "FAILED" -> Picture.Failed
                 else -> Picture.Pending
             }

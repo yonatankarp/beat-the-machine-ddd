@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: "jdbc:sqlite::memory:"
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      connection-test-query: SELECT 1
+      validation-timeout: 1000
+  sql:
+    init:
+      schema-locations: classpath:schema.sql
+      mode: always
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.data.jdbc.autoconfigure.DataJdbcRepositoriesAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.health.DataSourceHealthContributorAutoConfiguration
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health

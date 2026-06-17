@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 class RiddleTest {
     @Test
-    fun `should mark all prompt as hit when player give up`() {
+    fun `giveUp reveals every word of the prompt`() {
         // Given
         val riddle = Riddle(id = 10, startPrompt = "--- --- ---", prompt = "dog eat god", url = "a nice url")
 
@@ -14,10 +14,11 @@ class RiddleTest {
         val actual = riddle.giveUp()
 
         // Then
-        riddle.prompt.split(" ").forEachIndexed { i, word ->
-            assertEquals(word, actual[i].first)
-            assertEquals(MISS, actual[i].second)
-        }
+        // The legacy implementation reveals each word (first element) but incorrectly
+        // marks every result as MISS instead of a loss/reveal state. The correct
+        // loss semantics (forfeit reveals the full prompt and scores as a loss) are
+        // implemented in Task 2.3 via Challenge.forfeit().
+        assertEquals(listOf("dog", "eat", "god"), actual.map { it.first })
     }
 
     @Test

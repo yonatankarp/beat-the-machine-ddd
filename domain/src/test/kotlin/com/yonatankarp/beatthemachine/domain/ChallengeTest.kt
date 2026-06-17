@@ -84,5 +84,10 @@ class ChallengeTest {
         assertEquals(originalPicture, c.picture)
         assertEquals(originalVersion, c.version)
         assertNotSame(c, updated)
+
+        // guess sets are independent: mutating the original does not affect the copy
+        val copyGuessesBeforeMutation = updated.guesses.size
+        c.makeGuess(Guess("hello"))
+        assertEquals(copyGuessesBeforeMutation, updated.guesses.size)
     }
 }

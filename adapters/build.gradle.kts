@@ -19,6 +19,8 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-restclient")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -53,8 +55,3 @@ tasks.findByName("spotlessKotlin")?.dependsOn("compileKotlin")
 tasks.findByName("spotlessKotlin")?.dependsOn("compileTestKotlin")
 tasks.findByName("spotlessKotlin")?.dependsOn("test")
 tasks.findByName("spotlessKotlin")?.dependsOn("jacocoTestReport")
-
-/* Required for deployment to Railway */
-tasks.register("stage") {
-    dependsOn("build")
-}

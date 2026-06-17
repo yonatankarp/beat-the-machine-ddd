@@ -5,3 +5,10 @@ spring:
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health

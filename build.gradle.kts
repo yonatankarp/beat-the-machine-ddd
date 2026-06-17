@@ -9,15 +9,6 @@ plugins {
 
 subprojects {
     repositories {
-        mavenLocal()
         mavenCentral()
-        maven { url = uri("https://packages.confluent.io/maven/") }
-        maven {
-            url = uri("https://maven.pkg.github.com/yonatankarp/beat-the-machine")
-            credentials {
-                username = findProperty("gpr.user")?.toString() ?: System.getenv("GITHUB_ACTOR")
-                password = findProperty("gpr.key")?.toString() ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
     }
 }

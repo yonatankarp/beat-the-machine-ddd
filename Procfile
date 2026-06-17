@@ -1,1 +1,1 @@
-web: java -jar beat-the-machine/build/libs/beat-the-machine.jar
+web: java -jar adapters/build/libs/adapters.jar

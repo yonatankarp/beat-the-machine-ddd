@@ -15,6 +15,7 @@
 - `:application` depends only on `:domain`. No framework dependencies.
 - All new domain types are value objects or the aggregate; no primitive `String`/`Int` fields leak across the domain API where a value object is defined.
 - One tokenization rule for prompts: split on the regex `\s+`, in `Prompt` only. No other masking implementation may exist.
+- Never use the `!!` non-null assertion operator (production or test code); it is not idiomatic Kotlin. Use `?:` (with `error("…")`/`throw`), `?.`, smart casts after a null check, `requireNotNull(x) { "msg" }`/`checkNotNull`, or `assertNotNull(x)` in tests.
 - Persistence of game state (guess, lives, status) is synchronous. Only picture generation is asynchronous.
 - Coverage must not regress versus the current build. Run the full test suite, not incremental, before each phase-closing commit.
 - Spotless runs clean (`./gradlew spotlessApply` then `spotlessCheck`) before every commit.

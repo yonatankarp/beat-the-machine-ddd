@@ -1,4 +1,5 @@
 plugins {
+    id("jacoco")
     id("org.jetbrains.kotlin.jvm")
 }
 
@@ -15,4 +16,5 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }

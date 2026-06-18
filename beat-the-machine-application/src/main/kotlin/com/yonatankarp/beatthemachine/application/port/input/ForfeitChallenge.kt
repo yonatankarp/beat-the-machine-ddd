@@ -1,8 +1,8 @@
 package com.yonatankarp.beatthemachine.application.port.input
 
-import com.yonatankarp.beatthemachine.domain.Challenge
-import com.yonatankarp.beatthemachine.domain.ChallengeId
+import com.yonatankarp.beatthemachine.domain.entity.Challenge
+import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 
-interface ForfeitChallenge {
-    fun forfeit(id: ChallengeId): Challenge
+fun interface ForfeitChallenge {
+    operator fun invoke(id: ChallengeId): Challenge
 }

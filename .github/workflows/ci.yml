@@ -31,4 +31,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.REVIEWER_GITHUB_TOKEN }}
 
   linters:
+    permissions:
+      contents: read
+      pull-requests: read
     uses: yonatankarp/github-actions/.github/workflows/linters.yml@v2

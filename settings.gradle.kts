@@ -1,6 +1,6 @@
 rootProject.name = "beat-the-machine"
 include(
-    "domain",
-    "application",
-    "adapters"
+    "beat-the-machine-domain",
+    "beat-the-machine-application",
+    "beat-the-machine-adapters"
 )

@@ -10,7 +10,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":domain"))
+    implementation(project(":beat-the-machine-domain"))
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.14.11")
 }

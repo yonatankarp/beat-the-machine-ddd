@@ -17,8 +17,8 @@ jobs:
     uses: yonatankarp/github-actions/.github/workflows/ci.yml@v2
     with:
       image-name: beat-the-machine
-      dockerfile-path: beat-the-machine/Dockerfile
-      gradle-module: ":beat-the-machine"
+      dockerfile-path: beat-the-machine-adapters/Dockerfile
+      gradle-module: ":beat-the-machine-adapters"
 
   dependabot_auto_merge:
     needs: pipeline

@@ -1,6 +1,6 @@
 plugins {
     id("jacoco")
-    id("beat-the-machine.code-metrics")
+    id("beat-the-machine.spotless")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.jvm")
@@ -32,8 +32,8 @@ dependencies {
     }
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-restclient")
-    testImplementation("io.mockk:mockk:1.14.11")
-    testImplementation("com.ninja-squad:springmockk:5.0.1")
+    testImplementation(libs.mockk)
+    testImplementation(libs.springmockk)
 }
 
 tasks.bootJar {
@@ -53,7 +53,6 @@ tasks {
         useJUnitPlatform()
         finalizedBy(spotlessApply)
         finalizedBy(jacocoTestReport)
-        finalizedBy(pmdTest)
     }
 }
 

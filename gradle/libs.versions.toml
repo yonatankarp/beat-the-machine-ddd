@@ -1,0 +1,19 @@
+[versions]
+kotlin = "2.4.0"
+spring-boot = "4.1.0"
+spring-dependency-management = "1.1.7"
+spotless = "8.7.0"
+swagger = "7.18.0"
+mockk = "1.14.11"
+springmockk = "5.0.1"
+
+[libraries]
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
+openapi-generator = { id = "org.openapi.generator", version.ref = "swagger" }

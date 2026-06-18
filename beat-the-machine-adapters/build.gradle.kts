@@ -1,6 +1,5 @@
 plugins {
     id("jacoco")
-    id("beat-the-machine.spotless")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.jvm")
@@ -45,18 +44,8 @@ tasks {
         enabled = false
     }
 
-    build {
-        finalizedBy(spotlessApply)
-    }
-
     withType<Test> {
         useJUnitPlatform()
-        finalizedBy(spotlessApply)
         finalizedBy(jacocoTestReport)
     }
 }
-
-tasks.findByName("spotlessKotlin")?.dependsOn("compileKotlin")
-tasks.findByName("spotlessKotlin")?.dependsOn("compileTestKotlin")
-tasks.findByName("spotlessKotlin")?.dependsOn("test")
-tasks.findByName("spotlessKotlin")?.dependsOn("jacocoTestReport")

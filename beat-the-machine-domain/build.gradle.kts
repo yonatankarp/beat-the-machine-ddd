@@ -1,5 +1,4 @@
 plugins {
-    id("beat-the-machine.spotless")
     id("org.jetbrains.kotlin.jvm")
 }
 
@@ -17,7 +16,3 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-
-tasks.findByName("spotlessKotlin")?.dependsOn("compileKotlin")
-tasks.findByName("spotlessKotlin")?.dependsOn("compileTestKotlin")
-tasks.findByName("spotlessKotlin")?.dependsOn("test")

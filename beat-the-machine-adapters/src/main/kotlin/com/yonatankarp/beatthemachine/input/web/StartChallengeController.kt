@@ -17,6 +17,5 @@ class StartChallengeController(
     @PostMapping
     fun start(
         @RequestParam(required = false) difficulty: Difficulty?,
-    ): ResponseEntity<ChallengeResponse> =
-        ResponseEntity.ok(ChallengeResponse.from(startChallenge(difficulty ?: Difficulty.MEDIUM)))
+    ): ResponseEntity<ChallengeResponse> = ResponseEntity.ok(ChallengeResponse.from(startChallenge(difficulty ?: Difficulty.MEDIUM)))
 }

@@ -1,5 +1,5 @@
 plugins {
-    id("beat-the-machine.code-metrics")
+    id("beat-the-machine.spotless")
     id("org.jetbrains.kotlin.jvm")
 }
 
@@ -12,7 +12,7 @@ kotlin {
 dependencies {
     implementation(project(":beat-the-machine-domain"))
     testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.14.11")
+    testImplementation(libs.mockk)
 }
 
 tasks.withType<Test> {

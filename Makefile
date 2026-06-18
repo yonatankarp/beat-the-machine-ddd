@@ -6,6 +6,16 @@ ADAPTERS     := :beat-the-machine-adapters
 IMAGE        := beat-the-machine
 DOCKERFILE   := beat-the-machine-adapters/Dockerfile
 JAR          := beat-the-machine-adapters/build/libs/adapters.jar
+PORT         := 8080
+BASE_URL     := http://localhost:$(PORT)
+
+# Prints where to reach the app. The URL appears above Spring's startup logs,
+# so scroll up if the boot output has buried it.
+define banner
+	@printf '\n\033[1;32m▶ Beat the Machine\033[0m starting on \033[36m%s\033[0m\n' '$(BASE_URL)'
+	@printf '  API:    \033[36m%s/api/challenges\033[0m\n' '$(BASE_URL)'
+	@printf '  Health: \033[36m%s/health\033[0m\n\n' '$(BASE_URL)'
+endef
 
 .DEFAULT_GOAL := help
 
@@ -28,10 +38,12 @@ check: ## Run the full verification (build + tests)
 	$(GRADLE) build
 
 run: ## Run the app (default persistence)
-	$(GRADLE) $(ADAPTERS):bootRun
+	$(banner)
+	PORT=$(PORT) $(GRADLE) $(ADAPTERS):bootRun
 
 run-inmemory: ## Run the app with in-memory persistence
-	$(GRADLE) $(ADAPTERS):bootRun --args='--btm.persistence=inmemory'
+	$(banner)
+	PORT=$(PORT) $(GRADLE) $(ADAPTERS):bootRun --args='--btm.persistence=inmemory'
 
 jar: ## Build the executable bootJar (adapters.jar)
 	$(GRADLE) $(ADAPTERS):bootJar
@@ -43,4 +55,5 @@ docker-build: jar ## Build the Docker image (builds the jar first)
 	docker build -f $(DOCKERFILE) -t $(IMAGE) .
 
 docker-run: ## Run the Docker image on port 8080
-	docker run --rm -p 8080:8080 $(IMAGE)
+	$(banner)
+	docker run --rm -p $(PORT):8080 $(IMAGE)

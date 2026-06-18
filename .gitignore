@@ -30,3 +30,6 @@
 
 # Local SQLite database files
 *.db
+
+# Local planning artifacts (superpowers plans/specs), not project source
+docs/superpowers/

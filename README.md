@@ -19,37 +19,49 @@
 | Maintenance  | [![Quality Gate Status][quality-badge]][quality-state] [![Maintainability Rating][maintainability-badge]][maintainability-state] [![Technical Debt][tech-debt-badge]][tech-debt-state] |
 | Security     | [![Security Rating][security-badge]][security-state] [![Vulnerabilities][vulnerabilities-badge]][vulnerabilities-state]                                                                |
 
-This repository manages the entire [Beat the machine!](https://beat-the-machine.yonatankarp.com/)
-game, which allow you to play the "Hangman Challenge" for auto AI auto-generated
-images.
+This repository hosts the backend for [Beat the machine!](https://beat-the-machine.yonatankarp.com/),
+a "Hangman Challenge" played against AI-generated images.
 
-To play the game locally on your machine, you can download the latest
-[release](https://github.com/yonatankarp/beat-the-machine/releases) jar file
-and run it using the command:
+## Architecture
 
-```shell
-java -jar beat-the-machine-0.1.0.jar
-```
+The backend follows a ports-and-adapters (hexagonal) layout across three Gradle
+modules, with dependencies pointing inward so the domain never depends on a
+framework:
 
-Go to your browser and enter the following url:
+- `beat-the-machine-domain` — the stateful `Challenge` aggregate and its value
+  objects (`Prompt`, `Guess`, `Lives`, `MaskedPrompt`, `Picture`, …). Pure
+  Kotlin, no Spring.
+- `beat-the-machine-application` — use cases (`StartChallenge`, `MakeGuess`,
+  `GetChallenge`, `ForfeitChallenge`) and the outbound ports
+  (`ChallengeRepository`, `PromptSource`, `Machine`). Depends only on the domain.
+- `beat-the-machine-adapters` — the Spring Boot application: a JSON REST web
+  adapter, in-memory and SQLite persistence adapters, seed AI adapters, and the
+  asynchronous picture-generation pipeline.
 
-```text
-https://localhost
-```
+The HTTP API is JSON-only; the player-facing UI is a separate SPA (tracked in a
+follow-up plan).
 
-![welcome screen](docs/resources/welcome_screen.png)
+### REST API
+
+| Method | Path                              | Description                          |
+|--------|-----------------------------------|--------------------------------------|
+| `POST` | `/api/challenges`                 | Start a new challenge                |
+| `GET`  | `/api/challenges/{id}`            | Fetch a challenge's current state    |
+| `POST` | `/api/challenges/{id}/guesses`    | Submit a guess (`{"word":"..."}`)    |
+| `POST` | `/api/challenges/{id}/forfeit`    | Give up; reveals the prompt          |
+
+The secret prompt is never serialized while a challenge is `IN_PROGRESS`.
 
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your
-local machine for development and testing purposes. See deployment for notes on
-how to deploy the project on a live system.
+local machine for development and testing purposes.
 
 ### Prerequisites
 
 To run the project you need to install the following:
 
-- JDK 17 or newer
+- JDK 25 or newer
 
 ### Building the application
 
@@ -64,15 +76,13 @@ To build the project execute the following command:
 
 ### Running the application
 
-You can run this project directly from Gradle by executing the following
-command:
+You can run the Spring Boot application directly from Gradle:
 
 ```shell
-./gradlew bootRun
+./gradlew :beat-the-machine-adapters:bootRun
 ```
 
-This will start the API container exposing the application's port
-(set to `80` in this app).
+This starts the API on the port read from `PORT` (defaulting to `80`).
 
 In order to test if the application is up, you can call its health endpoint:
 
@@ -86,31 +96,30 @@ You should get a response similar to this:
   {"status":"UP"}
 ```
 
-### And coding style tests
+#### Persistence
 
-This project uses [Spotless Gradle plugin](https://github.com/diffplug/spotless)
-to enforce its code style. The plugin will run automatically after every
-successful build, test, and assemble stage. However, if you would like to run
-it manually you can do so by running the following commands:
+The repository implementation is selected by the `btm.persistence` property:
 
-To apply the code style to the project run:
-
-```shell
-./gradlew spotlessApply
-```
-
-To check your code without applying any changes you can execute:
+- `sqlite` (default) — durable storage in a SQLite file at `BTM_DB_PATH`
+  (defaults to `beat-the-machine.db`).
+- `inmemory` — non-durable storage, handy for tests and demos.
 
 ```shell
-./gradlew spotlessCheck
+./gradlew :beat-the-machine-adapters:bootRun --args='--btm.persistence=inmemory'
 ```
+
+### Coding style
+
+Code style (ktlint via Spotless) is enforced in the CI pipeline rather than the
+local build. CI fails on any formatting violation, so format before pushing.
 
 ## Built With
 
-- [OpenJdk 17](https://openjdk.java.net/projects/jdk/17/)
+- [OpenJDK 25](https://openjdk.org/projects/jdk/25/)
 - [Kotlin](https://kotlinlang.org/)
-- [SpringBoot](https://spring.io/projects/spring-boot) - The web framework used
-- [Gradle](https://gradle.org/) - Dependency Management
+- [Spring Boot](https://spring.io/projects/spring-boot) - The web framework used
+- [SQLite](https://www.sqlite.org/) - Durable persistence
+- [Gradle](https://gradle.org/) - Build tool (Kotlin DSL, multi-module)
 - [GitHub Actions](https://docs.github.com/en/actions) - Continuous Integration
 
 ## Authors

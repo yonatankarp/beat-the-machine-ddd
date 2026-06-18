@@ -17,8 +17,8 @@ dependencies {
     implementation(project(":beat-the-machine-domain"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.xerial:sqlite-jdbc")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

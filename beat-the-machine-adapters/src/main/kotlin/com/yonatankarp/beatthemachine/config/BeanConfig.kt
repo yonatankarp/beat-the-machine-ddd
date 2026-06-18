@@ -4,32 +4,27 @@ import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
 import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
-import com.yonatankarp.beatthemachine.application.port.out.ChallengeRepository
-import com.yonatankarp.beatthemachine.application.port.out.Machine
-import com.yonatankarp.beatthemachine.application.port.out.PromptSource
-import com.yonatankarp.beatthemachine.application.service.ForfeitChallengeService
-import com.yonatankarp.beatthemachine.application.service.GetChallengeService
-import com.yonatankarp.beatthemachine.application.service.MakeGuessService
-import com.yonatankarp.beatthemachine.application.service.StartChallengeService
-import com.yonatankarp.beatthemachine.out.ai.SeedMachine
-import com.yonatankarp.beatthemachine.out.ai.SeedPromptSource
-import com.yonatankarp.beatthemachine.out.persistence.inmemory.InMemoryChallengeRepository
-import com.yonatankarp.beatthemachine.out.persistence.sqlite.SqliteChallengeRepository
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
+import com.yonatankarp.beatthemachine.application.port.output.FindPendingChallenges
+import com.yonatankarp.beatthemachine.application.port.output.Machine
+import com.yonatankarp.beatthemachine.application.port.output.PromptSource
+import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
+import com.yonatankarp.beatthemachine.application.usecase.ForfeitChallengeUseCase
+import com.yonatankarp.beatthemachine.application.usecase.GetChallengeUseCase
+import com.yonatankarp.beatthemachine.application.usecase.MakeGuessUseCase
+import com.yonatankarp.beatthemachine.application.usecase.StartChallengeUseCase
+import com.yonatankarp.beatthemachine.output.ai.PicturePregeneration
+import com.yonatankarp.beatthemachine.output.ai.SeedMachine
+import com.yonatankarp.beatthemachine.output.ai.SeedPromptSource
+import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import java.util.concurrent.Executor
+import java.util.concurrent.ThreadPoolExecutor
 
 @Configuration
 class BeanConfig {
-    @Bean
-    @ConditionalOnProperty(name = ["btm.persistence"], havingValue = "inmemory", matchIfMissing = true)
-    fun inMemoryChallengeRepository(): ChallengeRepository = InMemoryChallengeRepository()
-
-    @Bean
-    @ConditionalOnProperty(name = ["btm.persistence"], havingValue = "sqlite")
-    fun sqliteChallengeRepository(jdbcTemplate: JdbcTemplate): ChallengeRepository = SqliteChallengeRepository(jdbcTemplate)
-
     @Bean
     fun promptSource(): PromptSource = SeedPromptSource()
 
@@ -37,23 +32,49 @@ class BeanConfig {
     fun machine(): Machine = SeedMachine()
 
     @Bean
+    fun pictureExecutor(): ThreadPoolTaskExecutor =
+        ThreadPoolTaskExecutor().apply {
+            corePoolSize = 2
+            maxPoolSize = 4
+            queueCapacity = 50
+            setThreadNamePrefix("picture-")
+            // A full queue must not 500 the start endpoint; run the work on the
+            // calling request thread instead of rejecting it.
+            setRejectedExecutionHandler(ThreadPoolExecutor.CallerRunsPolicy())
+        }
+
+    @Bean
+    fun picturePregeneration(
+        machine: Machine,
+        findChallengeById: FindChallengeById,
+        storeChallenge: StoreChallenge,
+        findPendingChallenges: FindPendingChallenges,
+        pictureExecutor: Executor,
+    ): PicturePregeneration = PicturePregeneration(machine, findChallengeById, storeChallenge, findPendingChallenges, pictureExecutor)
+
+    @Bean
+    fun pendingPictureRetryRunner(picturePregeneration: PicturePregeneration): ApplicationRunner =
+        ApplicationRunner { picturePregeneration.retryPending() }
+
+    @Bean
     fun startChallenge(
         promptSource: PromptSource,
-        repository: ChallengeRepository,
-    ): StartChallenge =
-        StartChallengeService(
-            promptSource = promptSource,
-            repository = repository,
-            // TODO(Task 5.2): wire async PicturePregeneration.enqueue
-            enqueuePicture = {},
-        )
+        storeChallenge: StoreChallenge,
+        picturePregeneration: PicturePregeneration,
+    ): StartChallenge = StartChallengeUseCase(promptSource, storeChallenge, picturePregeneration::enqueue)
 
     @Bean
-    fun makeGuess(repository: ChallengeRepository): MakeGuess = MakeGuessService(repository)
+    fun makeGuess(
+        findChallengeById: FindChallengeById,
+        storeChallenge: StoreChallenge,
+    ): MakeGuess = MakeGuessUseCase(findChallengeById, storeChallenge)
 
     @Bean
-    fun getChallenge(repository: ChallengeRepository): GetChallenge = GetChallengeService(repository)
+    fun getChallenge(findChallengeById: FindChallengeById): GetChallenge = GetChallengeUseCase(findChallengeById)
 
     @Bean
-    fun forfeitChallenge(repository: ChallengeRepository): ForfeitChallenge = ForfeitChallengeService(repository)
+    fun forfeitChallenge(
+        findChallengeById: FindChallengeById,
+        storeChallenge: StoreChallenge,
+    ): ForfeitChallenge = ForfeitChallengeUseCase(findChallengeById, storeChallenge)
 }

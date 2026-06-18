@@ -2,9 +2,6 @@ server:
   port: ${PORT:80}
 
 spring:
-  thymeleaf:
-    prefix: classpath:/templates/
-    suffix: .html
   datasource:
     url: jdbc:sqlite:${BTM_DB_PATH:beat-the-machine.db}
     driver-class-name: org.sqlite.JDBC
@@ -22,3 +19,7 @@ management:
       base-path: /
       exposure:
         include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never

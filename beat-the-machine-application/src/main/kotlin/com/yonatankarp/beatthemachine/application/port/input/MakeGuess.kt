@@ -1,12 +1,12 @@
 package com.yonatankarp.beatthemachine.application.port.input
 
-import com.yonatankarp.beatthemachine.domain.Challenge
-import com.yonatankarp.beatthemachine.domain.ChallengeId
-import com.yonatankarp.beatthemachine.domain.Guess
-import com.yonatankarp.beatthemachine.domain.GuessOutcome
+import com.yonatankarp.beatthemachine.domain.entity.Challenge
+import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
+import com.yonatankarp.beatthemachine.domain.valueobject.Guess
+import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
 
-interface MakeGuess {
-    fun guess(
+fun interface MakeGuess {
+    operator fun invoke(
         id: ChallengeId,
         guess: Guess,
     ): Pair<Challenge, GuessOutcome>

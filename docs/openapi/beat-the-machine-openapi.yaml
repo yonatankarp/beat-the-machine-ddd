@@ -1,0 +1,344 @@
+openapi: 3.0.3
+info:
+  title: Beat The Machine API
+  description: >-
+    Backend for "Beat the machine!", a Hangman-style challenge played against
+    AI-generated images. The player is shown a masked prompt and a picture
+    generated from that prompt, then guesses words to reveal the prompt before
+    running out of lives.
+
+    The secret prompt is never serialized while a challenge is `IN_PROGRESS`:
+    hidden tokens are returned with `word: null` and only `revealed` tokens carry
+    their text. Error messages are fixed, non-reflective strings and never echo
+    client input back.
+  version: 1.0.0
+servers:
+  - url: https://beat-the-machine.yonatankarp.com
+    description: Production
+  - url: http://localhost:80
+    description: Local (port read from PORT, defaults to 80)
+tags:
+  - name: Challenges
+    description: Start, inspect, play, and forfeit challenges.
+  - name: Operations
+    description: Service health.
+paths:
+  /api/challenges:
+    post:
+      tags:
+        - Challenges
+      summary: Start a new challenge
+      description: >-
+        Creates a new challenge and returns its initial state. The picture is
+        generated asynchronously, so it is typically `PENDING` immediately after
+        creation and flips to `READY` (or `FAILED`) on a later fetch.
+      operationId: startChallenge
+      parameters:
+        - name: difficulty
+          in: query
+          required: false
+          description: Challenge difficulty. Defaults to `MEDIUM` when omitted.
+          schema:
+            $ref: '#/components/schemas/Difficulty'
+      responses:
+        '200':
+          description: Challenge created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeResponse'
+        '422':
+          description: Unprocessable entity (e.g. an unknown `difficulty` value).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: invalid request parameter
+  /api/challenges/{id}:
+    get:
+      tags:
+        - Challenges
+      summary: Fetch the current state of a challenge
+      description: >-
+        Returns the current challenge state. Clients poll this endpoint while
+        `picture.status` is `PENDING` to learn when the generated image is
+        available.
+      operationId: getChallenge
+      parameters:
+        - $ref: '#/components/parameters/ChallengeId'
+      responses:
+        '200':
+          description: Current challenge state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeResponse'
+        '404':
+          description: No challenge exists with the given id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: challenge not found
+        '422':
+          description: The path `id` is not a valid UUID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: invalid request parameter
+  /api/challenges/{id}/guesses:
+    post:
+      tags:
+        - Challenges
+      summary: Submit a guess
+      description: >-
+        Submits a single word guess against an in-progress challenge and returns
+        the updated state. A correct guess reveals the matching token(s); an
+        incorrect guess costs a life.
+      operationId: makeGuess
+      parameters:
+        - $ref: '#/components/parameters/ChallengeId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuessRequest'
+      responses:
+        '200':
+          description: Updated challenge state after applying the guess.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeResponse'
+        '404':
+          description: No challenge exists with the given id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: challenge not found
+        '409':
+          description: >-
+            The challenge is already over, or it was modified concurrently and
+            the write lost an optimistic-lock check.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                alreadyOver:
+                  value:
+                    message: challenge is already over
+                concurrentModification:
+                  value:
+                    message: challenge was modified concurrently; retry the operation
+        '422':
+          description: >-
+            The path `id` is not a valid UUID, the request body is missing or
+            malformed, the body fails validation (blank word or longer than 100
+            characters), or the guess is rejected by the domain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidBody:
+                  value:
+                    message: invalid request body
+                invalidGuess:
+                  value:
+                    message: invalid guess
+                invalidParameter:
+                  value:
+                    message: invalid request parameter
+  /api/challenges/{id}/forfeit:
+    post:
+      tags:
+        - Challenges
+      summary: Forfeit a challenge
+      description: >-
+        Gives up on an in-progress challenge. The returned state reveals the full
+        prompt.
+      operationId: forfeitChallenge
+      parameters:
+        - $ref: '#/components/parameters/ChallengeId'
+      responses:
+        '200':
+          description: Final challenge state with the prompt revealed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeResponse'
+        '404':
+          description: No challenge exists with the given id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: challenge not found
+        '409':
+          description: >-
+            The challenge is already over, or it was modified concurrently and
+            the write lost an optimistic-lock check.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                alreadyOver:
+                  value:
+                    message: challenge is already over
+                concurrentModification:
+                  value:
+                    message: challenge was modified concurrently; retry the operation
+        '422':
+          description: The path `id` is not a valid UUID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: invalid request parameter
+  /health:
+    get:
+      tags:
+        - Operations
+      summary: Liveness/health probe
+      description: Spring Boot Actuator health endpoint, exposed at the root base path.
+      operationId: health
+      responses:
+        '200':
+          description: Service is up.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: UP
+components:
+  parameters:
+    ChallengeId:
+      name: id
+      in: path
+      required: true
+      description: The challenge identifier.
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    Difficulty:
+      type: string
+      description: Challenge difficulty level.
+      enum:
+        - EASY
+        - MEDIUM
+        - HARD
+    ChallengeStatus:
+      type: string
+      description: Lifecycle state of a challenge.
+      enum:
+        - IN_PROGRESS
+        - BEATEN
+        - LOST
+    PictureStatus:
+      type: string
+      description: >-
+        State of the asynchronously generated picture. `PENDING` while
+        generation is in flight, `READY` once an image URL is available, and
+        `FAILED` if generation could not produce an image.
+      enum:
+        - PENDING
+        - READY
+        - FAILED
+    GuessRequest:
+      type: object
+      required:
+        - word
+      properties:
+        word:
+          type: string
+          description: The guessed word. Must be non-blank and at most 100 characters.
+          minLength: 1
+          maxLength: 100
+          example: dragon
+    MaskedToken:
+      type: object
+      description: >-
+        One token of the prompt. When `revealed` is `false` the token is hidden
+        and `word` is `null`; the secret is never serialized while a challenge is
+        in progress.
+      required:
+        - revealed
+        - word
+      properties:
+        revealed:
+          type: boolean
+        word:
+          type: string
+          nullable: true
+          description: The token text when revealed, otherwise `null`.
+          example: a
+    Picture:
+      type: object
+      required:
+        - status
+        - url
+      properties:
+        status:
+          $ref: '#/components/schemas/PictureStatus'
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: Image URL when `status` is `READY`, otherwise `null`.
+          example: https://example.com/images/abc123.png
+    ChallengeResponse:
+      type: object
+      required:
+        - id
+        - maskedPrompt
+        - livesRemaining
+        - status
+        - picture
+      properties:
+        id:
+          type: string
+          format: uuid
+        maskedPrompt:
+          type: array
+          description: The prompt as an ordered list of revealed/hidden tokens.
+          items:
+            $ref: '#/components/schemas/MaskedToken'
+        livesRemaining:
+          type: integer
+          description: Number of incorrect guesses still allowed.
+          minimum: 0
+          example: 5
+        status:
+          $ref: '#/components/schemas/ChallengeStatus'
+        picture:
+          $ref: '#/components/schemas/Picture'
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: A fixed, non-reflective error message.
+          example: challenge not found
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: UP

@@ -2,10 +2,12 @@ package com.yonatankarp.beatthemachine.config
 
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.application.port.output.FindPendingChallenges
+import com.yonatankarp.beatthemachine.application.port.output.PictureStore
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryChallengeStore
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindChallengeById
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindPendingChallenges
+import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryPictureStore
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryStoreChallenge
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
@@ -25,4 +27,7 @@ class InMemoryPersistenceConfig {
 
     @Bean
     fun findPendingChallenges(store: InMemoryChallengeStore): FindPendingChallenges = InMemoryFindPendingChallenges(store)
+
+    @Bean
+    fun pictureStore(): PictureStore = InMemoryPictureStore()
 }

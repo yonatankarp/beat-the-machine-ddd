@@ -13,17 +13,6 @@ class SpaForwardingRouterTest {
             .build()
 
     @Test
-    fun `app deep links are served by the SPA entry point`() {
-        // static/index.html is now bundled; deep links under /app must return the SPA.
-        client
-            .get()
-            .uri("/app/some/deep/link")
-            .exchange()
-            .expectStatus()
-            .isOk
-    }
-
-    @Test
     fun `the router is scoped to app and does not match other paths`() {
         // A path outside /app/** must not be handled by this router (it falls through to a 404
         // from the router with no matching route), proving it never shadows /api or /actuator.
@@ -51,5 +40,17 @@ class SpaForwardingRouterIntegrationTest(
             .isFound
             .expectHeader()
             .valueEquals("Location", "/app/")
+    }
+
+    @Test
+    fun `app deep links are served by the SPA entry point`() {
+        // With the SPA bundled, deep links under /app must return the SPA shell so client-side
+        // routing can take over. Verified against a real context where static/index.html is present.
+        client
+            .get()
+            .uri("/app/some/deep/link")
+            .exchange()
+            .expectStatus()
+            .isOk
     }
 }

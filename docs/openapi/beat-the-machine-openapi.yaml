@@ -13,6 +13,8 @@ info:
     client input back.
   version: 1.0.0
 servers:
+  - url: /
+    description: Same origin as the served SPA (relative; the default for generated clients)
   - url: https://beat-the-machine.yonatankarp.com
     description: Production
   - url: http://localhost:80
@@ -298,6 +300,7 @@ components:
         - id
         - maskedPrompt
         - livesRemaining
+        - maxLives
         - status
         - picture
       properties:
@@ -314,6 +317,11 @@ components:
           description: Number of incorrect guesses still allowed.
           minimum: 0
           example: 5
+        maxLives:
+          type: integer
+          description: Total lives granted at the start, determined by difficulty. Lets the UI render remaining out of total.
+          minimum: 1
+          example: 6
         status:
           $ref: '#/components/schemas/ChallengeStatus'
         picture:

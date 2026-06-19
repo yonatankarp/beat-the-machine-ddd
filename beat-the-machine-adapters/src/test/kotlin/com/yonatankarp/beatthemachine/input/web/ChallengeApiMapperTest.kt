@@ -59,6 +59,16 @@ class ChallengeApiMapperTest {
     }
 
     @Test
+    fun `maps livesRemaining and the difficulty-derived maxLives`() {
+        val medium = challenge().toApiResponse()
+        assertEquals(6, medium.livesRemaining)
+        assertEquals(6, medium.maxLives)
+
+        val easy = Challenge.start(Prompt("hello world"), Lives(8), difficulty = DomainDifficulty.EASY).toApiResponse()
+        assertEquals(8, easy.maxLives)
+    }
+
+    @Test
     fun `Difficulty toDomain maps each value to the same-named domain Difficulty`() {
         assertEquals(DomainDifficulty.EASY, Difficulty.EASY.toDomain())
         assertEquals(DomainDifficulty.MEDIUM, Difficulty.MEDIUM.toDomain())

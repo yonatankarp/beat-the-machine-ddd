@@ -9,7 +9,6 @@ export default function AppRoutes() {
       <Route path="/" element={<LandingScreen />} />
       <Route path="/play/:id" element={<GameScreen />} />
       <Route path="/result/:id" element={<ResultScreen />} />
-      <Route path="/profile" element={<div className="p-6 text-slate-300">Profiles coming soon.</div>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

@@ -11,4 +11,13 @@ value class Lives(
     fun lose(): Lives = Lives(maxOf(0, remaining - 1))
 
     fun isExhausted(): Boolean = remaining == 0
+
+    companion object {
+        fun initialFor(difficulty: Difficulty): Lives =
+            when (difficulty) {
+                Difficulty.EASY -> Lives(8)
+                Difficulty.MEDIUM -> Lives(6)
+                Difficulty.HARD -> Lives(4)
+            }
+    }
 }

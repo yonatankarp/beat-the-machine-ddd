@@ -34,7 +34,7 @@ class LocalStableDiffusionMachine(
     override suspend fun generate(prompt: Prompt): Picture =
         try {
             val response =
-                withContext(Dispatchers.Default.limitedParallelism(1)) {
+                withContext(Dispatchers.IO) {
                     withTimeout(timeout) {
                         webClient
                             .post()

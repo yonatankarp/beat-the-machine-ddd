@@ -39,9 +39,10 @@ class SpringAiImageMachine(
                     }
 
                     !image.url.isNullOrBlank() -> {
+                        val url = image.url ?: return Picture.Failed
                         webClient
                             .get()
-                            .uri(image.url!!)
+                            .uri(url)
                             .retrieve()
                             .awaitBody<ByteArray>()
                     }

@@ -14,8 +14,7 @@ make run-inmemory   # backend at http://localhost:8080 (open it to play the bund
 make ui             # in a second shell: SPA dev server with hot reload at /app
 ```
 
-`make run-inmemory` serves the full app (the SPA is bundled into the backend, and
-`/` redirects to `/app`). For UI work, `make ui` runs Vite with hot reload at
+`make run-inmemory` serves the full app. For UI work, `make ui` runs Vite with hot reload at
 http://localhost:5173/app/ and proxies its `/api` calls to that backend. Use
 `make run` for durable SQLite storage instead of in-memory.
 
@@ -32,8 +31,8 @@ domain never depends on a framework:
 - `beat-the-machine-application`: use cases and the outbound ports.
 - `beat-the-machine-adapters`: the Spring Boot app (REST API, persistence, the
   async AI picture pipeline). Also serves the SPA at `/app`.
-- `beat-the-machine-frontend`: the React + Vite player UI, built into the backend
-  jar at package time.
+- `beat-the-machine-frontend`: the player UI, a React single-page app (SPA) built
+  with Vite and TypeScript, bundled into the backend jar at package time.
 
 The HTTP API is defined in
 [`docs/openapi/beat-the-machine-openapi.yaml`](docs/openapi/beat-the-machine-openapi.yaml);

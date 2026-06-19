@@ -14,7 +14,6 @@ import com.yonatankarp.beatthemachine.application.usecase.GetChallengeUseCase
 import com.yonatankarp.beatthemachine.application.usecase.MakeGuessUseCase
 import com.yonatankarp.beatthemachine.application.usecase.StartChallengeUseCase
 import com.yonatankarp.beatthemachine.output.ai.PicturePregeneration
-import com.yonatankarp.beatthemachine.output.ai.SeedMachine
 import com.yonatankarp.beatthemachine.output.ai.SeedPromptSource
 import kotlinx.coroutines.launch
 import org.springframework.boot.ApplicationRunner
@@ -25,9 +24,6 @@ import org.springframework.context.annotation.Configuration
 class BeanConfig {
     @Bean
     fun promptSource(): PromptSource = SeedPromptSource()
-
-    @Bean
-    fun machine(): Machine = SeedMachine()
 
     @Bean
     fun pictureScope(): PictureScope = PictureScope()

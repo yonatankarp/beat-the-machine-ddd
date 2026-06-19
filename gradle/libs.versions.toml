@@ -13,6 +13,7 @@ jvm = "25"
 # Pinned here for the application module, which has no Spring dependency management.
 kotlinx-coroutines = "1.10.2"
 mockwebserver = "4.12.0"
+spring-ai = "2.0.0"
 
 [libraries]
 # --- Versions managed by Spring Boot's BOM (no version declared here) ---
@@ -35,6 +36,9 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
+spring-ai-bom = { module = "org.springframework.ai:spring-ai-bom", version.ref = "spring-ai" }
+spring-ai-starter-model-openai = { module = "org.springframework.ai:spring-ai-starter-model-openai" }
+spring-ai-starter-model-ollama = { module = "org.springframework.ai:spring-ai-starter-model-ollama" }
 
 [bundles]
 # Production Spring Boot starters used by the adapters module.

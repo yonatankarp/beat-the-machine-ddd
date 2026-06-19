@@ -2,21 +2,16 @@ package com.yonatankarp.beatthemachine.input.web
 
 import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.input.web.dto.ChallengeResponse
+import com.yonatankarp.beatthemachine.openapi.v1.GetChallengeApi
+import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeResponse
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/challenges")
 class GetChallengeController(
-    private val getChallenge: GetChallenge,
-) {
-    @GetMapping("/{id}")
-    suspend fun get(
-        @PathVariable id: UUID,
-    ): ResponseEntity<ChallengeResponse> = ResponseEntity.ok(ChallengeResponse.from(getChallenge(ChallengeId(id))))
+    private val getChallengeUseCase: GetChallenge,
+) : GetChallengeApi {
+    override suspend fun getChallenge(id: UUID): ResponseEntity<ChallengeResponse> =
+        ResponseEntity.ok(getChallengeUseCase(ChallengeId(id)).toApiResponse())
 }

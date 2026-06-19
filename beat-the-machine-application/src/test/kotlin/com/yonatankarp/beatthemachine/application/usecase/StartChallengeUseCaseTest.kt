@@ -4,6 +4,7 @@ import com.yonatankarp.beatthemachine.application.port.output.PromptSource
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
+import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import kotlinx.coroutines.test.runTest
@@ -12,7 +13,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class StartChallengeUseCaseTest {
-    private val prompts = PromptSource { Prompt("hello world") }
+    private val fakePrompt = Prompt("hello world")
+    private val prompts = PromptSource { fakePrompt }
     private val store = FakeChallengeStore()
 
     @Test
@@ -31,8 +33,8 @@ class StartChallengeUseCaseTest {
     fun `starting lives scale with difficulty`() =
         runTest {
             val startChallenge = StartChallengeUseCase(prompts, store) {}
-            assertEquals(8, startChallenge(Difficulty.EASY).lives.remaining)
-            assertEquals(6, startChallenge(Difficulty.MEDIUM).lives.remaining)
-            assertEquals(4, startChallenge(Difficulty.HARD).lives.remaining)
+            assertEquals(Lives.forSecret(fakePrompt, Difficulty.EASY).remaining, startChallenge(Difficulty.EASY).lives.remaining)
+            assertEquals(Lives.forSecret(fakePrompt, Difficulty.MEDIUM).remaining, startChallenge(Difficulty.MEDIUM).lives.remaining)
+            assertEquals(Lives.forSecret(fakePrompt, Difficulty.HARD).remaining, startChallenge(Difficulty.HARD).lives.remaining)
         }
 }

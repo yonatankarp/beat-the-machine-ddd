@@ -34,6 +34,8 @@ class Challenge private constructor(
             MaskedPrompt.of(prompt, guesses)
         }
 
+    fun maxLives(): Lives = Lives.forSecret(prompt, difficulty)
+
     fun makeGuess(guess: Guess): Pair<Challenge, GuessOutcome> {
         if (status != ChallengeStatus.IN_PROGRESS) throw ChallengeAlreadyOver(id)
         val normalized = guess.normalized()

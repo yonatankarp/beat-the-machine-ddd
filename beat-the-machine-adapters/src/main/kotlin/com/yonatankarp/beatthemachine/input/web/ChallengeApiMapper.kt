@@ -1,7 +1,6 @@
 package com.yonatankarp.beatthemachine.input.web
 
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeResponse
@@ -18,7 +17,7 @@ fun Challenge.toApiResponse(): ChallengeResponse =
         id = id.value,
         maskedPrompt = maskedPrompt().tokens.map { it.toApi() },
         livesRemaining = lives.remaining,
-        maxLives = Lives.initialFor(difficulty).remaining,
+        maxLives = maxLives().remaining,
         status = ChallengeStatus.valueOf(status.name),
         picture = picture.toApi(),
     )

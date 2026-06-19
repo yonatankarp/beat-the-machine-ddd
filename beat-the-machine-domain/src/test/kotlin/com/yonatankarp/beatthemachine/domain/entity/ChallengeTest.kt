@@ -2,6 +2,7 @@ package com.yonatankarp.beatthemachine.domain.entity
 
 import com.yonatankarp.beatthemachine.domain.exception.ChallengeAlreadyOver
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
+import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Guess
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
@@ -97,5 +98,16 @@ class ChallengeTest {
         // original is unchanged
         assertEquals(Picture.Pending, c.picture)
         assertNotSame(c, updated)
+    }
+
+    @Test
+    fun `maxLives reflects the secret and difficulty`() {
+        val challenge =
+            Challenge.start(
+                Prompt("a b c"),
+                Lives.forSecret(Prompt("a b c"), Difficulty.MEDIUM),
+                difficulty = Difficulty.MEDIUM,
+            )
+        assertEquals(Lives(9), challenge.maxLives())
     }
 }

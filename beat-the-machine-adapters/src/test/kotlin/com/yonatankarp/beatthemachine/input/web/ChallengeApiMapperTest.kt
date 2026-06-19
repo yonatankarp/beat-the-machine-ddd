@@ -60,12 +60,19 @@ class ChallengeApiMapperTest {
 
     @Test
     fun `maps livesRemaining and the difficulty-derived maxLives`() {
+        val prompt = Prompt("hello world")
         val medium = challenge().toApiResponse()
         assertEquals(6, medium.livesRemaining)
-        assertEquals(6, medium.maxLives)
+        assertEquals(Lives.forSecret(prompt, DomainDifficulty.MEDIUM).remaining, medium.maxLives)
 
-        val easy = Challenge.start(Prompt("hello world"), Lives(8), difficulty = DomainDifficulty.EASY).toApiResponse()
-        assertEquals(8, easy.maxLives)
+        val easy =
+            Challenge
+                .start(
+                    prompt,
+                    Lives.forSecret(prompt, DomainDifficulty.EASY),
+                    difficulty = DomainDifficulty.EASY,
+                ).toApiResponse()
+        assertEquals(Lives.forSecret(prompt, DomainDifficulty.EASY).remaining, easy.maxLives)
     }
 
     @Test

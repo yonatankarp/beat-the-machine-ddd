@@ -1,19 +1,19 @@
 plugins {
-    id("jacoco")
-    id("org.jetbrains.kotlin.jvm")
+    jacoco
+    alias(libs.plugins.kotlin.jvm)
 }
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get()))
     }
 }
 
 dependencies {
     implementation(project(":beat-the-machine-domain"))
     implementation(libs.kotlinx.coroutines.core)
-    testImplementation(kotlin("test"))
-    testImplementation(libs.mockk)
+
+    testImplementation(libs.bundles.unit.test)
     testImplementation(libs.kotlinx.coroutines.test)
 }
 

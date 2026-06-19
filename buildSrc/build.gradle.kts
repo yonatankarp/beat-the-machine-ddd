@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    implementation("org.openapitools:openapi-generator-gradle-plugin:${libs.versions.swagger.get()}")
+    implementation(libs.openapi.generator.gradle.plugin)
 }

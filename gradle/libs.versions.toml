@@ -5,15 +5,59 @@ spring-dependency-management = "1.1.7"
 swagger = "7.18.0"
 mockk = "1.14.11"
 springmockk = "5.0.1"
+jvm = "25"
 # Matches the version managed by Spring Boot 4.1.0's BOM (kotlinx-coroutines-bom).
 # Pinned here for the application module, which has no Spring dependency management.
 kotlinx-coroutines = "1.10.2"
 
 [libraries]
-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
+# --- Versions managed by Spring Boot's BOM (no version declared here) ---
+spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+spring-boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-starter-webflux-test = { module = "org.springframework.boot:spring-boot-starter-webflux-test" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
+kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor" }
+
+# --- Explicitly versioned (not on the BOM, or used where the BOM is absent) ---
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
+
+# --- buildSrc plugin dependency ---
+openapi-generator-gradle-plugin = { module = "org.openapitools:openapi-generator-gradle-plugin", version.ref = "swagger" }
+
+[bundles]
+# Production Spring Boot starters used by the adapters module.
+spring-boot-starters = [
+    "spring-boot-starter-webflux",
+    "spring-boot-starter-actuator",
+    "spring-boot-starter-validation",
+    "spring-boot-starter-jdbc",
+]
+# Coroutine support for the WebFlux/Reactor pipeline.
+kotlinx-coroutines = [
+    "kotlinx-coroutines-core",
+    "kotlinx-coroutines-reactor",
+]
+# Plain unit-testing stack shared by every module.
+unit-test = [
+    "kotlin-test",
+    "mockk",
+]
+# Spring slice/integration testing plus the springmockk @MockkBean bridge.
+spring-boot-test = [
+    "spring-boot-starter-test",
+    "spring-boot-starter-webflux-test",
+    "springmockk",
+]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

@@ -37,8 +37,10 @@ export default function GameScreen() {
       if (e.status === 422) {
         setInlineError('That guess is not valid.')
         setShake((n) => n + 1)
+        retriedWordRef.current = null
       } else if (e.status === 409) {
         if (e.message.toLowerCase().includes('already over')) {
+          qc.invalidateQueries({ queryKey: ['challenge', id] })
           navigate(`/result/${id}`)
         } else if (retriedWordRef.current !== variables) {
           retriedWordRef.current = variables
@@ -50,16 +52,21 @@ export default function GameScreen() {
       } else if (e.status === 404) {
         clearChallengeId()
         navigate('/')
+        retriedWordRef.current = null
       } else {
         setInlineError('Something went wrong. Try again.')
         setShake((n) => n + 1)
+        retriedWordRef.current = null
       }
     },
   })
 
   const forfeit = useMutation({
     mutationFn: () => forfeitChallenge(id),
-    onSuccess: () => navigate(`/result/${id}`),
+    onSuccess: (final) => {
+      qc.setQueryData(['challenge', id], final)
+      navigate(`/result/${id}`)
+    },
   })
 
   if (isLoading || !challenge) {

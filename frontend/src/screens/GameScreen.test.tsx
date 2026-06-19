@@ -85,13 +85,13 @@ it('409 already-over navigates to result', async () => {
 
 it('409 concurrent-modification retries silently then succeeds', async () => {
   vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+
+  let resolveRetry!: (v: never) => void
+  const retryPromise = new Promise<never>((res) => { resolveRetry = res })
+
   const makeGuessSpy = vi.spyOn(api, 'makeGuess')
     .mockRejectedValueOnce({ status: 409, message: 'challenge was modified concurrently; retry the operation' })
-    .mockResolvedValueOnce({
-      ...(ready as object),
-      maskedPrompt: [{ revealed: true, word: 'fear', length: 4 }],
-      status: 'BEATEN',
-    } as never)
+    .mockReturnValueOnce(retryPromise)
 
   renderScreen(
     <QueryClientProvider client={new QueryClient()}>
@@ -108,8 +108,20 @@ it('409 concurrent-modification retries silently then succeeds', async () => {
   await userEvent.type(screen2.getByRole('textbox'), 'fear')
   await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
 
+  // Wait until both calls have been issued (first rejected, retry pending).
+  await vi.waitFor(() => expect(makeGuessSpy).toHaveBeenCalledTimes(2))
+
+  // While the retry is still in-flight, the result page must NOT be shown.
+  expect(screen2.queryByText('result page')).toBeNull()
+
+  // Now resolve the retry with a terminal state.
+  resolveRetry({
+    ...(ready as object),
+    maskedPrompt: [{ revealed: true, word: 'fear', length: 4 }],
+    status: 'BEATEN',
+  } as never)
+
   expect(await screen2.findByText('result page')).toBeInTheDocument()
-  expect(makeGuessSpy).toHaveBeenCalledTimes(2)
   expect(makeGuessSpy).toHaveBeenNthCalledWith(1, 'g1', 'fear')
   expect(makeGuessSpy).toHaveBeenNthCalledWith(2, 'g1', 'fear')
 })

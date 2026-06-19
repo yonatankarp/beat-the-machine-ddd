@@ -6,6 +6,7 @@ import com.yonatankarp.beatthemachine.output.ai.LocalStableDiffusionMachine
 import com.yonatankarp.beatthemachine.output.ai.SeedMachine
 import com.yonatankarp.beatthemachine.output.ai.SpringAiImageMachine
 import org.springframework.ai.image.ImageModel
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,11 +23,11 @@ class MachineConfig {
     @ConditionalOnProperty(name = ["btm.image.provider"], havingValue = "local-sd")
     fun localStableDiffusionMachine(
         pictureStore: PictureStore,
-        @org.springframework.beans.factory.annotation.Value("\${btm.image.local-sd.base-url}") baseUrl: String,
-        @org.springframework.beans.factory.annotation.Value("\${btm.image.local-sd.steps:8}") steps: Int,
-        @org.springframework.beans.factory.annotation.Value("\${btm.image.local-sd.width:512}") width: Int,
-        @org.springframework.beans.factory.annotation.Value("\${btm.image.local-sd.height:512}") height: Int,
-        @org.springframework.beans.factory.annotation.Value("\${btm.image.local-sd.timeout-seconds:120}") timeoutSeconds: Long,
+        @Value("\${btm.image.local-sd.base-url}") baseUrl: String,
+        @Value("\${btm.image.local-sd.steps:8}") steps: Int,
+        @Value("\${btm.image.local-sd.width:512}") width: Int,
+        @Value("\${btm.image.local-sd.height:512}") height: Int,
+        @Value("\${btm.image.local-sd.timeout-seconds:120}") timeoutSeconds: Long,
     ): Machine =
         LocalStableDiffusionMachine(
             WebClient.builder().baseUrl(baseUrl).build(),

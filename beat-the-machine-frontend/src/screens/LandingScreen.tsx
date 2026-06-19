@@ -10,11 +10,11 @@ import { focusRing } from '../components/focusRing'
 
 const DIFFICULTIES: Difficulty[] = [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard]
 
-// Lives per difficulty mirror the backend policy (domain Lives.initialFor).
-const DIFFICULTY_INFO: Record<Difficulty, { lives: number; blurb: string }> = {
-  [Difficulty.Easy]: { lives: 8, blurb: 'Most forgiving' },
-  [Difficulty.Medium]: { lives: 6, blurb: 'A balanced duel' },
-  [Difficulty.Hard]: { lives: 4, blurb: 'For prompt whisperers' },
+// Short blurb per difficulty; starting lives are derived from the secret on the backend, so we don't promise a number here.
+const DIFFICULTY_INFO: Record<Difficulty, { blurb: string }> = {
+  [Difficulty.Easy]: { blurb: 'Most forgiving' },
+  [Difficulty.Medium]: { blurb: 'A balanced duel' },
+  [Difficulty.Hard]: { blurb: 'For prompt whisperers' },
 }
 
 export default function LandingScreen() {
@@ -109,7 +109,7 @@ export default function LandingScreen() {
           ))}
         </div>
         <p className="text-sm text-ink-dim">
-          {DIFFICULTY_INFO[difficulty].blurb} · {DIFFICULTY_INFO[difficulty].lives} lives
+          {DIFFICULTY_INFO[difficulty].blurb}
         </p>
       </motion.div>
 

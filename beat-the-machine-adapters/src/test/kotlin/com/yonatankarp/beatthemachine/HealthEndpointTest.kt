@@ -1,21 +1,26 @@
 package com.yonatankarp.beatthemachine
 
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.resttestclient.TestRestTemplate
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
+import org.springframework.test.web.reactive.server.WebTestClient
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestRestTemplate
+@AutoConfigureWebTestClient
 class HealthEndpointTest(
-    @Autowired val rest: TestRestTemplate,
+    @Autowired val client: WebTestClient,
 ) {
     @Test
     fun `health endpoint reports UP`() {
-        val body = rest.getForObject("/health", String::class.java)
-        val nonNullBody = requireNotNull(body) { "Response body must not be null" }
-        assertTrue(nonNullBody.contains("\"status\":\"UP\""))
+        client
+            .get()
+            .uri("/health")
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.status")
+            .isEqualTo("UP")
     }
 }

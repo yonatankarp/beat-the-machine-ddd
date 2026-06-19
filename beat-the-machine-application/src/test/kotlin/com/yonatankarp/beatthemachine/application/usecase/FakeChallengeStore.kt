@@ -17,9 +17,9 @@ class FakeChallengeStore :
     FindPendingChallenges {
     val byId = linkedMapOf<ChallengeId, Challenge>()
 
-    override fun invoke(challenge: Challenge): Challenge = challenge.also { byId[it.id] = it }
+    override suspend fun invoke(challenge: Challenge): Challenge = challenge.also { byId[it.id] = it }
 
-    override fun invoke(id: ChallengeId): Challenge? = byId[id]
+    override suspend fun invoke(id: ChallengeId): Challenge? = byId[id]
 
-    override fun invoke(): List<Challenge> = byId.values.filter { it.picture is Picture.Pending }
+    override suspend fun invoke(): List<Challenge> = byId.values.filter { it.picture is Picture.Pending }
 }

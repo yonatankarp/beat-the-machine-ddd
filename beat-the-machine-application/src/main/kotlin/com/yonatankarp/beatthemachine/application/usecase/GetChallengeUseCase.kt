@@ -9,5 +9,5 @@ import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 class GetChallengeUseCase(
     private val findChallengeById: FindChallengeById,
 ) : GetChallenge {
-    override fun invoke(id: ChallengeId): Challenge = findChallengeById(id) ?: throw ChallengeNotFound(id)
+    override suspend fun invoke(id: ChallengeId): Challenge = findChallengeById(id) ?: throw ChallengeNotFound(id)
 }

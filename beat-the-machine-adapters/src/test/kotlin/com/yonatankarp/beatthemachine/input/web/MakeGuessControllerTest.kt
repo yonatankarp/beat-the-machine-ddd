@@ -5,22 +5,22 @@ import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.exception.ChallengeAlreadyOver
+import com.yonatankarp.beatthemachine.domain.exception.InvalidGuess
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.Guess
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
-import io.mockk.every
+import io.mockk.coEvery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.post
+import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebMvcTest(MakeGuessController::class)
+@WebFluxTest(MakeGuessController::class)
 class MakeGuessControllerTest(
-    @Autowired val mvc: MockMvc,
+    @Autowired val client: WebTestClient,
 ) {
     @MockkBean
     lateinit var makeGuess: MakeGuess
@@ -28,44 +28,70 @@ class MakeGuessControllerTest(
     @Test
     fun `a successful guess returns the updated masked prompt`() {
         val (afterHit, _) = Challenge.start(Prompt("hello world"), Lives(6)).makeGuess(Guess("hello"))
-        every { makeGuess(any(), any()) } returns (afterHit to GuessOutcome.HIT)
-        mvc
-            .post("/api/challenges/${ChallengeId.new().value}/guesses") {
-                contentType = MediaType.APPLICATION_JSON
-                content = """{"word":"hello"}"""
-            }.andExpect {
-                status { isOk() }
-                jsonPath("$.maskedPrompt[0].revealed") { value(true) }
-                jsonPath("$.maskedPrompt[0].word") { value("hello") }
-            }
+        coEvery { makeGuess(any(), any()) } returns (afterHit to GuessOutcome.HIT)
+        client
+            .post()
+            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("""{"word":"hello"}""")
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.maskedPrompt[0].revealed")
+            .isEqualTo(true)
+            .jsonPath("$.maskedPrompt[0].word")
+            .isEqualTo("hello")
     }
 
     @Test
     fun `guessing an unknown challenge returns 404`() {
-        every { makeGuess(any(), any()) } throws ChallengeNotFound(ChallengeId.new())
-        mvc
-            .post("/api/challenges/${ChallengeId.new().value}/guesses") {
-                contentType = MediaType.APPLICATION_JSON
-                content = """{"word":"hello"}"""
-            }.andExpect { status { isNotFound() } }
+        coEvery { makeGuess(any(), any()) } throws ChallengeNotFound(ChallengeId.new())
+        client
+            .post()
+            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("""{"word":"hello"}""")
+            .exchange()
+            .expectStatus()
+            .isNotFound
     }
 
     @Test
     fun `guessing on an already-over challenge returns 409`() {
-        every { makeGuess(any(), any()) } throws ChallengeAlreadyOver(ChallengeId.new())
-        mvc
-            .post("/api/challenges/${ChallengeId.new().value}/guesses") {
-                contentType = MediaType.APPLICATION_JSON
-                content = """{"word":"hello"}"""
-            }.andExpect { status { isConflict() } }
+        coEvery { makeGuess(any(), any()) } throws ChallengeAlreadyOver(ChallengeId.new())
+        client
+            .post()
+            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("""{"word":"hello"}""")
+            .exchange()
+            .expectStatus()
+            .isEqualTo(409)
+    }
+
+    @Test
+    fun `a domain-rejected guess returns 422`() {
+        coEvery { makeGuess(any(), any()) } throws InvalidGuess("not a single word")
+        client
+            .post()
+            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("""{"word":"two words"}""")
+            .exchange()
+            .expectStatus()
+            .isEqualTo(422)
     }
 
     @Test
     fun `guessing with a blank word returns 422`() {
-        mvc
-            .post("/api/challenges/${ChallengeId.new().value}/guesses") {
-                contentType = MediaType.APPLICATION_JSON
-                content = """{"word":"   "}"""
-            }.andExpect { status { isEqualTo(422) } }
+        client
+            .post()
+            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("""{"word":"   "}""")
+            .exchange()
+            .expectStatus()
+            .isEqualTo(422)
     }
 }

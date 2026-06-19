@@ -7,5 +7,5 @@ import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 class InMemoryFindChallengeById(
     private val store: InMemoryChallengeStore,
 ) : FindChallengeById {
-    override fun invoke(id: ChallengeId): Challenge? = store.byId[id]
+    override suspend fun invoke(id: ChallengeId): Challenge? = store.byId[id]
 }

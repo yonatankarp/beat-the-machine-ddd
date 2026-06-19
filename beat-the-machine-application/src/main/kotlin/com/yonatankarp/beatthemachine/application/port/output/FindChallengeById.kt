@@ -5,5 +5,5 @@ import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 
 /** Looks up a single challenge by its id, or `null` when none exists. */
 fun interface FindChallengeById {
-    operator fun invoke(id: ChallengeId): Challenge?
+    suspend operator fun invoke(id: ChallengeId): Challenge?
 }

@@ -4,6 +4,7 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -21,13 +22,14 @@ class SqliteFindPendingChallengesIT {
     }
 
     @Test
-    fun `returns only challenges whose picture is pending`() {
-        val pendingA = storeChallenge(Challenge.start(Prompt("pending one"), Lives(2), picture = Picture.Pending))
-        val pendingB = storeChallenge(Challenge.start(Prompt("pending two"), Lives(2), picture = Picture.Pending))
-        storeChallenge(Challenge.start(Prompt("ready pic"), Lives(2), picture = Picture.Ready("https://example.com/img.png")))
-        storeChallenge(Challenge.start(Prompt("failed pic"), Lives(2), picture = Picture.Failed))
+    fun `returns only challenges whose picture is pending`() =
+        runTest {
+            val pendingA = storeChallenge(Challenge.start(Prompt("pending one"), Lives(2), picture = Picture.Pending))
+            val pendingB = storeChallenge(Challenge.start(Prompt("pending two"), Lives(2), picture = Picture.Pending))
+            storeChallenge(Challenge.start(Prompt("ready pic"), Lives(2), picture = Picture.Ready("https://example.com/img.png")))
+            storeChallenge(Challenge.start(Prompt("failed pic"), Lives(2), picture = Picture.Failed))
 
-        val ids = findPendingChallenges().map { it.id }.toSet()
-        assertEquals(setOf(pendingA.id, pendingB.id), ids)
-    }
+            val ids = findPendingChallenges().map { it.id }.toSet()
+            assertEquals(setOf(pendingA.id, pendingB.id), ids)
+        }
 }

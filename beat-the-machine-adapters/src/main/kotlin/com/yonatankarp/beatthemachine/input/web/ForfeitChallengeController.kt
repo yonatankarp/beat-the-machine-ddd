@@ -16,7 +16,7 @@ class ForfeitChallengeController(
     private val forfeitChallenge: ForfeitChallenge,
 ) {
     @PostMapping("/{id}/forfeit")
-    fun forfeit(
+    suspend fun forfeit(
         @PathVariable id: UUID,
     ): ResponseEntity<ChallengeResponse> = ResponseEntity.ok(ChallengeResponse.from(forfeitChallenge(ChallengeId(id))))
 }

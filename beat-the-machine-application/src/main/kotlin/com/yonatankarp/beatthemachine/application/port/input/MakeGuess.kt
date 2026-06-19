@@ -6,7 +6,7 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Guess
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
 
 fun interface MakeGuess {
-    operator fun invoke(
+    suspend operator fun invoke(
         id: ChallengeId,
         guess: Guess,
     ): Pair<Challenge, GuessOutcome>

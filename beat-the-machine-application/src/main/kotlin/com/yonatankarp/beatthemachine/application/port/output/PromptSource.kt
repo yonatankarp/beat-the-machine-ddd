@@ -4,5 +4,5 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 
 fun interface PromptSource {
-    infix fun next(difficulty: Difficulty): Prompt
+    suspend infix fun next(difficulty: Difficulty): Prompt
 }

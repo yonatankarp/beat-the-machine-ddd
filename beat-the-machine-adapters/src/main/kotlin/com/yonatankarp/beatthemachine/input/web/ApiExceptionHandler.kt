@@ -8,10 +8,10 @@ import com.yonatankarp.beatthemachine.input.web.dto.ErrorResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.bind.support.WebExchangeBindException
+import org.springframework.web.server.ServerWebInputException
 
 /**
  * Maps domain/application failures to HTTP status codes. Messages are fixed,
@@ -36,15 +36,21 @@ class ApiExceptionHandler {
     fun handleInvalidGuess(ex: InvalidGuess): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(HttpStatusCode.valueOf(422)).body(ErrorResponse("invalid guess"))
 
-    @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleValidation(ex: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> =
+    // Bean-validation failures on the request body (`@Valid`) surface in WebFlux as
+    // WebExchangeBindException (the MVC MethodArgumentNotValidException equivalent).
+    @ExceptionHandler(WebExchangeBindException::class)
+    fun handleValidation(ex: WebExchangeBindException): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(HttpStatusCode.valueOf(422)).body(ErrorResponse("invalid request body"))
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(HttpStatusCode.valueOf(422)).body(ErrorResponse("invalid input"))
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
-    fun handleTypeMismatch(ex: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse> =
+    // Query-param conversion failures (e.g. a bad `difficulty` enum) and undeserializable
+    // request bodies surface in WebFlux as ServerWebInputException (the MVC
+    // MethodArgumentTypeMismatchException equivalent). WebExchangeBindException is a
+    // subtype handled above, so it is matched first by Spring's most-specific resolution.
+    @ExceptionHandler(ServerWebInputException::class)
+    fun handleInputError(ex: ServerWebInputException): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(HttpStatusCode.valueOf(422)).body(ErrorResponse("invalid request parameter"))
 }

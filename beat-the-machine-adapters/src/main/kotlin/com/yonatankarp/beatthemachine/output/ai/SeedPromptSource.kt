@@ -11,5 +11,5 @@ import kotlin.random.Random
  * the port contract for when a difficulty-aware source replaces this seed adapter.
  */
 class SeedPromptSource : PromptSource {
-    override fun next(difficulty: Difficulty): Prompt = SEED[Random.nextInt(SEED.size)].first
+    override suspend fun next(difficulty: Difficulty): Prompt = SEED[Random.nextInt(SEED.size)].first
 }

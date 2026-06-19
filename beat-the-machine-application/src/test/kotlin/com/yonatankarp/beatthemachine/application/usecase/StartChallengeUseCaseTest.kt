@@ -6,6 +6,7 @@ import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -15,21 +16,23 @@ class StartChallengeUseCaseTest {
     private val store = FakeChallengeStore()
 
     @Test
-    fun `starts a pending challenge and enqueues picture generation`() {
-        val enqueued = mutableListOf<ChallengeId>()
-        val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
-        val challenge = startChallenge(Difficulty.MEDIUM)
-        assertEquals(Picture.Pending, challenge.picture)
-        assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
-        assertEquals(listOf(challenge.id), enqueued)
-        assertTrue(store.byId.containsKey(challenge.id))
-    }
+    fun `starts a pending challenge and enqueues picture generation`() =
+        runTest {
+            val enqueued = mutableListOf<ChallengeId>()
+            val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
+            val challenge = startChallenge(Difficulty.MEDIUM)
+            assertEquals(Picture.Pending, challenge.picture)
+            assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
+            assertEquals(listOf(challenge.id), enqueued)
+            assertTrue(store.byId.containsKey(challenge.id))
+        }
 
     @Test
-    fun `starting lives scale with difficulty`() {
-        val startChallenge = StartChallengeUseCase(prompts, store) {}
-        assertEquals(8, startChallenge(Difficulty.EASY).lives.remaining)
-        assertEquals(6, startChallenge(Difficulty.MEDIUM).lives.remaining)
-        assertEquals(4, startChallenge(Difficulty.HARD).lives.remaining)
-    }
+    fun `starting lives scale with difficulty`() =
+        runTest {
+            val startChallenge = StartChallengeUseCase(prompts, store) {}
+            assertEquals(8, startChallenge(Difficulty.EASY).lives.remaining)
+            assertEquals(6, startChallenge(Difficulty.MEDIUM).lives.remaining)
+            assertEquals(4, startChallenge(Difficulty.HARD).lives.remaining)
+        }
 }

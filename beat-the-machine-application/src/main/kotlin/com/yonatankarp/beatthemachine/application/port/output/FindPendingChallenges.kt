@@ -9,5 +9,5 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Picture
  * created but never had their picture produced.
  */
 fun interface FindPendingChallenges {
-    operator fun invoke(): List<Challenge>
+    suspend operator fun invoke(): List<Challenge>
 }

@@ -7,35 +7,43 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
-import io.mockk.every
+import io.mockk.coEvery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.post
+import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
+import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebMvcTest(ForfeitChallengeController::class)
+@WebFluxTest(ForfeitChallengeController::class)
 class ForfeitChallengeControllerTest(
-    @Autowired val mvc: MockMvc,
+    @Autowired val client: WebTestClient,
 ) {
     @MockkBean
     lateinit var forfeitChallenge: ForfeitChallenge
 
     @Test
     fun `forfeit reveals the prompt and reports LOST`() {
-        every { forfeitChallenge(any()) } returns Challenge.start(Prompt("hello world"), Lives(6)).forfeit()
-        mvc.post("/api/challenges/${ChallengeId.new().value}/forfeit").andExpect {
-            status { isOk() }
-            jsonPath("$.status") { value("LOST") }
-            jsonPath("$.maskedPrompt[0].revealed") { value(true) }
-        }
+        coEvery { forfeitChallenge(any()) } returns Challenge.start(Prompt("hello world"), Lives(6)).forfeit()
+        client
+            .post()
+            .uri("/api/challenges/${ChallengeId.new().value}/forfeit")
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.status")
+            .isEqualTo("LOST")
+            .jsonPath("$.maskedPrompt[0].revealed")
+            .isEqualTo(true)
     }
 
     @Test
     fun `forfeit with concurrent modification returns 409`() {
-        every { forfeitChallenge(any()) } throws OptimisticLockConflict(ChallengeId.new())
-        mvc
-            .post("/api/challenges/${ChallengeId.new().value}/forfeit")
-            .andExpect { status { isConflict() } }
+        coEvery { forfeitChallenge(any()) } throws OptimisticLockConflict(ChallengeId.new())
+        client
+            .post()
+            .uri("/api/challenges/${ChallengeId.new().value}/forfeit")
+            .exchange()
+            .expectStatus()
+            .isEqualTo(409)
     }
 }

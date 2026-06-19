@@ -16,12 +16,10 @@ import com.yonatankarp.beatthemachine.application.usecase.StartChallengeUseCase
 import com.yonatankarp.beatthemachine.output.ai.PicturePregeneration
 import com.yonatankarp.beatthemachine.output.ai.SeedMachine
 import com.yonatankarp.beatthemachine.output.ai.SeedPromptSource
+import kotlinx.coroutines.launch
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import java.util.concurrent.Executor
-import java.util.concurrent.ThreadPoolExecutor
 
 @Configuration
 class BeanConfig {
@@ -32,16 +30,7 @@ class BeanConfig {
     fun machine(): Machine = SeedMachine()
 
     @Bean
-    fun pictureExecutor(): ThreadPoolTaskExecutor =
-        ThreadPoolTaskExecutor().apply {
-            corePoolSize = 2
-            maxPoolSize = 4
-            queueCapacity = 50
-            setThreadNamePrefix("picture-")
-            // A full queue must not 500 the start endpoint; run the work on the
-            // calling request thread instead of rejecting it.
-            setRejectedExecutionHandler(ThreadPoolExecutor.CallerRunsPolicy())
-        }
+    fun pictureScope(): PictureScope = PictureScope()
 
     @Bean
     fun picturePregeneration(
@@ -49,12 +38,18 @@ class BeanConfig {
         findChallengeById: FindChallengeById,
         storeChallenge: StoreChallenge,
         findPendingChallenges: FindPendingChallenges,
-        pictureExecutor: Executor,
-    ): PicturePregeneration = PicturePregeneration(machine, findChallengeById, storeChallenge, findPendingChallenges, pictureExecutor)
+        pictureScope: PictureScope,
+    ): PicturePregeneration = PicturePregeneration(machine, findChallengeById, storeChallenge, findPendingChallenges, pictureScope)
 
     @Bean
-    fun pendingPictureRetryRunner(picturePregeneration: PicturePregeneration): ApplicationRunner =
-        ApplicationRunner { picturePregeneration.retryPending() }
+    fun pendingPictureRetryRunner(
+        picturePregeneration: PicturePregeneration,
+        pictureScope: PictureScope,
+    ): ApplicationRunner =
+        ApplicationRunner {
+            // Launch the retry sweep into the picture scope; the boot thread must not block.
+            pictureScope.launch { picturePregeneration.retryPending() }
+        }
 
     @Bean
     fun startChallenge(

@@ -13,7 +13,7 @@ class MakeGuessUseCase(
     private val findChallengeById: FindChallengeById,
     private val storeChallenge: StoreChallenge,
 ) : MakeGuess {
-    override fun invoke(
+    override suspend fun invoke(
         id: ChallengeId,
         guess: Guess,
     ): Pair<Challenge, GuessOutcome> {

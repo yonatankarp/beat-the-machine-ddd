@@ -1,16 +1,18 @@
 package com.yonatankarp.beatthemachine.output.ai
 
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
 class SeedPromptSourceTest {
     @Test
-    fun `returns a prompt from the curated seed set`() {
-        val seedPrompts = SEED.map { it.first }.toSet()
-        repeat(20) {
-            val prompt = SeedPromptSource().next(Difficulty.MEDIUM)
-            assertTrue(prompt in seedPrompts, "returned prompt must come from the curated SEED set")
+    fun `returns a prompt from the curated seed set`() =
+        runTest {
+            val seedPrompts = SEED.map { it.first }.toSet()
+            repeat(20) {
+                val prompt = SeedPromptSource().next(Difficulty.MEDIUM)
+                assertTrue(prompt in seedPrompts, "returned prompt must come from the curated SEED set")
+            }
         }
-    }
 }

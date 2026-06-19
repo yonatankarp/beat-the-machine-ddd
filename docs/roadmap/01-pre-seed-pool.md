@@ -1,6 +1,6 @@
 # Pre-seed pool (background producer + instant serve)
 
-Status: draft / scope only — implementation TBD.
+Status: implemented (feat/pre-seed-pool, PR #19).
 Builds on: PR #18 (local LLM + image generation).
 
 ## Problem

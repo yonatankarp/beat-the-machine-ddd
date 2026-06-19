@@ -25,7 +25,10 @@ import { afterEach, vi } from 'vitest'
 import GameScreen from './GameScreen'
 import * as api from '../api/challenges'
 
-afterEach(() => vi.restoreAllMocks())
+afterEach(() => {
+  vi.restoreAllMocks()
+  localStorage.clear()
+})
 
 const ready = {
   id: 'g1',
@@ -38,6 +41,82 @@ const ready = {
 it('a 422 rejection shows an inline error without costing a life', async () => {
   vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
   vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 422, message: 'invalid guess' })
+
+  renderScreen(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={['/play/g1']}>
+        <Routes>
+          <Route path="/play/:id" element={<GameScreen />} />
+          <Route path="/result/:id" element={<div>result page</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+
+  await screen2.findByRole('img')
+  await userEvent.type(screen2.getByRole('textbox'), 'bad')
+  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
+
+  expect(await screen2.findByRole('alert')).toBeInTheDocument()
+  expect(screen2.getByLabelText('5 lives remaining')).toBeInTheDocument()
+  expect(screen2.queryByText('result page')).not.toBeInTheDocument()
+})
+
+it('409 already-over navigates to result', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+  vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 409, message: 'challenge is already over' })
+
+  renderScreen(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={['/play/g1']}>
+        <Routes>
+          <Route path="/play/:id" element={<GameScreen />} />
+          <Route path="/result/:id" element={<div>result page</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+
+  await screen2.findByRole('img')
+  await userEvent.type(screen2.getByRole('textbox'), 'over')
+  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
+  expect(await screen2.findByText('result page')).toBeInTheDocument()
+})
+
+it('409 concurrent-modification retries silently then succeeds', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+  const makeGuessSpy = vi.spyOn(api, 'makeGuess')
+    .mockRejectedValueOnce({ status: 409, message: 'challenge was modified concurrently; retry the operation' })
+    .mockResolvedValueOnce({
+      ...(ready as object),
+      maskedPrompt: [{ revealed: true, word: 'fear', length: 4 }],
+      status: 'BEATEN',
+    } as never)
+
+  renderScreen(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={['/play/g1']}>
+        <Routes>
+          <Route path="/play/:id" element={<GameScreen />} />
+          <Route path="/result/:id" element={<div>result page</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+
+  await screen2.findByRole('img')
+  await userEvent.type(screen2.getByRole('textbox'), 'fear')
+  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
+
+  expect(await screen2.findByText('result page')).toBeInTheDocument()
+  expect(makeGuessSpy).toHaveBeenCalledTimes(2)
+  expect(makeGuessSpy).toHaveBeenNthCalledWith(1, 'g1', 'fear')
+  expect(makeGuessSpy).toHaveBeenNthCalledWith(2, 'g1', 'fear')
+})
+
+it('unexpected status shows inline error with lives unchanged and no navigation', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+  vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 500, message: 'boom' })
 
   renderScreen(
     <QueryClientProvider client={new QueryClient()}>

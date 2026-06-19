@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'motion/react'
@@ -17,6 +17,7 @@ export default function GameScreen() {
   const [word, setWord] = useState('')
   const [shake, setShake] = useState(0)
   const [inlineError, setInlineError] = useState<string | null>(null)
+  const retriedWordRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (challenge && challenge.status !== 'IN_PROGRESS') {
@@ -30,16 +31,28 @@ export default function GameScreen() {
       qc.setQueryData(['challenge', id], updated)
       setWord('')
       setInlineError(null)
+      retriedWordRef.current = null
     },
-    onError: (e: ApiError) => {
+    onError: (e: ApiError, variables: string) => {
       if (e.status === 422) {
         setInlineError('That guess is not valid.')
         setShake((n) => n + 1)
       } else if (e.status === 409) {
-        navigate(`/result/${id}`)
+        if (e.message.toLowerCase().includes('already over')) {
+          navigate(`/result/${id}`)
+        } else if (retriedWordRef.current !== variables) {
+          retriedWordRef.current = variables
+          guess.mutate(variables)
+        } else {
+          setInlineError('Something went wrong. Try again.')
+          retriedWordRef.current = null
+        }
       } else if (e.status === 404) {
         clearChallengeId()
         navigate('/')
+      } else {
+        setInlineError('Something went wrong. Try again.')
+        setShake((n) => n + 1)
       }
     },
   })
@@ -91,6 +104,7 @@ export default function GameScreen() {
           onChange={(e) => setWord(e.target.value)}
           maxLength={100}
           placeholder="Guess a word"
+          aria-label="Guess a word"
           className="flex-1 rounded-lg bg-slate-700 px-4 py-2 text-slate-100 outline-none"
         />
         <button

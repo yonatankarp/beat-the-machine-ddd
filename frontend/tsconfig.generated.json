@@ -11,6 +11,7 @@
     "noUnusedParameters": false,
     "skipLibCheck": true,
     "composite": true,
+    "emitDeclarationOnly": true,
     "outDir": "dist/generated-types"
   },
   "include": ["src/generated"]

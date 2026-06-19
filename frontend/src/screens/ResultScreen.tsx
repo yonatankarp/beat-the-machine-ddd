@@ -1,10 +1,12 @@
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useChallenge } from '../hooks/useChallenge'
 import { clearChallengeId } from '../api/challengeStore'
 
 export default function ResultScreen() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  const qc = useQueryClient()
   const { data: challenge, isLoading } = useChallenge(id)
 
   if (isLoading || !challenge) {
@@ -16,6 +18,7 @@ export default function ResultScreen() {
 
   const playAgain = () => {
     clearChallengeId()
+    qc.removeQueries({ queryKey: ['challenge'] })
     navigate('/')
   }
 

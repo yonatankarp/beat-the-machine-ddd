@@ -25,9 +25,15 @@ class LivesTest {
     }
 
     @Test
-    fun `initial lives are granted per difficulty`() {
-        assertEquals(Lives(8), Lives.initialFor(Difficulty.EASY))
-        assertEquals(Lives(6), Lives.initialFor(Difficulty.MEDIUM))
-        assertEquals(Lives(4), Lives.initialFor(Difficulty.HARD))
+    fun `lives scale with word count and difficulty multiplier`() {
+        // base = 3 lives per word, EASY x1.5 / MEDIUM x1.0 / HARD x0.7, rounded, floor 2
+        assertEquals(Lives(9), Lives.forSecret(Prompt("dragon cookie"), Difficulty.EASY)) // round(3*2*1.5)=9
+        assertEquals(Lives(9), Lives.forSecret(Prompt("a b c"), Difficulty.MEDIUM)) // round(3*3*1.0)=9
+        assertEquals(Lives(8), Lives.forSecret(Prompt("a b c d"), Difficulty.HARD)) // round(3*4*0.7)=8
+    }
+
+    @Test
+    fun `lives never drop below the floor`() {
+        assertEquals(Lives(2), Lives.forSecret(Prompt("cat"), Difficulty.HARD)) // round(3*1*0.7)=2
     }
 }

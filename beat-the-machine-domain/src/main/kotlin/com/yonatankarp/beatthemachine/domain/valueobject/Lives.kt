@@ -1,5 +1,7 @@
 package com.yonatankarp.beatthemachine.domain.valueobject
 
+import kotlin.math.roundToInt
+
 @JvmInline
 value class Lives(
     val remaining: Int,
@@ -13,11 +15,15 @@ value class Lives(
     fun isExhausted(): Boolean = remaining == 0
 
     companion object {
-        fun initialFor(difficulty: Difficulty): Lives =
-            when (difficulty) {
-                Difficulty.EASY -> Lives(8)
-                Difficulty.MEDIUM -> Lives(6)
-                Difficulty.HARD -> Lives(4)
-            }
+        private const val PER_WORD_BASE = 3
+        private const val MIN_LIVES = 2
+
+        fun forSecret(
+            prompt: Prompt,
+            difficulty: Difficulty,
+        ): Lives {
+            val raw = (PER_WORD_BASE * prompt.words().size * difficulty.livesMultiplier).roundToInt()
+            return Lives(maxOf(MIN_LIVES, raw))
+        }
     }
 }

@@ -3,28 +3,22 @@ package com.yonatankarp.beatthemachine.input.web
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.Guess
-import com.yonatankarp.beatthemachine.input.web.dto.ChallengeResponse
-import com.yonatankarp.beatthemachine.input.web.dto.GuessRequest
-import jakarta.validation.Valid
+import com.yonatankarp.beatthemachine.openapi.v1.MakeGuessApi
+import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeResponse
+import com.yonatankarp.beatthemachine.openapi.v1.models.GuessRequest
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/challenges")
 class MakeGuessController(
-    private val makeGuess: MakeGuess,
-) {
-    @PostMapping("/{id}/guesses")
-    suspend fun guess(
-        @PathVariable id: UUID,
-        @Valid @RequestBody request: GuessRequest,
+    private val makeGuessUseCase: MakeGuess,
+) : MakeGuessApi {
+    override suspend fun makeGuess(
+        id: UUID,
+        guessRequest: GuessRequest,
     ): ResponseEntity<ChallengeResponse> {
-        val (challenge, _) = makeGuess(ChallengeId(id), Guess(request.word))
-        return ResponseEntity.ok(ChallengeResponse.from(challenge))
+        val (challenge, _) = makeGuessUseCase(ChallengeId(id), Guess(guessRequest.word))
+        return ResponseEntity.ok(challenge.toApiResponse())
     }
 }

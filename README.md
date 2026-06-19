@@ -94,6 +94,21 @@ The repository implementation is selected by the `btm.persistence` property:
 Code style (ktlint via Spotless) is enforced in the CI pipeline rather than the
 local build. CI fails on any formatting violation, so format before pushing.
 
+To catch violations before they reach CI, enable the bundled pre-commit hook
+once per clone:
+
+```shell
+make setup
+```
+
+This sets `core.hooksPath` to `.githooks`, whose `pre-commit` runs the same
+Spotless check CI runs (via `gradle/spotless.init.gradle.kts`) and blocks the
+commit on violations. Auto-fix them with:
+
+```shell
+./gradlew --init-script gradle/spotless.init.gradle.kts spotlessApply
+```
+
 ## Built With
 
 - [OpenJDK 25](https://openjdk.org/projects/jdk/25/)

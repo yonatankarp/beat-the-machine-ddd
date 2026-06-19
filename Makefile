@@ -19,11 +19,15 @@ endef
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build test coverage check run run-inmemory jar clean docker-build docker-run
+.PHONY: help setup build test coverage check run run-inmemory jar clean docker-build docker-run
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
 		| awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
+
+setup: ## One-time: enable the local Spotless pre-commit hook
+	@git config core.hooksPath .githooks
+	@printf '\033[1;32m▶\033[0m git hooks enabled: \033[36mcore.hooksPath=.githooks\033[0m (pre-commit runs spotlessCheck)\n'
 
 build: ## Compile and assemble all modules (no tests)
 	$(GRADLE) build -x test

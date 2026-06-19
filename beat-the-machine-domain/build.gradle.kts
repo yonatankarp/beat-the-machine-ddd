@@ -1,17 +1,16 @@
 plugins {
-    id("jacoco")
-    id("org.jetbrains.kotlin.jvm")
+    jacoco
+    alias(libs.plugins.kotlin.jvm)
 }
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get()))
     }
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
-    testImplementation(libs.mockk)
+    testImplementation(libs.bundles.unit.test)
 }
 
 tasks.withType<Test> {

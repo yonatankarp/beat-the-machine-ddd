@@ -1,14 +1,14 @@
 plugins {
-    id("jacoco")
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
-    id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.kotlin.plugin.spring")
+    jacoco
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
 }
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get()))
     }
 }
 
@@ -16,27 +16,18 @@ dependencies {
     implementation(project(":beat-the-machine-application"))
     implementation(project(":beat-the-machine-domain"))
 
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
-    implementation("org.xerial:sqlite-jdbc")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    // Versions managed by Spring Boot's BOM (kotlinx-coroutines-bom). kotlinx-coroutines-reactor
-    // bridges suspend handlers to WebFlux's Reactor pipeline.
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    implementation(libs.bundles.spring.boot.starters)
+    implementation(libs.sqlite.jdbc)
+    implementation(libs.jackson.module.kotlin)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.kotlin.stdlib.jdk8)
+    implementation(libs.bundles.kotlinx.coroutines)
 
-    testImplementation(kotlin("test"))
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude("org.mockito:mockito-core")
+    testImplementation(libs.bundles.unit.test)
+    testImplementation(libs.bundles.spring.boot.test) {
+        exclude("org.mockito", "mockito-core")
     }
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
-    testImplementation(libs.mockk)
-    testImplementation(libs.springmockk)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 tasks.bootJar {

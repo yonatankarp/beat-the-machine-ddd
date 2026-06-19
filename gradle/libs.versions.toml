@@ -11,7 +11,7 @@ springmockk = "5.0.1"
 jvm = "25"
 # Matches the version managed by Spring Boot 4.1.0's BOM (kotlinx-coroutines-bom).
 # Pinned here for the application module, which has no Spring dependency management.
-kotlinx-coroutines = "1.10.2"
+kotlinx-coroutines = "1.11.0"
 
 [libraries]
 # --- Versions managed by Spring Boot's BOM (no version declared here) ---

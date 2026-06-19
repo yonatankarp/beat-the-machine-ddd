@@ -46,6 +46,18 @@ tasks {
     }
 }
 
+val copyWebApp by tasks.registering(Sync::class) {
+    dependsOn(":beat-the-machine-web:buildWebApp")
+    from(project(":beat-the-machine-web").layout.projectDirectory.dir("dist"))
+    into(layout.buildDirectory.dir("generated/web/static"))
+}
+
+sourceSets.main {
+    resources.srcDir(layout.buildDirectory.dir("generated/web"))
+}
+
+tasks.named("processResources") { dependsOn(copyWebApp) }
+
 openapiContracts {
     directoryPath.set(
         rootProject.layout.projectDirectory

@@ -19,8 +19,8 @@ framework:
   adapter, in-memory and SQLite persistence adapters, seed AI adapters, and the
   asynchronous picture-generation pipeline.
 
-The HTTP API is JSON-only; the player-facing UI is a separate SPA (tracked in a
-follow-up plan).
+The backend also serves the player SPA under `/app` from its static resources,
+built by the `:beat-the-machine-web` subproject.
 
 ### REST API
 

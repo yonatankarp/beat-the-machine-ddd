@@ -15,3 +15,10 @@ CREATE TABLE IF NOT EXISTS picture (
     bytes        BLOB NOT NULL,
     content_type TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS challenge_template (
+    id          TEXT PRIMARY KEY,
+    difficulty  TEXT NOT NULL,
+    prompt      TEXT NOT NULL,
+    picture_url TEXT NOT NULL
+);

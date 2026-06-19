@@ -21,6 +21,9 @@ spring:
 
 btm:
   persistence: sqlite
+  pool:
+    target: ${BTM_POOL_TARGET:10}
+    sweep-ms: ${BTM_POOL_SWEEP_MS:60000}
   prompt:
     provider: ${BTM_PROMPT_PROVIDER:seed}
   image:

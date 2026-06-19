@@ -46,7 +46,7 @@ class LocalStableDiffusionMachineTest {
                     .setHeader("Content-Type", "application/json")
                     .setBody("""{"images":["$b64"]}"""),
             )
-            coEvery { pictureStore.save(any(), "image/png") } returns "/images/xyz"
+            coEvery { pictureStore.save(pngBytes, "image/png") } returns "/images/xyz"
 
             val result = machine().generate(Prompt("dragon eating a cookie"))
 

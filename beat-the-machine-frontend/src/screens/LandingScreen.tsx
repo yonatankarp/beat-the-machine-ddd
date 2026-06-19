@@ -10,6 +10,13 @@ import { focusRing } from '../components/focusRing'
 
 const DIFFICULTIES: Difficulty[] = [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard]
 
+// Lives per difficulty mirror the backend policy (domain Lives.initialFor).
+const DIFFICULTY_INFO: Record<Difficulty, { lives: number; blurb: string }> = {
+  [Difficulty.Easy]: { lives: 8, blurb: 'Most forgiving' },
+  [Difficulty.Medium]: { lives: 6, blurb: 'A balanced duel' },
+  [Difficulty.Hard]: { lives: 4, blurb: 'For prompt whisperers' },
+}
+
 export default function LandingScreen() {
   const navigate = useNavigate()
   const headingRef = useHeadingFocus<HTMLHeadingElement>()
@@ -101,6 +108,9 @@ export default function LandingScreen() {
             </button>
           ))}
         </div>
+        <p className="text-sm text-ink-dim">
+          {DIFFICULTY_INFO[difficulty].blurb} · {DIFFICULTY_INFO[difficulty].lives} lives
+        </p>
       </motion.div>
 
       <motion.button

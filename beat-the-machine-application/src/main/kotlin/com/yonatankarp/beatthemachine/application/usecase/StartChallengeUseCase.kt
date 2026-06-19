@@ -14,16 +14,9 @@ class StartChallengeUseCase(
     private val enqueuePicture: (ChallengeId) -> Unit,
 ) : StartChallenge {
     override suspend fun invoke(difficulty: Difficulty): Challenge {
-        val challenge = Challenge.start(promptSource next difficulty, startingLives(difficulty))
+        val challenge = Challenge.start(promptSource next difficulty, Lives.initialFor(difficulty))
         val persisted = storeChallenge(challenge)
         enqueuePicture(persisted.id)
         return persisted
     }
-
-    private fun startingLives(difficulty: Difficulty): Lives =
-        when (difficulty) {
-            Difficulty.EASY -> Lives(8)
-            Difficulty.MEDIUM -> Lives(6)
-            Difficulty.HARD -> Lives(4)
-        }
 }

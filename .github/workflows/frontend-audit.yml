@@ -1,0 +1,27 @@
+name: Frontend npm audit
+
+on:
+  pull_request:
+    paths:
+      - 'beat-the-machine-frontend/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: beat-the-machine-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      # Fail the build only on high/critical advisories; lower severities are reported but non-blocking.
+      - run: npm audit --audit-level=high

@@ -23,4 +23,11 @@ class LivesTest {
         assertTrue(Lives(0).isExhausted())
         assertFalse(Lives(1).isExhausted())
     }
+
+    @Test
+    fun `initial lives are granted per difficulty`() {
+        assertEquals(Lives(8), Lives.initialFor(Difficulty.EASY))
+        assertEquals(Lives(6), Lives.initialFor(Difficulty.MEDIUM))
+        assertEquals(Lives(4), Lives.initialFor(Difficulty.HARD))
+    }
 }

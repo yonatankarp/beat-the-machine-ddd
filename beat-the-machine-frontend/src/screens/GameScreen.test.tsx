@@ -40,7 +40,7 @@ it('a 422 rejection shows an inline error without costing a life', async () => {
   await guessWith('bad')
 
   expect(await screen.findByRole('alert')).toHaveTextContent('That guess is not valid.')
-  expect(screen.getByLabelText('5 lives remaining')).toBeInTheDocument()
+  expect(screen.getByLabelText('5 of 6 lives remaining')).toBeInTheDocument()
   expect(screen.queryByText('result page')).not.toBeInTheDocument()
 })
 
@@ -120,7 +120,7 @@ it('unexpected status shows inline error with lives unchanged and no navigation'
   await guessWith('bad')
 
   expect(await screen.findByRole('alert')).toBeInTheDocument()
-  expect(screen.getByLabelText('5 lives remaining')).toBeInTheDocument()
+  expect(screen.getByLabelText('5 of 6 lives remaining')).toBeInTheDocument()
   expect(screen.queryByText('result page')).not.toBeInTheDocument()
 })
 

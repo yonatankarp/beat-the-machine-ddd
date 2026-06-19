@@ -165,7 +165,7 @@ export default function GameScreen() {
       </div>
 
       <div className="flex w-full items-center justify-between">
-        <Hearts remaining={challenge.livesRemaining} />
+        <Hearts remaining={challenge.livesRemaining} total={challenge.maxLives} />
         {confirmingForfeit ? (
           <div className="flex items-center gap-3 text-sm">
             <span className="text-ink-dim">Give up?</span>

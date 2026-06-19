@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.openapi.contracts)
 }
 
 kotlin {
@@ -42,5 +43,20 @@ tasks {
     withType<Test> {
         useJUnitPlatform()
         finalizedBy(jacocoTestReport)
+    }
+}
+
+openapiContracts {
+    directoryPath.set(
+        rootProject.layout.projectDirectory
+            .dir("docs/openapi")
+            .asFile.absolutePath,
+    )
+    servers {
+        register("BeatTheMachineApi") {
+            spec.set("beat-the-machine-openapi.yaml")
+            packageName.set("com.yonatankarp.beatthemachine.openapi.v1")
+            modelPackageName.set("com.yonatankarp.beatthemachine.openapi.v1.models")
+        }
     }
 }

@@ -1,10 +1,12 @@
 package com.yonatankarp.beatthemachine.config
 
+import com.yonatankarp.beatthemachine.application.port.output.ChallengeTemplates
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.application.port.output.FindPendingChallenges
 import com.yonatankarp.beatthemachine.application.port.output.PictureStore
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.output.persistence.sqlite.ChallengeRowMapper
+import com.yonatankarp.beatthemachine.output.persistence.sqlite.SqliteChallengeTemplates
 import com.yonatankarp.beatthemachine.output.persistence.sqlite.SqliteFindChallengeById
 import com.yonatankarp.beatthemachine.output.persistence.sqlite.SqliteFindPendingChallenges
 import com.yonatankarp.beatthemachine.output.persistence.sqlite.SqlitePictureStore
@@ -40,4 +42,7 @@ class SqlitePersistenceConfig {
 
     @Bean
     fun pictureStore(jdbcTemplate: JdbcTemplate): PictureStore = SqlitePictureStore(jdbcTemplate)
+
+    @Bean
+    fun challengeTemplates(jdbcTemplate: JdbcTemplate): ChallengeTemplates = SqliteChallengeTemplates(jdbcTemplate)
 }

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.node.gradle)
+    alias(libs.plugins.openapi.generator)
 }
 
 node {
@@ -13,6 +14,26 @@ node {
     download.set(true)
     nodeProjectDir.set(layout.projectDirectory)
 }
+
+openApiGenerate {
+    generatorName.set("typescript-fetch")
+    inputSpec.set(
+        rootProject.layout.projectDirectory
+            .file("docs/openapi/beat-the-machine-openapi.yaml")
+            .asFile.absolutePath,
+    )
+    outputDir.set(layout.projectDirectory.dir("src/generated").asFile.absolutePath)
+    configOptions.set(
+        mapOf(
+            "supportsES6" to "true",
+            "withInterfaces" to "true",
+            "typescriptThreePlus" to "true",
+        ),
+    )
+    cleanupOutput.set(true)
+}
+
+tasks.named("npmInstall") { dependsOn(tasks.named("openApiGenerate")) }
 
 val buildWebApp by tasks.registering(com.github.gradle.node.npm.task.NpmTask::class) {
     dependsOn(tasks.named("npmInstall"))

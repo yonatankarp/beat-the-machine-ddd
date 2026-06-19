@@ -10,7 +10,7 @@ Requires JDK 25+ (and Node.js 22+ only for UI development). Tasks run through th
 Makefile; `make help` lists them all.
 
 ```shell
-make run-inmemory   # backend at http://localhost:8080 (open it to play the bundled UI)
+make run-inmemory   # backend + bundled UI at http://localhost:8080
 make ui             # in a second shell: SPA dev server with hot reload at /app
 ```
 

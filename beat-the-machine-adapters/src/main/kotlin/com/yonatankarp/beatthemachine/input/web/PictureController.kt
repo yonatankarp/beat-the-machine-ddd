@@ -18,10 +18,21 @@ class PictureController(
         @PathVariable id: String,
     ): ResponseEntity<ByteArray> {
         val image = pictureStore.load(id) ?: return ResponseEntity.notFound().build()
+        val safeContentType =
+            if (image.contentType in ALLOWED_CONTENT_TYPES) {
+                image.contentType
+            } else {
+                FALLBACK_CONTENT_TYPE
+            }
         return ResponseEntity
             .ok()
-            .contentType(MediaType.parseMediaType(image.contentType))
+            .contentType(MediaType.parseMediaType(safeContentType))
             .cacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable())
             .body(image.bytes)
+    }
+
+    companion object {
+        val ALLOWED_CONTENT_TYPES = setOf("image/png", "image/jpeg", "image/webp", "image/gif")
+        const val FALLBACK_CONTENT_TYPE = "application/octet-stream"
     }
 }

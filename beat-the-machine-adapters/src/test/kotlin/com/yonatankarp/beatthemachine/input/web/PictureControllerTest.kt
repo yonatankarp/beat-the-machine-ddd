@@ -41,4 +41,23 @@ class PictureControllerTest(
             .expectStatus()
             .isNotFound
     }
+
+    @Test
+    fun `non-image content type is coerced to application octet-stream`() {
+        coEvery { pictureStore.load("malicious") } returns
+            StoredImage(
+                byteArrayOf(60, 104, 116, 109, 108, 62),
+                "text/html",
+            )
+        client
+            .get()
+            .uri("/images/malicious")
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectHeader()
+            .contentType("application/octet-stream")
+            .expectBody()
+            .consumeWith { assert(it.responseBody!!.contentEquals(byteArrayOf(60, 104, 116, 109, 108, 62))) }
+    }
 }

@@ -1,10 +1,12 @@
 package com.yonatankarp.beatthemachine.config
 
+import com.yonatankarp.beatthemachine.application.port.output.ChallengeTemplates
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.application.port.output.FindPendingChallenges
 import com.yonatankarp.beatthemachine.application.port.output.PictureStore
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryChallengeStore
+import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryChallengeTemplates
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindChallengeById
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindPendingChallenges
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryPictureStore
@@ -30,4 +32,7 @@ class InMemoryPersistenceConfig {
 
     @Bean
     fun pictureStore(): PictureStore = InMemoryPictureStore()
+
+    @Bean
+    fun challengeTemplates(): ChallengeTemplates = InMemoryChallengeTemplates()
 }

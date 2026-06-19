@@ -24,7 +24,9 @@ import kotlin.coroutines.CoroutineContext
  * Cancelled on context shutdown via [DisposableBean], so in-flight generations are
  * cancelled and no coroutine outlives the application.
  */
-class PictureScope : CoroutineScope, DisposableBean {
+class PictureScope :
+    CoroutineScope,
+    DisposableBean {
     override val coroutineContext: CoroutineContext =
         SupervisorJob() + Dispatchers.IO.limitedParallelism(PICTURE_PARALLELISM)
 

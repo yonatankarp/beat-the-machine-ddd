@@ -27,7 +27,7 @@ class SecurityHeadersFilterTest(
                 require("script-src 'self'" in csp) { "missing script-src: $csp" }
                 require("frame-ancestors 'none'" in csp) { "missing frame-ancestors: $csp" }
                 require("object-src 'none'" in csp) { "missing object-src: $csp" }
-                require("img-src 'self' https: data:" in csp) { "missing img-src: $csp" }
+                require("img-src 'self' https:;" in csp) { "missing img-src: $csp" }
             }
     }
 }

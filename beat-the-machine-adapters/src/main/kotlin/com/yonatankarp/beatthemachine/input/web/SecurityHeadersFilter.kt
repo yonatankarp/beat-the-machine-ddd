@@ -33,7 +33,7 @@ class SecurityHeadersFilter : WebFilter {
             "default-src 'self'; " +
                 "script-src 'self'; " +
                 "style-src 'self' 'unsafe-inline'; " +
-                "img-src 'self' https: data:; " +
+                "img-src 'self' https:; " +
                 "font-src 'self'; " +
                 "connect-src 'self'; " +
                 "object-src 'none'; " +

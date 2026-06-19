@@ -18,15 +18,15 @@ servers:
   - url: http://localhost:80
     description: Local (port read from PORT, defaults to 80)
 tags:
-  - name: Challenges
-    description: Start, inspect, play, and forfeit challenges.
-  - name: Operations
-    description: Service health.
+  - name: StartChallenge
+  - name: GetChallenge
+  - name: MakeGuess
+  - name: ForfeitChallenge
 paths:
   /api/challenges:
     post:
       tags:
-        - Challenges
+        - StartChallenge
       summary: Start a new challenge
       description: >-
         Creates a new challenge and returns its initial state. The picture is
@@ -40,6 +40,7 @@ paths:
           description: Challenge difficulty. Defaults to `MEDIUM` when omitted.
           schema:
             $ref: '#/components/schemas/Difficulty'
+            default: MEDIUM
       responses:
         '200':
           description: Challenge created.
@@ -58,7 +59,7 @@ paths:
   /api/challenges/{id}:
     get:
       tags:
-        - Challenges
+        - GetChallenge
       summary: Fetch the current state of a challenge
       description: >-
         Returns the current challenge state. Clients poll this endpoint while
@@ -93,7 +94,7 @@ paths:
   /api/challenges/{id}/guesses:
     post:
       tags:
-        - Challenges
+        - MakeGuess
       summary: Submit a guess
       description: >-
         Submits a single word guess against an in-progress challenge and returns
@@ -160,7 +161,7 @@ paths:
   /api/challenges/{id}/forfeit:
     post:
       tags:
-        - Challenges
+        - ForfeitChallenge
       summary: Forfeit a challenge
       description: >-
         Gives up on an in-progress challenge. The returned state reveals the full
@@ -206,22 +207,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 message: invalid request parameter
-  /health:
-    get:
-      tags:
-        - Operations
-      summary: Liveness/health probe
-      description: Spring Boot Actuator health endpoint, exposed at the root base path.
-      operationId: health
-      responses:
-        '200':
-          description: Service is up.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HealthResponse'
-              example:
-                status: UP
 components:
   parameters:
     ChallengeId:
@@ -267,6 +252,7 @@ components:
           description: The guessed word. Must be non-blank and at most 100 characters.
           minLength: 1
           maxLength: 100
+          pattern: ".*\\S.*"
           example: dragon
     MaskedToken:
       type: object
@@ -334,11 +320,3 @@ components:
           type: string
           description: A fixed, non-reflective error message.
           example: challenge not found
-    HealthResponse:
-      type: object
-      required:
-        - status
-      properties:
-        status:
-          type: string
-          example: UP

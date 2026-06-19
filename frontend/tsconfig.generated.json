@@ -7,13 +7,11 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noEmit": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "skipLibCheck": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "composite": true,
+    "outDir": "dist/generated-types"
   },
-  "include": ["src"],
-  "exclude": ["src/generated"],
-  "references": [{ "path": "./tsconfig.generated.json" }]
+  "include": ["src/generated"]
 }

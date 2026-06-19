@@ -58,6 +58,8 @@ class StartChallengeControllerTest(
             .expectBody()
             .jsonPath("$.picture.status")
             .isEqualTo("READY")
+            .jsonPath("$.picture.url")
+            .isEqualTo("/images/a")
     }
 
     @Test

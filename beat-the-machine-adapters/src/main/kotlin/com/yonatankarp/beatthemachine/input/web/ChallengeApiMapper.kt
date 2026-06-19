@@ -15,31 +15,33 @@ import com.yonatankarp.beatthemachine.openapi.v1.models.Picture as ApiPicture
 fun Challenge.toApiResponse(): ChallengeResponse =
     ChallengeResponse(
         id = id.value,
-        maskedPrompt =
-            maskedPrompt().tokens.map { token ->
-                when (token) {
-                    is MaskedToken.Revealed -> ApiMaskedToken(revealed = true, word = token.word)
-                    MaskedToken.Hidden -> ApiMaskedToken(revealed = false, word = null)
-                }
-            },
+        maskedPrompt = maskedPrompt().tokens.map { it.toApi() },
         livesRemaining = lives.remaining,
         status = ChallengeStatus.valueOf(status.name),
-        picture =
-            when (val pic = picture) {
-                Picture.Pending -> {
-                    ApiPicture(PictureStatus.PENDING, null)
-                }
-
-                is Picture.Ready -> {
-                    runCatching { URI.create(pic.url) }
-                        .map { ApiPicture(PictureStatus.READY, it) }
-                        .getOrDefault(ApiPicture(PictureStatus.FAILED, null))
-                }
-
-                Picture.Failed -> {
-                    ApiPicture(PictureStatus.FAILED, null)
-                }
-            },
+        picture = picture.toApi(),
     )
+
+private fun MaskedToken.toApi(): ApiMaskedToken =
+    when (this) {
+        is MaskedToken.Revealed -> ApiMaskedToken(revealed = true, word = word)
+        MaskedToken.Hidden -> ApiMaskedToken(revealed = false, word = null)
+    }
+
+private fun Picture.toApi(): ApiPicture =
+    when (this) {
+        Picture.Pending -> {
+            ApiPicture(PictureStatus.PENDING, null)
+        }
+
+        is Picture.Ready -> {
+            runCatching { URI.create(url) }
+                .map { ApiPicture(PictureStatus.READY, it) }
+                .getOrDefault(ApiPicture(PictureStatus.FAILED, null))
+        }
+
+        Picture.Failed -> {
+            ApiPicture(PictureStatus.FAILED, null)
+        }
+    }
 
 fun Difficulty.toDomain(): DomainDifficulty = DomainDifficulty.valueOf(name)

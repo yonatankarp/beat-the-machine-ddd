@@ -14,7 +14,8 @@ make run-inmemory   # backend at http://localhost:8080 (open it to play the bund
 make ui             # in a second shell: SPA dev server with hot reload at /app
 ```
 
-`make run-inmemory` serves the full app. For UI work, `make ui` runs Vite with hot reload at
+`make run-inmemory` serves the full app: open http://localhost:8080 and you are
+redirected to the UI at `/app`. For UI work, `make ui` runs Vite with hot reload at
 http://localhost:5173/app/ and proxies its `/api` calls to that backend. Use
 `make run` for durable SQLite storage instead of in-memory.
 

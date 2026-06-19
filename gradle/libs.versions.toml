@@ -12,6 +12,7 @@ jvm = "25"
 # Matches the version managed by Spring Boot 4.1.0's BOM (kotlinx-coroutines-bom).
 # Pinned here for the application module, which has no Spring dependency management.
 kotlinx-coroutines = "1.10.2"
+mockwebserver = "4.12.0"
 
 [libraries]
 # --- Versions managed by Spring Boot's BOM (no version declared here) ---
@@ -32,6 +33,7 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
 
 [bundles]
@@ -51,6 +53,7 @@ kotlinx-coroutines = [
 unit-test = [
     "kotlin-test",
     "mockk",
+    "mockwebserver",
 ]
 # Spring slice/integration testing plus the springmockk @MockkBean bridge.
 spring-boot-test = [

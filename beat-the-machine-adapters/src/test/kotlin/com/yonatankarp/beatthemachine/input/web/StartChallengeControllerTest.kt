@@ -3,7 +3,9 @@ package com.yonatankarp.beatthemachine.input.web
 import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
+import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
+import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
@@ -40,6 +42,22 @@ class StartChallengeControllerTest(
             .doesNotExist()
             .jsonPath("$.secretPrompt")
             .doesNotExist()
+    }
+
+    @Test
+    fun `started challenge exposes a ready picture`() {
+        val challenge =
+            Challenge.start(Prompt("red car"), Lives(6), Picture.Ready("/images/a"), Difficulty.EASY)
+        coEvery { startChallenge(any()) } returns challenge
+        client
+            .post()
+            .uri("/api/challenges?difficulty=EASY")
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.picture.status")
+            .isEqualTo("READY")
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
 import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
+import com.yonatankarp.beatthemachine.application.port.output.ChallengeTemplates
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.application.port.output.FindPendingChallenges
 import com.yonatankarp.beatthemachine.application.port.output.Machine
@@ -13,13 +14,18 @@ import com.yonatankarp.beatthemachine.application.usecase.ForfeitChallengeUseCas
 import com.yonatankarp.beatthemachine.application.usecase.GetChallengeUseCase
 import com.yonatankarp.beatthemachine.application.usecase.MakeGuessUseCase
 import com.yonatankarp.beatthemachine.application.usecase.StartChallengeUseCase
+import com.yonatankarp.beatthemachine.output.ai.ChallengePoolReplenisher
+import com.yonatankarp.beatthemachine.output.ai.ChallengeTemplateSeeder
 import com.yonatankarp.beatthemachine.output.ai.PicturePregeneration
 import kotlinx.coroutines.launch
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.scheduling.annotation.EnableScheduling
 
 @Configuration
+@EnableScheduling
 class BeanConfig {
     @Bean
     fun pictureScope(): PictureScope = PictureScope()
@@ -34,6 +40,32 @@ class BeanConfig {
     ): PicturePregeneration = PicturePregeneration(machine, findChallengeById, storeChallenge, findPendingChallenges, pictureScope)
 
     @Bean
+    fun challengePoolReplenisher(
+        promptSource: PromptSource,
+        machine: Machine,
+        challengeTemplates: ChallengeTemplates,
+        pictureScope: PictureScope,
+        @Value("\${btm.pool.target:10}") target: Int,
+    ): ChallengePoolReplenisher = ChallengePoolReplenisher(promptSource, machine, challengeTemplates, pictureScope, target)
+
+    @Bean
+    fun challengeTemplateSeeder(challengeTemplates: ChallengeTemplates): ChallengeTemplateSeeder =
+        ChallengeTemplateSeeder(challengeTemplates)
+
+    @Bean
+    fun poolWarmUpRunner(
+        seeder: ChallengeTemplateSeeder,
+        replenisher: ChallengePoolReplenisher,
+        pictureScope: PictureScope,
+    ): ApplicationRunner =
+        ApplicationRunner {
+            pictureScope.launch {
+                seeder.seed()
+                replenisher.warmUp()
+            }
+        }
+
+    @Bean
     fun pendingPictureRetryRunner(
         picturePregeneration: PicturePregeneration,
         pictureScope: PictureScope,
@@ -45,10 +77,19 @@ class BeanConfig {
 
     @Bean
     fun startChallenge(
+        challengeTemplates: ChallengeTemplates,
         promptSource: PromptSource,
         storeChallenge: StoreChallenge,
         picturePregeneration: PicturePregeneration,
-    ): StartChallenge = StartChallengeUseCase(promptSource, storeChallenge, picturePregeneration::enqueue)
+        challengePoolReplenisher: ChallengePoolReplenisher,
+    ): StartChallenge =
+        StartChallengeUseCase(
+            challengeTemplates,
+            promptSource,
+            storeChallenge,
+            picturePregeneration::enqueue,
+            challengePoolReplenisher::replenish,
+        )
 
     @Bean
     fun makeGuess(

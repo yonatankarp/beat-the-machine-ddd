@@ -35,6 +35,30 @@ const ready = {
   picture: { status: 'READY', url: 'https://example.com/x.png' },
 } as never
 
+it('a 422 rejection shows an inline error without costing a life', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+  vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 422, message: 'invalid guess' })
+
+  renderScreen(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={['/play/g1']}>
+        <Routes>
+          <Route path="/play/:id" element={<GameScreen />} />
+          <Route path="/result/:id" element={<div>result page</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+
+  await screen2.findByRole('img')
+  await userEvent.type(screen2.getByRole('textbox'), 'bad')
+  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
+
+  expect(await screen2.findByRole('alert')).toBeInTheDocument()
+  expect(screen2.getByLabelText('5 lives remaining')).toBeInTheDocument()
+  expect(screen2.queryByText('result page')).not.toBeInTheDocument()
+})
+
 it('submits a guess and shows the updated state', async () => {
   vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
   vi.spyOn(api, 'makeGuess').mockResolvedValue({

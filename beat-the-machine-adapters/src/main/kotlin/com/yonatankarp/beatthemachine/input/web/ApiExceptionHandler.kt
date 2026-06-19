@@ -4,7 +4,7 @@ import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.domain.exception.ChallengeAlreadyOver
 import com.yonatankarp.beatthemachine.domain.exception.InvalidGuess
-import com.yonatankarp.beatthemachine.input.web.dto.ErrorResponse
+import com.yonatankarp.beatthemachine.openapi.v1.models.ErrorResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity

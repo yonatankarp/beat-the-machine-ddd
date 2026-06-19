@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: enforce the same Spotless/ktlint formatting that CI enforces,
+# so style violations are caught locally instead of failing the `linters` job.
+#
+# It runs the vendored init script (gradle/spotless.init.gradle.kts), which mirrors
+# yonatankarp/github-actions' spotless config exactly. The project build itself has no
+# Spotless plugin ("CI owns Spotless"); this hook is the only local entry point.
+#
+# Enable once per clone:  git config core.hooksPath .githooks
+# Auto-fix violations:    ./gradlew --init-script gradle/spotless.init.gradle.kts spotlessApply
+# Bypass (discouraged):   git commit --no-verify
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+
+echo "pre-commit: running spotlessCheck…"
+if ! ./gradlew --quiet --init-script gradle/spotless.init.gradle.kts spotlessCheck; then
+    cat >&2 <<'EOF'
+
+✗ Spotless found formatting violations (same check CI runs).
+  Fix them with:
+      ./gradlew --init-script gradle/spotless.init.gradle.kts spotlessApply
+  then re-stage and commit. To bypass intentionally: git commit --no-verify
+EOF
+    exit 1
+fi

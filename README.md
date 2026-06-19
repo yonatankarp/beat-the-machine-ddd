@@ -20,7 +20,7 @@ framework:
   asynchronous picture-generation pipeline.
 
 The backend also serves the player SPA under `/app` from its static resources,
-built by the `:beat-the-machine-web` subproject.
+built by the `:beat-the-machine-frontend` subproject.
 
 ### REST API
 

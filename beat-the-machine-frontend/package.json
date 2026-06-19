@@ -1,5 +1,5 @@
 {
-  "name": "beat-the-machine-web",
+  "name": "beat-the-machine-frontend",
   "private": true,
   "type": "module",
   "scripts": {

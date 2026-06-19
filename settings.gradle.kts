@@ -3,6 +3,5 @@ include(
     "beat-the-machine-domain",
     "beat-the-machine-application",
     "beat-the-machine-adapters",
-    "beat-the-machine-web"
+    "beat-the-machine-frontend"
 )
-project(":beat-the-machine-web").projectDir = file("frontend")

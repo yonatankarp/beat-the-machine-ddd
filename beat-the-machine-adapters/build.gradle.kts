@@ -47,8 +47,8 @@ tasks {
 }
 
 val copyWebApp by tasks.registering(Sync::class) {
-    dependsOn(":beat-the-machine-web:buildWebApp")
-    from(project(":beat-the-machine-web").layout.projectDirectory.dir("dist"))
+    dependsOn(":beat-the-machine-frontend:buildWebApp")
+    from(project(":beat-the-machine-frontend").layout.projectDirectory.dir("dist"))
     into(layout.buildDirectory.dir("generated/web/static"))
 }
 

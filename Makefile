@@ -6,8 +6,12 @@ ADAPTERS     := :beat-the-machine-adapters
 IMAGE        := beat-the-machine
 DOCKERFILE   := beat-the-machine-adapters/Dockerfile
 JAR          := beat-the-machine-adapters/build/libs/adapters.jar
+FRONTEND     := :beat-the-machine-frontend
+UI_DIR       := beat-the-machine-frontend
 PORT         := 8080
+UI_PORT      := 5173
 BASE_URL     := http://localhost:$(PORT)
+UI_URL       := http://localhost:$(UI_PORT)/app/
 
 # Prints where to reach the app. The URL appears above Spring's startup logs,
 # so scroll up if the boot output has buried it.
@@ -19,7 +23,7 @@ endef
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup build test coverage check run run-inmemory jar clean docker-build docker-run
+.PHONY: help setup build test coverage check run run-inmemory ui ui-build jar clean docker-build docker-run
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -48,6 +52,14 @@ run: ## Run the app (default persistence)
 run-inmemory: ## Run the app with in-memory persistence
 	$(banner)
 	PORT=$(PORT) $(GRADLE) $(ADAPTERS):bootRun --args='--btm.persistence=inmemory'
+
+ui: ## Run the SPA dev server (Vite, hot reload); needs the backend running (make run-inmemory)
+	@printf '\n\033[1;32m▶ UI dev server\033[0m on \033[36m%s\033[0m\n' '$(UI_URL)'
+	@printf '  proxies /api to the backend on \033[36m%s\033[0m — start it with `make run-inmemory`\n\n' '$(BASE_URL)'
+	cd $(UI_DIR) && npm install && npm run dev
+
+ui-build: ## Build the production SPA bundle (also part of `make build`)
+	$(GRADLE) $(FRONTEND):buildWebApp
 
 jar: ## Build the executable bootJar (adapters.jar)
 	$(GRADLE) $(ADAPTERS):bootJar

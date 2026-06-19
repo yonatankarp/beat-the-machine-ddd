@@ -1,0 +1,35 @@
+package com.yonatankarp.beatthemachine.input.web
+
+import com.yonatankarp.beatthemachine.domain.entity.Challenge
+import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
+import com.yonatankarp.beatthemachine.domain.valueobject.Picture
+import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeResponse
+import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeStatus
+import com.yonatankarp.beatthemachine.openapi.v1.models.Difficulty
+import com.yonatankarp.beatthemachine.openapi.v1.models.PictureStatus
+import java.net.URI
+import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty as DomainDifficulty
+import com.yonatankarp.beatthemachine.openapi.v1.models.MaskedToken as ApiMaskedToken
+import com.yonatankarp.beatthemachine.openapi.v1.models.Picture as ApiPicture
+
+fun Challenge.toApiResponse(): ChallengeResponse =
+    ChallengeResponse(
+        id = id.value,
+        maskedPrompt =
+            maskedPrompt().tokens.map { token ->
+                when (token) {
+                    is MaskedToken.Revealed -> ApiMaskedToken(revealed = true, word = token.word)
+                    MaskedToken.Hidden -> ApiMaskedToken(revealed = false, word = null)
+                }
+            },
+        livesRemaining = lives.remaining,
+        status = ChallengeStatus.valueOf(status.name),
+        picture =
+            when (val pic = picture) {
+                Picture.Pending -> ApiPicture(PictureStatus.PENDING, null)
+                is Picture.Ready -> ApiPicture(PictureStatus.READY, URI.create(pic.url))
+                Picture.Failed -> ApiPicture(PictureStatus.FAILED, null)
+            },
+    )
+
+fun Difficulty.toDomain(): DomainDifficulty = DomainDifficulty.valueOf(name)

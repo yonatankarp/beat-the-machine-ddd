@@ -1,0 +1,61 @@
+import { render, screen } from '@testing-library/react'
+import { expect, it } from 'vitest'
+import MaskedPrompt from '../components/MaskedPrompt'
+
+it('renders revealed words and blanks sized by length', () => {
+  render(
+    <MaskedPrompt
+      tokens={[
+        { revealed: true, word: 'fear', length: 4 },
+        { revealed: false, word: null, length: 2 },
+        { revealed: false, word: null, length: 3 },
+      ]}
+    />,
+  )
+  expect(screen.getByText('fear')).toBeInTheDocument()
+  // Two hidden words: one with 2 blanks, one with 3 blanks => 5 blank cells total.
+  expect(screen.getAllByTestId('blank')).toHaveLength(5)
+})
+
+import { render as renderScreen, screen as screen2 } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { afterEach, vi } from 'vitest'
+import GameScreen from './GameScreen'
+import * as api from '../api/challenges'
+
+afterEach(() => vi.restoreAllMocks())
+
+const ready = {
+  id: 'g1',
+  maskedPrompt: [{ revealed: false, word: null, length: 4 }],
+  livesRemaining: 5,
+  status: 'IN_PROGRESS',
+  picture: { status: 'READY', url: 'https://example.com/x.png' },
+} as never
+
+it('submits a guess and shows the updated state', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+  vi.spyOn(api, 'makeGuess').mockResolvedValue({
+    ...(ready as object),
+    maskedPrompt: [{ revealed: true, word: 'fear', length: 4 }],
+    status: 'BEATEN',
+  } as never)
+
+  renderScreen(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={['/play/g1']}>
+        <Routes>
+          <Route path="/play/:id" element={<GameScreen />} />
+          <Route path="/result/:id" element={<div>result page</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+
+  await screen2.findByRole('img')
+  await userEvent.type(screen2.getByRole('textbox'), 'fear')
+  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
+  expect(await screen2.findByText('result page')).toBeInTheDocument()
+})

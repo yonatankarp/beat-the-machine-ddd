@@ -1,21 +1,17 @@
 package com.yonatankarp.beatthemachine.input.web
 
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
-import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
-import com.yonatankarp.beatthemachine.input.web.dto.ChallengeResponse
+import com.yonatankarp.beatthemachine.openapi.v1.StartChallengeApi
+import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeResponse
+import com.yonatankarp.beatthemachine.openapi.v1.models.Difficulty
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty as DomainDifficulty
 
 @RestController
-@RequestMapping("/api/challenges")
 class StartChallengeController(
-    private val startChallenge: StartChallenge,
-) {
-    @PostMapping
-    suspend fun start(
-        @RequestParam(required = false) difficulty: Difficulty?,
-    ): ResponseEntity<ChallengeResponse> = ResponseEntity.ok(ChallengeResponse.from(startChallenge(difficulty ?: Difficulty.MEDIUM)))
+    private val startChallengeUseCase: StartChallenge,
+) : StartChallengeApi {
+    override suspend fun startChallenge(difficulty: Difficulty?): ResponseEntity<ChallengeResponse> =
+        ResponseEntity.ok(startChallengeUseCase(difficulty?.toDomain() ?: DomainDifficulty.MEDIUM).toApiResponse())
 }

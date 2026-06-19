@@ -23,8 +23,8 @@ fun Challenge.toApiResponse(): ChallengeResponse =
 
 private fun MaskedToken.toApi(): ApiMaskedToken =
     when (this) {
-        is MaskedToken.Revealed -> ApiMaskedToken(revealed = true, word = word)
-        MaskedToken.Hidden -> ApiMaskedToken(revealed = false, word = null)
+        is MaskedToken.Revealed -> ApiMaskedToken(revealed = true, word = word, length = word.length)
+        is MaskedToken.Hidden -> ApiMaskedToken(revealed = false, word = null, length = length)
     }
 
 private fun Picture.toApi(): ApiPicture =

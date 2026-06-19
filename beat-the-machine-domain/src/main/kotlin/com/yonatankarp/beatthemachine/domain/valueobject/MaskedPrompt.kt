@@ -5,7 +5,9 @@ sealed interface MaskedToken {
         val word: String,
     ) : MaskedToken
 
-    data object Hidden : MaskedToken
+    data class Hidden(
+        val length: Int,
+    ) : MaskedToken
 }
 
 class MaskedPrompt private constructor(
@@ -24,7 +26,7 @@ class MaskedPrompt private constructor(
                     if (word.lowercase() in guessed) {
                         MaskedToken.Revealed(word)
                     } else {
-                        MaskedToken.Hidden
+                        MaskedToken.Hidden(word.length)
                     }
                 },
             )

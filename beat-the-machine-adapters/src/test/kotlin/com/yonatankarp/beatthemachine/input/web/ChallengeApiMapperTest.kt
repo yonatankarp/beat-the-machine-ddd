@@ -47,14 +47,14 @@ class ChallengeApiMapperTest {
     @Test
     fun `hides every word while the challenge is in progress`() {
         val r = challenge().toApiResponse()
-        assertEquals(listOf(MaskedToken(false, null), MaskedToken(false, null)), r.maskedPrompt)
+        assertEquals(listOf(MaskedToken(false, null, 5), MaskedToken(false, null, 5)), r.maskedPrompt)
         assertEquals(ChallengeStatus.IN_PROGRESS, r.status)
     }
 
     @Test
     fun `reveals the whole prompt once the challenge is lost`() {
         val r = challenge().forfeit().toApiResponse()
-        assertEquals(listOf(MaskedToken(true, "hello"), MaskedToken(true, "world")), r.maskedPrompt)
+        assertEquals(listOf(MaskedToken(true, "hello", 5), MaskedToken(true, "world", 5)), r.maskedPrompt)
         assertEquals("LOST", r.status.value)
     }
 

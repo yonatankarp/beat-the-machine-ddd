@@ -259,10 +259,12 @@ components:
       description: >-
         One token of the prompt. When `revealed` is `false` the token is hidden
         and `word` is `null`; the secret is never serialized while a challenge is
-        in progress.
+        in progress. `length` is the character count of the underlying word and
+        is always present so hidden tokens can be rendered as per-letter blanks.
       required:
         - revealed
         - word
+        - length
       properties:
         revealed:
           type: boolean
@@ -271,6 +273,11 @@ components:
           nullable: true
           description: The token text when revealed, otherwise `null`.
           example: a
+        length:
+          type: integer
+          description: Character count of the word, present whether revealed or hidden.
+          minimum: 1
+          example: 6
     Picture:
       type: object
       required:

@@ -11,7 +11,7 @@ class MaskedPromptTest {
     @Test
     fun `hides every word when there are no guesses`() {
         val masked = MaskedPrompt.of(prompt("hello world"), emptySet())
-        assertEquals(listOf(MaskedToken.Hidden, MaskedToken.Hidden), masked.tokens)
+        assertEquals(listOf(MaskedToken.Hidden(5), MaskedToken.Hidden(5)), masked.tokens)
         assertFalse(masked.isFullyRevealed())
     }
 
@@ -19,14 +19,14 @@ class MaskedPromptTest {
     fun `reveals a matching word case-insensitively`() {
         val masked = MaskedPrompt.of(prompt("Hello World"), setOf(Guess("hello")))
         assertEquals(MaskedToken.Revealed("Hello"), masked.tokens[0])
-        assertEquals(MaskedToken.Hidden, masked.tokens[1])
+        assertEquals(MaskedToken.Hidden(5), masked.tokens[1])
     }
 
     @Test
     fun `reveals every occurrence of a repeated word`() {
         val masked = MaskedPrompt.of(prompt("na na batman"), setOf(Guess("na")))
         assertEquals(
-            listOf(MaskedToken.Revealed("na"), MaskedToken.Revealed("na"), MaskedToken.Hidden),
+            listOf(MaskedToken.Revealed("na"), MaskedToken.Revealed("na"), MaskedToken.Hidden(6)),
             masked.tokens,
         )
     }

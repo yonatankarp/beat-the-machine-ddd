@@ -59,6 +59,8 @@ val StartChallengeControllerSuite by testSuite {
                 .expectBody()
                 .jsonPath("$.picture.status")
                 .isEqualTo("READY")
+                .jsonPath("$.picture.url")
+                .isEqualTo("/images/a")
         }
 
         test("invalid difficulty query param returns 422") {

@@ -20,7 +20,7 @@ class MakeGuessController(
     private val makeGuess: MakeGuess,
 ) {
     @PostMapping("/{id}/guesses")
-    fun guess(
+    suspend fun guess(
         @PathVariable id: UUID,
         @Valid @RequestBody request: GuessRequest,
     ): ResponseEntity<ChallengeResponse> {

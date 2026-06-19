@@ -7,5 +7,5 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 class InMemoryFindPendingChallenges(
     private val store: InMemoryChallengeStore,
 ) : FindPendingChallenges {
-    override fun invoke(): List<Challenge> = store.byId.values.filter { it.picture is Picture.Pending }
+    override suspend fun invoke(): List<Challenge> = store.byId.values.filter { it.picture is Picture.Pending }
 }

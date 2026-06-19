@@ -10,6 +10,7 @@ import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -17,32 +18,35 @@ import kotlin.test.assertFailsWith
 class MakeGuessUseCaseTest {
     private val store = FakeChallengeStore()
 
-    private fun seed(): Challenge = store(Challenge.start(Prompt("hello world"), Lives(3)))
+    private suspend fun seed(): Challenge = store(Challenge.start(Prompt("hello world"), Lives(3)))
 
     @Test
-    fun `a hit is persisted`() {
-        val c = seed()
-        val makeGuess = MakeGuessUseCase(store, store)
-        val (updated, outcome) = makeGuess(c.id, Guess("hello"))
-        assertEquals(GuessOutcome.HIT, outcome)
-        assertEquals(MaskedToken.Revealed("hello"), updated.maskedPrompt().tokens[0])
-        assertEquals(MaskedToken.Revealed("hello"), store(c.id)?.maskedPrompt()?.tokens?.get(0))
-    }
-
-    @Test
-    fun `an unknown challenge throws ChallengeNotFound`() {
-        val makeGuess = MakeGuessUseCase(store, store)
-        assertFailsWith<ChallengeNotFound> {
-            makeGuess(ChallengeId.new(), Guess("hello"))
+    fun `a hit is persisted`() =
+        runTest {
+            val c = seed()
+            val makeGuess = MakeGuessUseCase(store, store)
+            val (updated, outcome) = makeGuess(c.id, Guess("hello"))
+            assertEquals(GuessOutcome.HIT, outcome)
+            assertEquals(MaskedToken.Revealed("hello"), updated.maskedPrompt().tokens[0])
+            assertEquals(MaskedToken.Revealed("hello"), store(c.id)?.maskedPrompt()?.tokens?.get(0))
         }
-    }
 
     @Test
-    fun `an optimistic-lock conflict on store propagates`() {
-        val c = seed()
-        val conflicting = StoreChallenge { throw OptimisticLockConflict(it.id) }
-        assertFailsWith<OptimisticLockConflict> {
-            MakeGuessUseCase(store, conflicting)(c.id, Guess("hello"))
+    fun `an unknown challenge throws ChallengeNotFound`() =
+        runTest {
+            val makeGuess = MakeGuessUseCase(store, store)
+            assertFailsWith<ChallengeNotFound> {
+                makeGuess(ChallengeId.new(), Guess("hello"))
+            }
         }
-    }
+
+    @Test
+    fun `an optimistic-lock conflict on store propagates`() =
+        runTest {
+            val c = seed()
+            val conflicting = StoreChallenge { throw OptimisticLockConflict(it.id) }
+            assertFailsWith<OptimisticLockConflict> {
+                MakeGuessUseCase(store, conflicting)(c.id, Guess("hello"))
+            }
+        }
 }

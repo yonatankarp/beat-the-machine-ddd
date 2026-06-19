@@ -5,6 +5,7 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -14,14 +15,16 @@ class GetChallengeUseCaseTest {
     private val getChallenge = GetChallengeUseCase(store)
 
     @Test
-    fun `returns a challenge that exists`() {
-        val challenge = store(Challenge.start(Prompt("red fox"), Lives(6)))
+    fun `returns a challenge that exists`() =
+        runTest {
+            val challenge = store(Challenge.start(Prompt("red fox"), Lives(6)))
 
-        assertEquals(challenge, getChallenge(challenge.id))
-    }
+            assertEquals(challenge, getChallenge(challenge.id))
+        }
 
     @Test
-    fun `throws ChallengeNotFound for an unknown id`() {
-        assertFailsWith<ChallengeNotFound> { getChallenge(ChallengeId.new()) }
-    }
+    fun `throws ChallengeNotFound for an unknown id`() =
+        runTest {
+            assertFailsWith<ChallengeNotFound> { getChallenge(ChallengeId.new()) }
+        }
 }

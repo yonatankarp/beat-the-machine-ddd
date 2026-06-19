@@ -11,7 +11,7 @@ class ForfeitChallengeUseCase(
     private val findChallengeById: FindChallengeById,
     private val storeChallenge: StoreChallenge,
 ) : ForfeitChallenge {
-    override fun invoke(id: ChallengeId): Challenge {
+    override suspend fun invoke(id: ChallengeId): Challenge {
         val challenge = findChallengeById(id) ?: throw ChallengeNotFound(id)
         return storeChallenge(challenge.forfeit())
     }

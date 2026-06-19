@@ -16,7 +16,7 @@ class GetChallengeController(
     private val getChallenge: GetChallenge,
 ) {
     @GetMapping("/{id}")
-    fun get(
+    suspend fun get(
         @PathVariable id: UUID,
     ): ResponseEntity<ChallengeResponse> = ResponseEntity.ok(ChallengeResponse.from(getChallenge(ChallengeId(id))))
 }

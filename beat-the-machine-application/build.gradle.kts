@@ -11,8 +11,10 @@ kotlin {
 
 dependencies {
     implementation(project(":beat-the-machine-domain"))
+    implementation(libs.kotlinx.coroutines.core)
     testImplementation(kotlin("test"))
     testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 tasks.withType<Test> {

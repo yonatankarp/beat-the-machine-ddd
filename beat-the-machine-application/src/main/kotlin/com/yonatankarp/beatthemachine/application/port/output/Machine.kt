@@ -4,5 +4,5 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 
 fun interface Machine {
-    infix fun generate(prompt: Prompt): Picture
+    suspend infix fun generate(prompt: Prompt): Picture
 }

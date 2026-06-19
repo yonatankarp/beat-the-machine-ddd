@@ -12,5 +12,5 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
  * domain operations leave it untouched.
  */
 fun interface StoreChallenge {
-    operator fun invoke(challenge: Challenge): Challenge
+    suspend operator fun invoke(challenge: Challenge): Challenge
 }

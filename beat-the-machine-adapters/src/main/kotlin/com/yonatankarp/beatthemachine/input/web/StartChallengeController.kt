@@ -15,7 +15,7 @@ class StartChallengeController(
     private val startChallenge: StartChallenge,
 ) {
     @PostMapping
-    fun start(
+    suspend fun start(
         @RequestParam(required = false) difficulty: Difficulty?,
     ): ResponseEntity<ChallengeResponse> = ResponseEntity.ok(ChallengeResponse.from(startChallenge(difficulty ?: Difficulty.MEDIUM)))
 }

@@ -11,7 +11,6 @@ import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.web.reactive.function.client.WebClient
 import java.util.Base64
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
@@ -31,10 +30,15 @@ class LocalStableDiffusionMachineTest {
         server.shutdown()
     }
 
-    private fun machine(): LocalStableDiffusionMachine {
-        val webClient = WebClient.builder().baseUrl(server.url("/").toString()).build()
-        return LocalStableDiffusionMachine(webClient, pictureStore, steps = 8, width = 512, height = 512, timeout = 5.seconds)
-    }
+    private fun machine(): LocalStableDiffusionMachine =
+        LocalStableDiffusionMachine(
+            server.url("/").toString(),
+            pictureStore,
+            steps = 8,
+            width = 512,
+            height = 512,
+            timeout = 5.seconds,
+        )
 
     @Test
     fun `stores the decoded image and returns Ready`() =

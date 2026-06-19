@@ -22,9 +22,17 @@ import java.util.Base64
 class SpringAiImageMachine(
     private val imageModel: ImageModel,
     private val pictureStore: PictureStore,
-    private val webClient: WebClient,
 ) : Machine {
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    // The adapter owns its transport, used only to fetch a provider-returned image
+    // URL. The decode buffer is raised since image bytes can exceed WebClient's
+    // 256 KB default.
+    private val webClient =
+        WebClient
+            .builder()
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_RESPONSE_BYTES) }
+            .build()
 
     override suspend fun generate(prompt: Prompt): Picture =
         try {
@@ -56,4 +64,9 @@ class SpringAiImageMachine(
             logger.warn("Paid image generation failed for prompt '{}'", prompt.text, e)
             Picture.Failed
         }
+
+    private companion object {
+        // 16 MB: comfortably fits a provider-returned image.
+        const val MAX_RESPONSE_BYTES = 16 * 1024 * 1024
+    }
 }

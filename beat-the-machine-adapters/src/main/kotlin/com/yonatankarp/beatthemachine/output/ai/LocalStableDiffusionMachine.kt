@@ -22,7 +22,7 @@ import kotlin.time.Duration
  * so the picture pipeline records it cleanly rather than hanging.
  */
 class LocalStableDiffusionMachine(
-    private val webClient: WebClient,
+    baseUrl: String,
     private val pictureStore: PictureStore,
     private val steps: Int,
     private val width: Int,
@@ -30,6 +30,16 @@ class LocalStableDiffusionMachine(
     private val timeout: Duration,
 ) : Machine {
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    // The adapter owns its transport. A txt2img response carries a base64 PNG that
+    // routinely exceeds WebClient's 256 KB default decode buffer, so the limit is
+    // raised here where the payload size is known — not leaked into wiring/config.
+    private val webClient =
+        WebClient
+            .builder()
+            .baseUrl(baseUrl)
+            .codecs { it.defaultCodecs().maxInMemorySize(MAX_RESPONSE_BYTES) }
+            .build()
 
     override suspend fun generate(prompt: Prompt): Picture =
         try {
@@ -63,4 +73,9 @@ class LocalStableDiffusionMachine(
     private data class Txt2ImgResponse(
         val images: List<String> = emptyList(),
     )
+
+    private companion object {
+        // 16 MB: comfortably fits a base64-encoded high-resolution PNG.
+        const val MAX_RESPONSE_BYTES = 16 * 1024 * 1024
+    }
 }

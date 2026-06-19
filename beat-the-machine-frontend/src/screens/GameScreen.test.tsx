@@ -1,27 +1,10 @@
 import { render, screen } from '@testing-library/react'
-import { expect, it } from 'vitest'
-import MaskedPrompt from '../components/MaskedPrompt'
-
-it('renders revealed words and blanks sized by length', () => {
-  render(
-    <MaskedPrompt
-      tokens={[
-        { revealed: true, word: 'fear', length: 4 },
-        { revealed: false, word: null, length: 2 },
-        { revealed: false, word: null, length: 3 },
-      ]}
-    />,
-  )
-  expect(screen.getByText('fear')).toBeInTheDocument()
-  // Two hidden words: one with 2 blanks, one with 3 blanks => 5 blank cells total.
-  expect(screen.getAllByTestId('blank')).toHaveLength(5)
-})
-
-import { render as renderScreen, screen as screen2 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { afterEach, vi } from 'vitest'
+import { afterEach, expect, it, vi } from 'vitest'
+import { ChallengeStatus, PictureStatus } from '../generated'
+import { makeChallenge } from '../test/fixtures'
 import GameScreen from './GameScreen'
 import * as api from '../api/challenges'
 
@@ -30,147 +13,182 @@ afterEach(() => {
   localStorage.clear()
 })
 
-const ready = {
-  id: 'g1',
-  maskedPrompt: [{ revealed: false, word: null, length: 4 }],
-  livesRemaining: 5,
-  status: 'IN_PROGRESS',
-  picture: { status: 'READY', url: 'https://example.com/x.png' },
-} as never
-
-it('a 422 rejection shows an inline error without costing a life', async () => {
-  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
-  vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 422, message: 'invalid guess' })
-
-  renderScreen(
-    <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={['/play/g1']}>
+const renderGameScreen = (id = 'g1') =>
+  render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MemoryRouter initialEntries={[`/play/${id}`]}>
         <Routes>
           <Route path="/play/:id" element={<GameScreen />} />
           <Route path="/result/:id" element={<div>result page</div>} />
+          <Route path="/" element={<div>landing page</div>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
   )
 
-  await screen2.findByRole('img')
-  await userEvent.type(screen2.getByRole('textbox'), 'bad')
-  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
+const guessWith = async (text: string) => {
+  await userEvent.type(screen.getByRole('textbox'), text)
+  await userEvent.click(screen.getByRole('button', { name: /^guess$/i }))
+}
 
-  expect(await screen2.findByRole('alert')).toBeInTheDocument()
-  expect(screen2.getByLabelText('5 lives remaining')).toBeInTheDocument()
-  expect(screen2.queryByText('result page')).not.toBeInTheDocument()
+it('a 422 rejection shows an inline error without costing a life', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
+  vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 422, message: 'invalid guess' })
+
+  renderGameScreen()
+  await screen.findByRole('img')
+  await guessWith('bad')
+
+  expect(await screen.findByRole('alert')).toHaveTextContent('That guess is not valid.')
+  expect(screen.getByLabelText('5 lives remaining')).toBeInTheDocument()
+  expect(screen.queryByText('result page')).not.toBeInTheDocument()
 })
 
 it('409 already-over navigates to result', async () => {
-  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
   vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 409, message: 'challenge is already over' })
 
-  renderScreen(
-    <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={['/play/g1']}>
-        <Routes>
-          <Route path="/play/:id" element={<GameScreen />} />
-          <Route path="/result/:id" element={<div>result page</div>} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
-  )
-
-  await screen2.findByRole('img')
-  await userEvent.type(screen2.getByRole('textbox'), 'over')
-  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
-  expect(await screen2.findByText('result page')).toBeInTheDocument()
+  renderGameScreen()
+  await screen.findByRole('img')
+  await guessWith('over')
+  expect(await screen.findByText('result page')).toBeInTheDocument()
 })
 
 it('409 concurrent-modification retries silently then succeeds', async () => {
-  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
 
-  let resolveRetry!: (v: never) => void
-  const retryPromise = new Promise<never>((res) => { resolveRetry = res })
+  let resolveRetry!: (v: ReturnType<typeof makeChallenge>) => void
+  const retryPromise = new Promise<ReturnType<typeof makeChallenge>>((res) => {
+    resolveRetry = res
+  })
 
-  const makeGuessSpy = vi.spyOn(api, 'makeGuess')
+  const makeGuessSpy = vi
+    .spyOn(api, 'makeGuess')
     .mockRejectedValueOnce({ status: 409, message: 'challenge was modified concurrently; retry the operation' })
     .mockReturnValueOnce(retryPromise)
 
-  renderScreen(
-    <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={['/play/g1']}>
-        <Routes>
-          <Route path="/play/:id" element={<GameScreen />} />
-          <Route path="/result/:id" element={<div>result page</div>} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
+  renderGameScreen()
+  await screen.findByRole('img')
+  await guessWith('fear')
+
+  await vi.waitFor(() => expect(makeGuessSpy).toHaveBeenCalledTimes(2))
+  expect(screen.queryByText('result page')).toBeNull()
+
+  resolveRetry(
+    makeChallenge({ maskedPrompt: [{ revealed: true, word: 'fear', length: 4 }], status: ChallengeStatus.Beaten }),
   )
 
-  await screen2.findByRole('img')
-  await userEvent.type(screen2.getByRole('textbox'), 'fear')
-  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
-
-  // Wait until both calls have been issued (first rejected, retry pending).
-  await vi.waitFor(() => expect(makeGuessSpy).toHaveBeenCalledTimes(2))
-
-  // While the retry is still in-flight, the result page must NOT be shown.
-  expect(screen2.queryByText('result page')).toBeNull()
-
-  // Now resolve the retry with a terminal state.
-  resolveRetry({
-    ...(ready as object),
-    maskedPrompt: [{ revealed: true, word: 'fear', length: 4 }],
-    status: 'BEATEN',
-  } as never)
-
-  expect(await screen2.findByText('result page')).toBeInTheDocument()
+  expect(await screen.findByText('result page')).toBeInTheDocument()
   expect(makeGuessSpy).toHaveBeenNthCalledWith(1, 'g1', 'fear')
   expect(makeGuessSpy).toHaveBeenNthCalledWith(2, 'g1', 'fear')
 })
 
+it('a second 409 conflict shows a generic alert after exactly two attempts', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
+  const makeGuessSpy = vi
+    .spyOn(api, 'makeGuess')
+    .mockRejectedValue({ status: 409, message: 'modified concurrently; retry the operation' })
+
+  renderGameScreen()
+  await screen.findByRole('img')
+  await guessWith('fear')
+
+  expect(await screen.findByRole('alert')).toBeInTheDocument()
+  expect(makeGuessSpy).toHaveBeenCalledTimes(2)
+  expect(screen.queryByText('result page')).toBeNull()
+})
+
+it('a 404 clears the stored id and returns to landing', async () => {
+  localStorage.setItem('btm.activeChallengeId', 'g1')
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
+  vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 404, message: 'not found' })
+
+  renderGameScreen()
+  await screen.findByRole('img')
+  await guessWith('gone')
+
+  expect(await screen.findByText('landing page')).toBeInTheDocument()
+  expect(localStorage.getItem('btm.activeChallengeId')).toBeNull()
+})
+
 it('unexpected status shows inline error with lives unchanged and no navigation', async () => {
-  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
   vi.spyOn(api, 'makeGuess').mockRejectedValue({ status: 500, message: 'boom' })
 
-  renderScreen(
-    <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={['/play/g1']}>
-        <Routes>
-          <Route path="/play/:id" element={<GameScreen />} />
-          <Route path="/result/:id" element={<div>result page</div>} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
-  )
+  renderGameScreen()
+  await screen.findByRole('img')
+  await guessWith('bad')
 
-  await screen2.findByRole('img')
-  await userEvent.type(screen2.getByRole('textbox'), 'bad')
-  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
-
-  expect(await screen2.findByRole('alert')).toBeInTheDocument()
-  expect(screen2.getByLabelText('5 lives remaining')).toBeInTheDocument()
-  expect(screen2.queryByText('result page')).not.toBeInTheDocument()
+  expect(await screen.findByRole('alert')).toBeInTheDocument()
+  expect(screen.getByLabelText('5 lives remaining')).toBeInTheDocument()
+  expect(screen.queryByText('result page')).not.toBeInTheDocument()
 })
 
 it('submits a guess and shows the updated state', async () => {
-  vi.spyOn(api, 'getChallenge').mockResolvedValue(ready)
-  vi.spyOn(api, 'makeGuess').mockResolvedValue({
-    ...(ready as object),
-    maskedPrompt: [{ revealed: true, word: 'fear', length: 4 }],
-    status: 'BEATEN',
-  } as never)
-
-  renderScreen(
-    <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={['/play/g1']}>
-        <Routes>
-          <Route path="/play/:id" element={<GameScreen />} />
-          <Route path="/result/:id" element={<div>result page</div>} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
+  vi.spyOn(api, 'makeGuess').mockResolvedValue(
+    makeChallenge({ maskedPrompt: [{ revealed: true, word: 'fear', length: 4 }], status: ChallengeStatus.Beaten }),
   )
 
-  await screen2.findByRole('img')
-  await userEvent.type(screen2.getByRole('textbox'), 'fear')
-  await userEvent.click(screen2.getByRole('button', { name: /guess/i }))
-  expect(await screen2.findByText('result page')).toBeInTheDocument()
+  renderGameScreen()
+  await screen.findByRole('img')
+  await guessWith('fear')
+  expect(await screen.findByText('result page')).toBeInTheDocument()
+})
+
+it('shows "Image unavailable" when the picture FAILED', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(
+    makeChallenge({ picture: { status: PictureStatus.Failed, url: null } }),
+  )
+  renderGameScreen()
+  expect(await screen.findByText('Image unavailable')).toBeInTheDocument()
+  expect(screen.queryByRole('img')).toBeNull()
+})
+
+it('shows "Generating image…" and no img while the picture is PENDING', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(
+    makeChallenge({ picture: { status: PictureStatus.Pending, url: null } }),
+  )
+  renderGameScreen()
+  expect(await screen.findByText('Generating image…')).toBeInTheDocument()
+  expect(screen.queryByRole('img')).toBeNull()
+})
+
+it('shows an error state with a Back to start button when getChallenge fails', async () => {
+  vi.spyOn(api, 'getChallenge').mockRejectedValue({ status: 500, message: 'boom' })
+  renderGameScreen()
+  expect(await screen.findByRole('button', { name: /back to start/i })).toBeInTheDocument()
+  expect(screen.queryByText('Loading…')).toBeNull()
+})
+
+it('a 404 from getChallenge clears the stored id and returns to landing', async () => {
+  localStorage.setItem('btm.activeChallengeId', 'g1')
+  vi.spyOn(api, 'getChallenge').mockRejectedValue({ status: 404, message: 'gone' })
+  renderGameScreen()
+  expect(await screen.findByText('landing page')).toBeInTheDocument()
+  expect(localStorage.getItem('btm.activeChallengeId')).toBeNull()
+})
+
+it('confirming Give up navigates to the result screen', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
+  vi.spyOn(api, 'forfeitChallenge').mockResolvedValue(makeChallenge({ status: ChallengeStatus.Lost }))
+
+  renderGameScreen()
+  await screen.findByRole('img')
+  await userEvent.click(screen.getByRole('button', { name: /give up/i }))
+  // First click only reveals the confirmation, it does not forfeit yet.
+  expect(screen.queryByText('result page')).toBeNull()
+  await userEvent.click(screen.getByRole('button', { name: /^yes$/i }))
+  expect(await screen.findByText('result page')).toBeInTheDocument()
+})
+
+it('a 409 on forfeit still navigates to the result screen', async () => {
+  vi.spyOn(api, 'getChallenge').mockResolvedValue(makeChallenge())
+  vi.spyOn(api, 'forfeitChallenge').mockRejectedValue({ status: 409, message: 'challenge is already over' })
+
+  renderGameScreen()
+  await screen.findByRole('img')
+  await userEvent.click(screen.getByRole('button', { name: /give up/i }))
+  await userEvent.click(screen.getByRole('button', { name: /^yes$/i }))
+  expect(await screen.findByText('result page')).toBeInTheDocument()
 })

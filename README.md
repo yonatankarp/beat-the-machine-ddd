@@ -73,7 +73,35 @@ docker compose --profile sd up
 Then set `BTM_IMAGE_PROVIDER=local-sd`. No extra API key needed; the SD
 container is included in the `sd` profile.
 
-### Real images on macOS (Automatic1111 native)
+### Real images without a GPU (CPU, slow)
+
+For hosts with no NVIDIA GPU — including Apple Silicon, where Docker
+cannot use the Mac GPU — run the CPU profile:
+
+```shell
+BTM_IMAGE_PROVIDER=local-sd docker compose --profile sd-cpu up
+```
+
+The `stable-diffusion-cpu` service runs Automatic1111 CPU-only and is
+aliased to the `stable-diffusion` hostname, so the app's default
+`BTM_IMAGE_LOCAL_SD_BASE_URL` works unchanged. Caveats:
+
+- Generation is slow (minutes per image). On Apple Silicon the image
+  runs under amd64 emulation (slower still) — uncomment `platform:
+  linux/amd64` on the service. It is meant to feed the background
+  pre-seed pool, not interactive play.
+- First run downloads a Stable Diffusion 1.5 checkpoint (~4 GB).
+- Not runtime-verified in this repo; adjust the image/flags to your
+  chosen A1111 build. A battle-tested alternative is
+  AbdBarho/stable-diffusion-webui-docker (`--profile auto-cpu`).
+
+Verify the API is up once the container has booted and pulled a model:
+
+```shell
+curl -s http://localhost:7860/sdapi/v1/sd-models | head -c 200
+```
+
+### Real images on macOS (Automatic1111 native, fast)
 
 Run Automatic1111 locally with `--api` enabled, then point the backend
 at it:

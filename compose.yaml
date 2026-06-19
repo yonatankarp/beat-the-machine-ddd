@@ -46,7 +46,32 @@ services:
     volumes:
       - sd-data:/data
 
+  # CPU-only Stable Diffusion (Automatic1111) for hosts WITHOUT an NVIDIA GPU —
+  # including Apple Silicon, where Docker cannot use the Mac GPU. Generation is
+  # SLOW (minutes per image, more under amd64 emulation); it exists to feed the
+  # background pre-seed pool, not interactive play. The `stable-diffusion` network
+  # alias means the app's default BTM_IMAGE_LOCAL_SD_BASE_URL works unchanged.
+  # First run downloads a Stable Diffusion 1.5 checkpoint (~4 GB) into sd-cpu-data.
+  # NOTE: not runtime-verified on this machine; adjust the image/flags/volume path
+  # to your chosen A1111 image if it differs. Battle-tested alternative:
+  # https://github.com/AbdBarho/stable-diffusion-webui-docker (`--profile auto-cpu`).
+  stable-diffusion-cpu:
+    image: universonic/stable-diffusion-webui:latest
+    # Apple Silicon: no arm64 image, so force amd64 under emulation (slower still):
+    # platform: linux/amd64
+    profiles: ["sd-cpu"]
+    ports:
+      - "7860:7860"
+    command: ["--api", "--listen", "--skip-torch-cuda-test", "--use-cpu", "all", "--no-half", "--precision", "full"]
+    networks:
+      default:
+        aliases:
+          - stable-diffusion
+    volumes:
+      - sd-cpu-data:/data
+
 volumes:
   app-data:
   ollama-data:
   sd-data:
+  sd-cpu-data:

@@ -26,9 +26,19 @@ fun Challenge.toApiResponse(): ChallengeResponse =
         status = ChallengeStatus.valueOf(status.name),
         picture =
             when (val pic = picture) {
-                Picture.Pending -> ApiPicture(PictureStatus.PENDING, null)
-                is Picture.Ready -> ApiPicture(PictureStatus.READY, URI.create(pic.url))
-                Picture.Failed -> ApiPicture(PictureStatus.FAILED, null)
+                Picture.Pending -> {
+                    ApiPicture(PictureStatus.PENDING, null)
+                }
+
+                is Picture.Ready -> {
+                    runCatching { URI.create(pic.url) }
+                        .map { ApiPicture(PictureStatus.READY, it) }
+                        .getOrDefault(ApiPicture(PictureStatus.FAILED, null))
+                }
+
+                Picture.Failed -> {
+                    ApiPicture(PictureStatus.FAILED, null)
+                }
             },
     )
 

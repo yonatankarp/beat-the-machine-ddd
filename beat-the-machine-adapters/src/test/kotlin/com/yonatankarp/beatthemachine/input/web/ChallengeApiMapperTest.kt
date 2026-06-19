@@ -4,11 +4,14 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeStatus
+import com.yonatankarp.beatthemachine.openapi.v1.models.Difficulty
 import com.yonatankarp.beatthemachine.openapi.v1.models.MaskedToken
 import com.yonatankarp.beatthemachine.openapi.v1.models.PictureStatus
 import org.junit.jupiter.api.Test
 import java.net.URI
 import kotlin.test.assertEquals
+import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty as DomainDifficulty
 
 class ChallengeApiMapperTest {
     private fun challenge() = Challenge.start(Prompt("hello world"), Lives(6))
@@ -35,9 +38,17 @@ class ChallengeApiMapperTest {
     }
 
     @Test
+    fun `degrades a ready picture with a malformed url to FAILED`() {
+        val r = challenge().withPicture(Picture.Ready("http:// bad url with spaces")).toApiResponse()
+        assertEquals(PictureStatus.FAILED, r.picture.status)
+        assertEquals(null, r.picture.url)
+    }
+
+    @Test
     fun `hides every word while the challenge is in progress`() {
         val r = challenge().toApiResponse()
         assertEquals(listOf(MaskedToken(false, null), MaskedToken(false, null)), r.maskedPrompt)
+        assertEquals(ChallengeStatus.IN_PROGRESS, r.status)
     }
 
     @Test
@@ -45,5 +56,12 @@ class ChallengeApiMapperTest {
         val r = challenge().forfeit().toApiResponse()
         assertEquals(listOf(MaskedToken(true, "hello"), MaskedToken(true, "world")), r.maskedPrompt)
         assertEquals("LOST", r.status.value)
+    }
+
+    @Test
+    fun `Difficulty toDomain maps each value to the same-named domain Difficulty`() {
+        assertEquals(DomainDifficulty.EASY, Difficulty.EASY.toDomain())
+        assertEquals(DomainDifficulty.MEDIUM, Difficulty.MEDIUM.toDomain())
+        assertEquals(DomainDifficulty.HARD, Difficulty.HARD.toDomain())
     }
 }

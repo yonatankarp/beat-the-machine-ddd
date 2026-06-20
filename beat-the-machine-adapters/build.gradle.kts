@@ -29,6 +29,7 @@ dependencies {
         exclude("org.mockito", "mockito-core")
     }
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(testFixtures(project(":beat-the-machine-domain")))
 }
 
 tasks.bootJar {

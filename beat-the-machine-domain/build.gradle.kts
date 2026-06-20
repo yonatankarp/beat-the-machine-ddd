@@ -1,6 +1,7 @@
 plugins {
     jacoco
     alias(libs.plugins.kotlin.jvm)
+    `java-test-fixtures`
 }
 
 kotlin {

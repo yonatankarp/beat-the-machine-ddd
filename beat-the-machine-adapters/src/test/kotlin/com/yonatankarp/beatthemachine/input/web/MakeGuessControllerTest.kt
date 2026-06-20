@@ -26,7 +26,7 @@ class MakeGuessControllerTest(
     @Test
     fun `a successful guess returns the updated masked prompt`() {
         val (afterHit, _) = mediumChallenge().makeGuess("hello".asGuess())
-        coEvery { makeGuess(any(), any()) } returns (afterHit to GuessOutcome.HIT)
+        coEvery { makeGuess handle any() } returns (afterHit to GuessOutcome.HIT)
 
         client
             .post()
@@ -45,7 +45,7 @@ class MakeGuessControllerTest(
 
     @Test
     fun `guessing an unknown challenge returns 404`() {
-        coEvery { makeGuess(any(), any()) } throws ChallengeNotFound(aChallengeId())
+        coEvery { makeGuess handle any() } throws ChallengeNotFound(aChallengeId())
 
         client
             .post()
@@ -59,7 +59,7 @@ class MakeGuessControllerTest(
 
     @Test
     fun `guessing on an already-over challenge returns 409`() {
-        coEvery { makeGuess(any(), any()) } throws ChallengeAlreadyOver(aChallengeId())
+        coEvery { makeGuess handle any() } throws ChallengeAlreadyOver(aChallengeId())
 
         client
             .post()
@@ -73,7 +73,7 @@ class MakeGuessControllerTest(
 
     @Test
     fun `a domain-rejected guess returns 422`() {
-        coEvery { makeGuess(any(), any()) } throws InvalidGuess("not a single word")
+        coEvery { makeGuess handle any() } throws InvalidGuess("not a single word")
 
         client
             .post()

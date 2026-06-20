@@ -2,6 +2,7 @@ package com.yonatankarp.beatthemachine.application.usecase
 
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
+import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
@@ -28,7 +29,7 @@ class MakeGuessUseCaseTest {
             val guess = "hello".asGuess()
 
             // When
-            val (updated, outcome) = makeGuess(c.id, guess)
+            val (updated, outcome) = makeGuess handle MakeGuess.Command(c.id, guess)
 
             // Then
             assertEquals(GuessOutcome.HIT, outcome)
@@ -46,7 +47,7 @@ class MakeGuessUseCaseTest {
 
             // When / Then
             assertFailsWith<ChallengeNotFound> {
-                makeGuess(unknownId, guess)
+                makeGuess handle MakeGuess.Command(unknownId, guess)
             }
         }
 
@@ -61,7 +62,7 @@ class MakeGuessUseCaseTest {
 
             // When / Then
             assertFailsWith<OptimisticLockConflict> {
-                makeGuess(c.id, guess)
+                makeGuess handle MakeGuess.Command(c.id, guess)
             }
         }
 }

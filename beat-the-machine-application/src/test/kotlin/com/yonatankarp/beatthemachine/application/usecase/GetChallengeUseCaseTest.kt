@@ -1,6 +1,7 @@
 package com.yonatankarp.beatthemachine.application.usecase
 
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
+import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
@@ -20,7 +21,7 @@ class GetChallengeUseCaseTest {
             val challenge = store(mediumChallenge(prompt = "red fox".asPrompt()))
 
             // When
-            val result = getChallenge(challenge.id)
+            val result = getChallenge answer GetChallenge.Query(challenge.id)
 
             // Then
             assertEquals(challenge, result)
@@ -33,6 +34,6 @@ class GetChallengeUseCaseTest {
             val unknownId = aChallengeId()
 
             // When / Then
-            assertFailsWith<ChallengeNotFound> { getChallenge(unknownId) }
+            assertFailsWith<ChallengeNotFound> { getChallenge answer GetChallenge.Query(unknownId) }
         }
 }

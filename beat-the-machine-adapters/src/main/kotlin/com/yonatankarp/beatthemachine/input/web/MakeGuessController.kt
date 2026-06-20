@@ -18,7 +18,7 @@ class MakeGuessController(
         id: UUID,
         guessRequest: GuessRequest,
     ): ResponseEntity<ChallengeResponse> {
-        val (challenge, _) = makeGuessUseCase(ChallengeId(id), Guess(guessRequest.word))
+        val (challenge, _) = makeGuessUseCase handle MakeGuess.Command(ChallengeId(id), Guess(guessRequest.word))
         return ResponseEntity.ok(challenge.toApiResponse())
     }
 }

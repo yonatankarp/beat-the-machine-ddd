@@ -14,9 +14,10 @@ class SpringAiPromptSource(
 
     override suspend infix fun next(difficulty: Difficulty): Prompt {
         val band = bandFor(difficulty)
+        val userMessage = userPrompt(difficulty, band)
         repeat(maxAttempts) { attempt ->
             val candidate =
-                runCatching { llm.complete(SYSTEM_PROMPT, userPrompt(difficulty, band)) }
+                runCatching { llm.complete(SYSTEM_PROMPT, userMessage) }
                     .getOrElse { llmError ->
                         logger.warn("LLM call failed (attempt {}/{})", attempt + 1, maxAttempts, llmError)
                         return@repeat

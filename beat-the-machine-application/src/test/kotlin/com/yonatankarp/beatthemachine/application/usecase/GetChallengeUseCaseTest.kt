@@ -2,6 +2,7 @@ package com.yonatankarp.beatthemachine.application.usecase
 
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
+import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
@@ -18,7 +19,7 @@ class GetChallengeUseCaseTest {
     fun `returns a challenge that exists`() =
         runTest {
             // Given
-            val challenge = store(mediumChallenge(prompt = "red fox".asPrompt()))
+            val challenge = store handle StoreChallenge.Command(mediumChallenge(prompt = "red fox".asPrompt()))
 
             // When
             val result = getChallenge answer GetChallenge.Query(challenge.id)

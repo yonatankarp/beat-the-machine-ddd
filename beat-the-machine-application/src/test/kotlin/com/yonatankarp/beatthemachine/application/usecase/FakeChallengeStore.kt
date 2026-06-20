@@ -10,7 +10,7 @@ class FakeChallengeStore :
     FindChallengeById {
     val byId = linkedMapOf<ChallengeId, Challenge>()
 
-    override suspend fun invoke(challenge: Challenge): Challenge = challenge.also { byId[it.id] = it }
+    override suspend fun handle(command: StoreChallenge.Command): Challenge = command.challenge.also { byId[it.id] = it }
 
     override suspend fun answer(query: FindChallengeById.Query): Challenge? = byId[query.id]
 }

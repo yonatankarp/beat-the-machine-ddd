@@ -65,7 +65,7 @@ class PicturePregeneration(
             val latest = (findChallengeById answer FindChallengeById.Query(id)) ?: return
             if (latest.picture !is Picture.Pending) return
             try {
-                storeChallenge(latest.withPicture(picture))
+                storeChallenge handle StoreChallenge.Command(latest.withPicture(picture))
                 return
             } catch (_: OptimisticLockConflict) {
                 logger.debug("Version conflict persisting picture for challenge {}; reloading and retrying", id)

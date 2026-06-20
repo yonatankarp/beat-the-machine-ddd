@@ -1,6 +1,7 @@
 package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
+import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
@@ -16,7 +17,7 @@ class InMemoryFindChallengeByIdTest {
             val store = InMemoryChallengeStore()
             val storeChallenge = InMemoryStoreChallenge(store)
             val findChallengeById = InMemoryFindChallengeById(store)
-            val saved = storeChallenge(mediumChallenge())
+            val saved = storeChallenge handle StoreChallenge.Command(mediumChallenge())
 
             // When
             val found = findChallengeById answer FindChallengeById.Query(saved.id)

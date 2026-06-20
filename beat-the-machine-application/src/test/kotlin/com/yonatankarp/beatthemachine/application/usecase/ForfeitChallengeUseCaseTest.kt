@@ -3,6 +3,7 @@ package com.yonatankarp.beatthemachine.application.usecase
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
+import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
@@ -15,7 +16,7 @@ import kotlin.test.assertFailsWith
 class ForfeitChallengeUseCaseTest {
     private val store = FakeChallengeStore()
 
-    private suspend fun seed(): Challenge = store(mediumChallenge())
+    private suspend fun seed(): Challenge = store handle StoreChallenge.Command(mediumChallenge())
 
     @Test
     fun `forfeit loads the challenge, sets LOST, and persists it`() =

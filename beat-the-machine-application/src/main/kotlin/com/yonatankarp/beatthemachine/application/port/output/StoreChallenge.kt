@@ -1,7 +1,10 @@
 package com.yonatankarp.beatthemachine.application.port.output
 
+import com.yonatankarp.beatthemachine.application.port.CommandHandler
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 
-fun interface StoreChallenge {
-    suspend operator fun invoke(challenge: Challenge): Challenge
+interface StoreChallenge : CommandHandler<StoreChallenge.Command, Challenge> {
+    data class Command(
+        val challenge: Challenge,
+    )
 }

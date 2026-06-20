@@ -13,6 +13,6 @@ class ForfeitChallengeUseCase(
     override suspend fun handle(command: ForfeitChallenge.Command): Challenge {
         val challenge =
             (findChallengeById answer FindChallengeById.Query(command.id)) ?: throw ChallengeNotFound(command.id)
-        return storeChallenge(challenge.forfeit())
+        return storeChallenge handle StoreChallenge.Command(challenge.forfeit())
     }
 }

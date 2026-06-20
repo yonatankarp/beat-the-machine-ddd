@@ -7,8 +7,9 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 class InMemoryStoreChallenge(
     private val store: InMemoryChallengeStore,
 ) : StoreChallenge {
-    override suspend fun invoke(challenge: Challenge): Challenge =
-        store.byId.compute(challenge.id) { _, existing ->
+    override suspend fun handle(command: StoreChallenge.Command): Challenge {
+        val challenge = command.challenge
+        return store.byId.compute(challenge.id) { _, existing ->
             if (existing != null && existing.version != challenge.version) {
                 throw OptimisticLockConflict(challenge.id)
             }
@@ -23,4 +24,5 @@ class InMemoryStoreChallenge(
                 version = challenge.version + 1,
             )
         }!!
+    }
 }

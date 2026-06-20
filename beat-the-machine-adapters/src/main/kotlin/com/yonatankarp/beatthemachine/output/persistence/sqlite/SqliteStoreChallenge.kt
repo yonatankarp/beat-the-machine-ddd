@@ -11,8 +11,9 @@ class SqliteStoreChallenge(
     private val jdbc: JdbcTemplate,
     private val mapper: ChallengeRowMapper,
 ) : StoreChallenge {
-    override suspend fun invoke(challenge: Challenge): Challenge =
+    override suspend fun handle(command: StoreChallenge.Command): Challenge =
         withContext(Dispatchers.IO) {
+            val challenge = command.challenge
             val nextVersion = challenge.version + 1
             val row = mapper.toRow(challenge, nextVersion)
 

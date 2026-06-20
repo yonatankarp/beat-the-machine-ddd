@@ -4,6 +4,7 @@ import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConfli
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
+import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryChallengeStore
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindChallengeById
@@ -32,7 +33,7 @@ class PicturePregenerationTest {
         runTest {
             // Given
             val machine = Machine { Picture.Ready("http://img/1.png") }
-            val c = storeChallenge(mediumChallenge())
+            val c = storeChallenge handle StoreChallenge.Command(mediumChallenge())
 
             // When
             pregeneration(machine, this).enqueue(c.id)
@@ -47,7 +48,7 @@ class PicturePregenerationTest {
         runTest {
             // Given
             val machine = Machine { error("boom") }
-            val c = storeChallenge(mediumChallenge())
+            val c = storeChallenge handle StoreChallenge.Command(mediumChallenge())
 
             // When
             pregeneration(machine, this).enqueue(c.id)
@@ -73,8 +74,10 @@ class PicturePregenerationTest {
         runTest {
             // Given
             val machine = Machine { Picture.Ready("http://img/retry.png") }
-            val pending = storeChallenge(mediumChallenge())
-            val done = storeChallenge(mediumChallenge(prompt = "foo bar".asPrompt()).withPicture(readyPicture("http://img/done.png")))
+            val pending = storeChallenge handle StoreChallenge.Command(mediumChallenge())
+            val done =
+                storeChallenge handle
+                    StoreChallenge.Command(mediumChallenge(prompt = "foo bar".asPrompt()).withPicture(readyPicture("http://img/done.png")))
 
             // When
             pregeneration(machine, this).retryPending()
@@ -89,17 +92,20 @@ class PicturePregenerationTest {
     fun `a concurrent version bump is retried so the picture still persists`() =
         runTest {
             // Given
-            val seeded = storeChallenge(mediumChallenge())
+            val seeded = storeChallenge handle StoreChallenge.Command(mediumChallenge())
 
             var firstStore = true
             val racingStore =
-                StoreChallenge { challenge ->
-                    if (firstStore && challenge.picture is Picture.Ready) {
-                        firstStore = false
-                        storeChallenge(findById answer FindChallengeById.Query(challenge.id) ?: challenge)
-                        throw OptimisticLockConflict(challenge.id)
+                object : StoreChallenge {
+                    override suspend fun handle(command: StoreChallenge.Command): Challenge {
+                        val challenge = command.challenge
+                        if (firstStore && challenge.picture is Picture.Ready) {
+                            firstStore = false
+                            storeChallenge handle StoreChallenge.Command(findById answer FindChallengeById.Query(challenge.id) ?: challenge)
+                            throw OptimisticLockConflict(challenge.id)
+                        }
+                        return storeChallenge handle StoreChallenge.Command(challenge)
                     }
-                    storeChallenge(challenge)
                 }
             val machine = Machine { Picture.Ready("http://img/raced.png") }
 
@@ -116,8 +122,8 @@ class PicturePregenerationTest {
         runTest {
             // Given
             val machine = Machine { Picture.Ready("http://img/admitted.png") }
-            val admitted = storeChallenge(mediumChallenge())
-            val shed = storeChallenge(mediumChallenge(prompt = "foo bar".asPrompt()))
+            val admitted = storeChallenge handle StoreChallenge.Command(mediumChallenge())
+            val shed = storeChallenge handle StoreChallenge.Command(mediumChallenge(prompt = "foo bar".asPrompt()))
             val pregeneration = pregeneration(machine, this, maxQueued = 1)
 
             // When

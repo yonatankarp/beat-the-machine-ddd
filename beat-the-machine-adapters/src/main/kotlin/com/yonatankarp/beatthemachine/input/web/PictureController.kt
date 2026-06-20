@@ -33,6 +33,7 @@ class PictureController(
     private companion object {
         val ALLOWED_CONTENT_TYPES = setOf("image/png", "image/jpeg", "image/webp", "image/gif")
         const val FALLBACK_CONTENT_TYPE = "application/octet-stream"
-        const val CACHE_CONTROL_VALUE = "public, max-age=31536000, immutable"
+        const val MAX_AGE_SECONDS = 31536000
+        const val CACHE_CONTROL_VALUE = "public, max-age=$MAX_AGE_SECONDS, immutable"
     }
 }

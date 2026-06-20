@@ -3,7 +3,7 @@ package com.yonatankarp.beatthemachine.input.web
 import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.lostChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ class ForfeitChallengeControllerTest(
 
         client
             .post()
-            .uri("/api/challenges/${ChallengeId.new().value}/forfeit")
+            .uri("/api/challenges/${aChallengeId().value}/forfeit")
             .exchange()
             .expectStatus()
             .isOk
@@ -37,11 +37,11 @@ class ForfeitChallengeControllerTest(
 
     @Test
     fun `forfeit with concurrent modification returns 409`() {
-        coEvery { forfeitChallenge(any()) } throws OptimisticLockConflict(ChallengeId.new())
+        coEvery { forfeitChallenge(any()) } throws OptimisticLockConflict(aChallengeId())
 
         client
             .post()
-            .uri("/api/challenges/${ChallengeId.new().value}/forfeit")
+            .uri("/api/challenges/${aChallengeId().value}/forfeit")
             .exchange()
             .expectStatus()
             .isEqualTo(409)

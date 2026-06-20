@@ -4,6 +4,7 @@ import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeStatus
 import com.yonatankarp.beatthemachine.openapi.v1.models.Difficulty
 import com.yonatankarp.beatthemachine.openapi.v1.models.MaskedToken
 import com.yonatankarp.beatthemachine.openapi.v1.models.PictureStatus
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.beatenChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.easyChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.lostChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
@@ -91,6 +92,19 @@ class ChallengeApiMapperTest {
         // Then
         assertEquals(listOf(MaskedToken(true, "hello", 5), MaskedToken(true, "world", 5)), response.maskedPrompt)
         assertEquals("LOST", response.status.value)
+    }
+
+    @Test
+    fun `reveals the whole prompt once the challenge is beaten`() {
+        // Given
+        val subject = beatenChallenge()
+
+        // When
+        val response = subject.toApiResponse()
+
+        // Then
+        assertEquals(listOf(MaskedToken(true, "hello", 5), MaskedToken(true, "world", 5)), response.maskedPrompt)
+        assertEquals("BEATEN", response.status.value)
     }
 
     @Test

@@ -2,8 +2,8 @@ package com.yonatankarp.beatthemachine.application.usecase
 
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -35,7 +35,7 @@ class ForfeitChallengeUseCaseTest {
         runTest {
             // Given
             val forfeitChallenge = ForfeitChallengeUseCase(store, store)
-            val unknownId = ChallengeId.new()
+            val unknownId = aChallengeId()
 
             // When / Then
             assertFailsWith<ChallengeNotFound> {

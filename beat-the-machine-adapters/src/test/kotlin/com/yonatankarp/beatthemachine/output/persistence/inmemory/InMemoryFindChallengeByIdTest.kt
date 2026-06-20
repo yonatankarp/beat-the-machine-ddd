@@ -1,6 +1,6 @@
 package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -30,7 +30,7 @@ class InMemoryFindChallengeByIdTest {
             // Given
             val store = InMemoryChallengeStore()
             val findChallengeById = InMemoryFindChallengeById(store)
-            val unknownId = ChallengeId.new()
+            val unknownId = aChallengeId()
 
             // When
             val found = findChallengeById(unknownId)

@@ -8,7 +8,6 @@ import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
 import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
 import com.yonatankarp.beatthemachine.test.dsl.asGuess
-import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -18,7 +17,7 @@ import kotlin.test.assertFailsWith
 class MakeGuessUseCaseTest {
     private val store = FakeChallengeStore()
 
-    private suspend fun seed(): Challenge = store(mediumChallenge(lives = 3.lives()))
+    private suspend fun seed(): Challenge = store(mediumChallenge())
 
     @Test
     fun `a hit is persisted`() =

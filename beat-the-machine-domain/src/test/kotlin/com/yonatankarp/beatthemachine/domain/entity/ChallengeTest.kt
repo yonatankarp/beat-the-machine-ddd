@@ -2,10 +2,13 @@ package com.yonatankarp.beatthemachine.domain.entity
 
 import com.yonatankarp.beatthemachine.domain.exception.ChallengeAlreadyOver
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
+import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
 import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asGuess
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
@@ -145,5 +148,60 @@ class ChallengeTest {
         assertEquals(challenge.version, updated.version)
         assertEquals(Picture.Pending, challenge.picture)
         assertNotSame(challenge, updated)
+    }
+
+    @Test
+    fun `maskedPrompt hides unguessed words while still in progress`() {
+        // Given
+        val (afterHit, _) = mediumChallenge().makeGuess("hello".asGuess())
+
+        // When
+        val masked = afterHit.maskedPrompt()
+
+        // Then
+        assertEquals(MaskedToken.Revealed("hello"), masked.tokens[0])
+        assertEquals(MaskedToken.Hidden(5), masked.tokens[1])
+    }
+
+    @Test
+    fun `start defaults to a pending picture and medium difficulty`() {
+        // Given
+        val prompt = "hello world".asPrompt()
+        val lives = 6.lives()
+
+        // When
+        val challenge = Challenge.start(prompt, lives)
+
+        // Then
+        assertEquals(Picture.Pending, challenge.picture)
+        assertEquals(Difficulty.MEDIUM, challenge.difficulty)
+        assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
+    }
+
+    @Test
+    fun `rehydrate reconstitutes a challenge and preserves the secret prompt`() {
+        // Given
+        val prompt = "secret phrase".asPrompt()
+
+        // When
+        val challenge =
+            Challenge.rehydrate(
+                id = aChallengeId(),
+                prompt = prompt,
+                guesses = emptySet(),
+                lives = 4.lives(),
+                status = ChallengeStatus.IN_PROGRESS,
+                picture = Picture.Failed,
+                difficulty = Difficulty.HARD,
+                version = 7L,
+            )
+
+        // Then
+        assertEquals(prompt, challenge.secretPrompt())
+        assertEquals(4, challenge.lives.remaining)
+        assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
+        assertEquals(Picture.Failed, challenge.picture)
+        assertEquals(Difficulty.HARD, challenge.difficulty)
+        assertEquals(7L, challenge.version)
     }
 }

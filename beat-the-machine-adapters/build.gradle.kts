@@ -47,6 +47,17 @@ tasks {
     }
 }
 
+tasks.jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+    classDirectories.setFrom(
+        classDirectories.files.map {
+            fileTree(it) { exclude("**/openapi/**", "**/openapitools/**") }
+        },
+    )
+}
+
 val copyWebApp by tasks.registering(Sync::class) {
     dependsOn(":beat-the-machine-frontend:buildWebApp")
     from(project(":beat-the-machine-frontend").layout.projectDirectory.dir("dist"))

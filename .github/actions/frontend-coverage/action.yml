@@ -1,0 +1,60 @@
+name: 'Frontend Coverage'
+description: >-
+  Runs the frontend vitest suite with coverage and posts a coverage summary
+  comment on the pull request. Generates the OpenAPI TypeScript client first
+  (it is git-ignored and required to compile the tests).
+
+inputs:
+  working-directory:
+    description: 'Frontend project directory, relative to the repo root.'
+    required: false
+    default: 'beat-the-machine-frontend'
+  node-version:
+    description: 'Node version for the frontend toolchain.'
+    required: false
+    default: '22'
+  jvm-version:
+    description: 'JDK version used to run the Gradle OpenAPI generator.'
+    required: false
+    default: '25'
+  gradle-generate-task:
+    description: 'Gradle task that generates the TypeScript client.'
+    required: false
+    default: ':beat-the-machine-frontend:openApiGenerate'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up JDK (for the OpenAPI generator)
+      uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: ${{ inputs.jvm-version }}
+        cache: gradle
+
+    - name: Generate the TypeScript API client
+      shell: bash
+      run: ./gradlew ${{ inputs.gradle-generate-task }} --no-daemon
+
+    - name: Set up Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm ci
+
+    - name: Run tests with coverage
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run test:coverage
+
+    - name: Report coverage on the pull request
+      if: ${{ github.event_name == 'pull_request' }}
+      uses: davelosert/vitest-coverage-report-action@v2
+      with:
+        working-directory: ${{ inputs.working-directory }}

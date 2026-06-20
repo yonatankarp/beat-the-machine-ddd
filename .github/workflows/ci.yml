@@ -18,7 +18,17 @@ jobs:
     with:
       image-name: beat-the-machine
       dockerfile-path: beat-the-machine-adapters/Dockerfile
-      gradle-module: ":beat-the-machine-adapters"
+      # Root build so every JVM module's tests run (a scoped :adapters build
+      # skips the domain and application test suites).
+
+  frontend-coverage:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/frontend-coverage
 
   dependabot_auto_merge:
     needs: pipeline

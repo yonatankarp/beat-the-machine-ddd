@@ -33,3 +33,13 @@
 
 # Local planning artifacts (superpowers plans/specs), not project source
 docs/superpowers/
+
+# Kotlin compiler error logs
+.kotlin/
+
+# Claude Code session artifacts
+.claude/
+
+# Untracked testing helper modules (not included in settings.gradle.kts)
+beat-the-machine-testing/
+beat-the-machine-testing-it/

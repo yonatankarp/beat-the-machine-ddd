@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
-class SqliteStoreChallengeIT {
+class SqliteStoreChallengeIntegrationTest {
     private lateinit var storeChallenge: SqliteStoreChallenge
     private lateinit var findChallengeById: SqliteFindChallengeById
 

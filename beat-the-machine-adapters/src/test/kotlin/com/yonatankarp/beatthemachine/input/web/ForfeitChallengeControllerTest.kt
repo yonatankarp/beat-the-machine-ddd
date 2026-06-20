@@ -7,17 +7,17 @@ import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.lostChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
+import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(ForfeitChallengeController::class)
+@MockkBean(types = [ForfeitChallenge::class])
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class ForfeitChallengeControllerTest(
-    @Autowired val client: WebTestClient,
+    private val client: WebTestClient,
+    private val forfeitChallenge: ForfeitChallenge,
 ) {
-    @MockkBean
-    lateinit var forfeitChallenge: ForfeitChallenge
-
     @Test
     fun `forfeit reveals the prompt and reports LOST`() {
         coEvery { forfeitChallenge(any()) } returns lostChallenge()

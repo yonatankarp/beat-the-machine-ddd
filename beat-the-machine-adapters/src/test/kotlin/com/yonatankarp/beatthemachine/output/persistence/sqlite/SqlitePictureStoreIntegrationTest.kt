@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class SqlitePictureStoreIT {
+class SqlitePictureStoreIntegrationTest {
     private val jdbc = newSqliteJdbc()
     private val store = SqlitePictureStore(jdbc)
 

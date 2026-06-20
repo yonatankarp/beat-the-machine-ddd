@@ -5,17 +5,17 @@ import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
+import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(StartChallengeController::class)
+@MockkBean(types = [StartChallenge::class])
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class StartChallengeControllerTest(
-    @Autowired val client: WebTestClient,
+    private val client: WebTestClient,
+    private val startChallenge: StartChallenge,
 ) {
-    @MockkBean
-    lateinit var startChallenge: StartChallenge
-
     @Test
     fun `POST creates a challenge and never leaks the prompt`() {
         coEvery { startChallenge(any()) } returns mediumChallenge()

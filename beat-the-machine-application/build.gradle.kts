@@ -15,6 +15,7 @@ dependencies {
 
     testImplementation(libs.bundles.unit.test)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(testFixtures(project(":beat-the-machine-domain")))
 }
 
 tasks.withType<Test> {

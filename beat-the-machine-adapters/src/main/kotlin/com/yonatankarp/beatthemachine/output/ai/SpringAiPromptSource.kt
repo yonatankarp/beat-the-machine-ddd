@@ -12,7 +12,8 @@ class SpringAiPromptSource(
 ) : PromptSource {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend infix fun next(difficulty: Difficulty): Prompt {
+    override suspend infix fun answer(query: PromptSource.Query): Prompt {
+        val difficulty = query.difficulty
         val band = bandFor(difficulty)
         val userMessage = userPrompt(difficulty, band)
         repeat(maxAttempts) { attempt ->
@@ -29,7 +30,7 @@ class SpringAiPromptSource(
             logger.info("Discarding out-of-band LLM phrase: '{}'", phrase)
         }
         logger.warn("LLM produced no valid phrase in {} attempts; using fallback", maxAttempts)
-        return fallback next difficulty
+        return fallback answer PromptSource.Query(difficulty)
     }
 
     private fun userPrompt(

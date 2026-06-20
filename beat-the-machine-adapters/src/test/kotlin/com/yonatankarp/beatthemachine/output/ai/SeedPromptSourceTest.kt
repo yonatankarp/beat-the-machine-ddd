@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.output.ai
 
+import com.yonatankarp.beatthemachine.application.port.output.PromptSource
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -14,7 +15,7 @@ class SeedPromptSourceTest {
 
             // When / Then
             repeat(20) {
-                val prompt = SeedPromptSource().next(Difficulty.MEDIUM)
+                val prompt = SeedPromptSource() answer PromptSource.Query(Difficulty.MEDIUM)
                 assertTrue(prompt in seedPrompts, "returned prompt must come from the curated SEED set")
             }
         }

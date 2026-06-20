@@ -47,7 +47,7 @@ class PicturePregeneration(
         val picture =
             try {
                 val current = (findChallengeById answer FindChallengeById.Query(id)) ?: return
-                machine generate current.secretPrompt()
+                machine answer Machine.Query(current.secretPrompt())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

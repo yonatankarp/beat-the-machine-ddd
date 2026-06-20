@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.output.ai
 
+import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.PictureStore
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
@@ -42,7 +43,7 @@ class LocalStableDiffusionMachineTest {
             coEvery { pictureStore.save(pngBytes, "image/png") } returns "xyz"
 
             // When
-            val result = machine().generate(Prompt("dragon eating a cookie"))
+            val result = machine() answer Machine.Query(Prompt("dragon eating a cookie"))
 
             // Then
             assertEquals(Picture.Ready("/images/xyz"), result)
@@ -55,7 +56,7 @@ class LocalStableDiffusionMachineTest {
             server.enqueue(MockResponse().setResponseCode(500))
 
             // When / Then
-            assertEquals(Picture.Failed, machine().generate(Prompt("anything")))
+            assertEquals(Picture.Failed, machine() answer Machine.Query(Prompt("anything")))
         }
 
     @Test
@@ -67,7 +68,7 @@ class LocalStableDiffusionMachineTest {
             )
 
             // When / Then
-            assertEquals(Picture.Failed, machine().generate(Prompt("anything")))
+            assertEquals(Picture.Failed, machine() answer Machine.Query(Prompt("anything")))
         }
 
     companion object {

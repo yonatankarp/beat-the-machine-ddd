@@ -13,7 +13,7 @@ class StartChallengeUseCase(
     private val enqueuePicture: (ChallengeId) -> Unit,
 ) : StartChallenge {
     override suspend fun handle(command: StartChallenge.Command): Challenge {
-        val prompt = promptSource next command.difficulty
+        val prompt = promptSource answer PromptSource.Query(command.difficulty)
         val challenge = Challenge.start(prompt, Lives.forSecret(prompt, command.difficulty), difficulty = command.difficulty)
         val persisted = storeChallenge handle StoreChallenge.Command(challenge)
         enqueuePicture(persisted.id)

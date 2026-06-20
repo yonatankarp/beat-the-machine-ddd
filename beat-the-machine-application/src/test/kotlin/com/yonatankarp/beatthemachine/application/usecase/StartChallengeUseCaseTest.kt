@@ -9,6 +9,8 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -17,7 +19,7 @@ import kotlin.test.assertTrue
 
 class StartChallengeUseCaseTest {
     private val fakePrompt = "hello world".asPrompt()
-    private val prompts = PromptSource { fakePrompt }
+    private val prompts = mockk<PromptSource>().also { coEvery { it answer any() } returns fakePrompt }
     private val store = FakeChallengeStore()
 
     @Test

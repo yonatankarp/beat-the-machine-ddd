@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.output.ai
 
+import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.PictureStore
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
@@ -33,7 +34,7 @@ class SpringAiImageMachineTest {
 
             // When
             val machine = SpringAiImageMachine(imageModel, pictureStore)
-            val result = machine.generate(Prompt("astronaut eating the moon"))
+            val result = machine answer Machine.Query(Prompt("astronaut eating the moon"))
 
             // Then
             assertEquals(Picture.Ready("/images/paid1"), result)
@@ -72,6 +73,6 @@ class SpringAiImageMachineTest {
             val machine = SpringAiImageMachine(imageModel, pictureStore)
 
             // Then
-            assertEquals(Picture.Failed, machine.generate(Prompt("anything")))
+            assertEquals(Picture.Failed, machine answer Machine.Query(Prompt("anything")))
         }
 }

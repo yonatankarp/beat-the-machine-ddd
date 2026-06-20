@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.output.ai
 
+import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import kotlinx.coroutines.test.runTest
@@ -16,7 +17,7 @@ class SeedMachineTest {
             val (prompt, url) = SEED.first()
 
             // When
-            val result = machine.generate(prompt)
+            val result = machine answer Machine.Query(prompt)
 
             // Then
             assertEquals(Picture.Ready(url), result)
@@ -29,7 +30,7 @@ class SeedMachineTest {
             val prompt = "a prompt that is not seeded".asPrompt()
 
             // When
-            val result = machine.generate(prompt)
+            val result = machine answer Machine.Query(prompt)
 
             // Then
             assertEquals(Picture.Failed, result)

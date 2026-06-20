@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.PictureStore
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -25,12 +24,12 @@ class LocalStableDiffusionMachine(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val webClient = imageWebClient(baseUrl)
 
-    override suspend fun generate(prompt: Prompt): Picture =
-        pictureStore.renderedPicture(logger, prompt) {
+    override suspend fun answer(query: Machine.Query): Picture =
+        pictureStore.renderedPicture(logger, query.prompt) {
             val response =
                 withContext(Dispatchers.IO) {
                     withTimeout(timeout) {
-                        webClient.textToImage(Txt2ImgRequest(prompt.text, steps, width, height))
+                        webClient.textToImage(Txt2ImgRequest(query.prompt.text, steps, width, height))
                     }
                 }
             val b64 = response.images.firstOrNull() ?: return@renderedPicture null

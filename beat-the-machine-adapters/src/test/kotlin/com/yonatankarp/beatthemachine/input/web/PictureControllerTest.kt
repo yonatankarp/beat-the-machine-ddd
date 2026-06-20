@@ -5,19 +5,19 @@ import com.yonatankarp.beatthemachine.application.port.output.PictureStore
 import com.yonatankarp.beatthemachine.application.port.output.StoredImage
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
+import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import kotlin.test.assertContentEquals
 
 @WebFluxTest(PictureController::class)
+@MockkBean(types = [PictureStore::class])
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class PictureControllerTest(
-    @Autowired val client: WebTestClient,
+    private val client: WebTestClient,
+    private val pictureStore: PictureStore,
 ) {
-    @MockkBean
-    lateinit var pictureStore: PictureStore
-
     @Test
     fun `serves image bytes with correct content-type`() {
         // Given

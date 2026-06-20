@@ -7,17 +7,17 @@ import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
+import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(GetChallengeController::class)
+@MockkBean(types = [GetChallenge::class])
+@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class GetChallengeControllerTest(
-    @Autowired val client: WebTestClient,
+    private val client: WebTestClient,
+    private val getChallenge: GetChallenge,
 ) {
-    @MockkBean
-    lateinit var getChallenge: GetChallenge
-
     @Test
     fun `GET returns the challenge state`() {
         val challenge = mediumChallenge()

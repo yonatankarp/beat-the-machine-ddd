@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class SqliteFindPendingChallengesIT {
+class SqliteFindPendingChallengesIntegrationTest {
     private lateinit var storeChallenge: SqliteStoreChallenge
     private lateinit var findPendingChallenges: SqliteFindPendingChallenges
 

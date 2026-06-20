@@ -1,17 +1,17 @@
 package com.yonatankarp.beatthemachine.domain.valueobject
 
+import com.yonatankarp.beatthemachine.test.dsl.asGuess
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class MaskedPromptTest {
-    private fun prompt(t: String) = Prompt(t)
-
     @Test
     fun `hides every word when there are no guesses`() {
         // Given
-        val secret = prompt("hello world")
+        val secret = "hello world".asPrompt()
         val guesses = emptySet<Guess>()
 
         // When
@@ -25,8 +25,8 @@ class MaskedPromptTest {
     @Test
     fun `reveals a matching word case-insensitively`() {
         // Given
-        val secret = prompt("Hello World")
-        val guesses = setOf(Guess("hello"))
+        val secret = "Hello World".asPrompt()
+        val guesses = setOf("hello".asGuess())
 
         // When
         val masked = MaskedPrompt.of(secret, guesses)
@@ -39,8 +39,8 @@ class MaskedPromptTest {
     @Test
     fun `reveals every occurrence of a repeated word`() {
         // Given
-        val secret = prompt("na na batman")
-        val guesses = setOf(Guess("na"))
+        val secret = "na na batman".asPrompt()
+        val guesses = setOf("na".asGuess())
 
         // When
         val masked = MaskedPrompt.of(secret, guesses)
@@ -55,8 +55,8 @@ class MaskedPromptTest {
     @Test
     fun `collapses arbitrary whitespace using one rule`() {
         // Given
-        val secret = prompt("hello\t \nworld")
-        val guesses = setOf(Guess("world"))
+        val secret = "hello\t \nworld".asPrompt()
+        val guesses = setOf("world".asGuess())
 
         // When
         val masked = MaskedPrompt.of(secret, guesses)
@@ -69,8 +69,8 @@ class MaskedPromptTest {
     @Test
     fun `is fully revealed when all words are guessed`() {
         // Given
-        val secret = prompt("hello world")
-        val guesses = setOf(Guess("hello"), Guess("world"))
+        val secret = "hello world".asPrompt()
+        val guesses = setOf("hello".asGuess(), "world".asGuess())
 
         // When
         val masked = MaskedPrompt.of(secret, guesses)

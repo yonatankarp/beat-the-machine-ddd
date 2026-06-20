@@ -2,12 +2,13 @@ package com.yonatankarp.beatthemachine.domain.entity
 
 import com.yonatankarp.beatthemachine.domain.exception.ChallengeAlreadyOver
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
-import com.yonatankarp.beatthemachine.domain.valueobject.Guess
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asGuess
+import com.yonatankarp.beatthemachine.test.dsl.lives
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
+import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -15,16 +16,11 @@ import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
 
 class ChallengeTest {
-    private fun newChallenge(
-        prompt: String = "hello world",
-        lives: Int = 3,
-    ) = Challenge.start(Prompt(prompt), Lives(lives))
-
     @Test
     fun `a correct guess reveals the word and stays in progress`() {
         // Given
-        val challenge = newChallenge()
-        val guess = Guess("hello")
+        val challenge = mediumChallenge(lives = 3.lives())
+        val guess = "hello".asGuess()
 
         // When
         val (updated, outcome) = challenge.makeGuess(guess)
@@ -38,8 +34,8 @@ class ChallengeTest {
     @Test
     fun `a wrong guess costs a life`() {
         // Given
-        val challenge = newChallenge()
-        val guess = Guess("nope")
+        val challenge = mediumChallenge(lives = 3.lives())
+        val guess = "nope".asGuess()
 
         // When
         val (updated, outcome) = challenge.makeGuess(guess)
@@ -52,11 +48,11 @@ class ChallengeTest {
     @Test
     fun `guessing every word beats the machine`() {
         // Given
-        val challenge = newChallenge()
-        val (afterFirst, _) = challenge.makeGuess(Guess("hello"))
+        val challenge = mediumChallenge(lives = 3.lives())
+        val (afterFirst, _) = challenge.makeGuess("hello".asGuess())
 
         // When
-        val (afterSecond, outcome) = afterFirst.makeGuess(Guess("world"))
+        val (afterSecond, outcome) = afterFirst.makeGuess("world".asGuess())
 
         // Then
         assertEquals(GuessOutcome.HIT, outcome)
@@ -66,8 +62,8 @@ class ChallengeTest {
     @Test
     fun `running out of lives loses the challenge`() {
         // Given
-        val challenge = newChallenge(lives = 1)
-        val guess = Guess("nope")
+        val challenge = mediumChallenge(lives = 1.lives())
+        val guess = "nope".asGuess()
 
         // When
         val (updated, _) = challenge.makeGuess(guess)
@@ -79,11 +75,11 @@ class ChallengeTest {
     @Test
     fun `a duplicate guess is a no-op and costs no life`() {
         // Given
-        val challenge = newChallenge()
-        val (afterFirst, _) = challenge.makeGuess(Guess("nope"))
+        val challenge = mediumChallenge(lives = 3.lives())
+        val (afterFirst, _) = challenge.makeGuess("nope".asGuess())
 
         // When
-        val (afterSecond, outcome) = afterFirst.makeGuess(Guess("Nope"))
+        val (afterSecond, outcome) = afterFirst.makeGuess("Nope".asGuess())
 
         // Then
         assertEquals(GuessOutcome.DUPLICATE, outcome)
@@ -93,8 +89,8 @@ class ChallengeTest {
     @Test
     fun `makeGuess does not mutate the receiver`() {
         // Given
-        val challenge = newChallenge()
-        val guess = Guess("nope")
+        val challenge = mediumChallenge(lives = 3.lives())
+        val guess = "nope".asGuess()
 
         // When
         challenge.makeGuess(guess)
@@ -107,16 +103,16 @@ class ChallengeTest {
     @Test
     fun `guessing after the challenge is over is rejected`() {
         // Given
-        val (lost, _) = newChallenge(lives = 1).makeGuess(Guess("nope"))
+        val (lost, _) = mediumChallenge(lives = 1.lives()).makeGuess("nope".asGuess())
 
         // When / Then
-        assertFailsWith<ChallengeAlreadyOver> { lost.makeGuess(Guess("hello")) }
+        assertFailsWith<ChallengeAlreadyOver> { lost.makeGuess("hello".asGuess()) }
     }
 
     @Test
     fun `forfeit reveals the prompt and loses`() {
         // Given
-        val challenge = newChallenge()
+        val challenge = mediumChallenge(lives = 3.lives())
 
         // When
         val forfeited = challenge.forfeit()
@@ -129,7 +125,7 @@ class ChallengeTest {
     @Test
     fun `forfeit after the challenge is over is rejected`() {
         // Given
-        val forfeited = newChallenge().forfeit()
+        val forfeited = mediumChallenge(lives = 3.lives()).forfeit()
 
         // When / Then
         assertFailsWith<ChallengeAlreadyOver> { forfeited.forfeit() }
@@ -138,8 +134,8 @@ class ChallengeTest {
     @Test
     fun `withPicture returns an independent copy at the same version`() {
         // Given
-        val challenge = newChallenge()
-        val newPicture = Picture.Ready("https://example.com/img.png")
+        val challenge = mediumChallenge(lives = 3.lives())
+        val newPicture = readyPicture("https://example.com/img.png")
 
         // When
         val updated = challenge.withPicture(newPicture)

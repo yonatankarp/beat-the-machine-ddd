@@ -1,7 +1,7 @@
 package com.yonatankarp.beatthemachine.output.ai
 
 import com.yonatankarp.beatthemachine.application.port.output.Machine
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
+import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import io.mockk.coEvery
@@ -17,12 +17,12 @@ import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
 class LocalStableDiffusionMachineTest {
-    private val pictureStore = mockk<PictureStore>()
+    private val storePicture = mockk<StorePicture>()
 
     private fun machine(): LocalStableDiffusionMachine =
         LocalStableDiffusionMachine(
             server.url("/").toString(),
-            pictureStore,
+            storePicture,
             steps = 8,
             width = 512,
             height = 512,
@@ -40,7 +40,7 @@ class LocalStableDiffusionMachineTest {
                     .setHeader("Content-Type", "application/json")
                     .setBody("""{"images":["$b64"]}"""),
             )
-            coEvery { pictureStore.save(pngBytes, "image/png") } returns "xyz"
+            coEvery { storePicture handle StorePicture.Command(pngBytes, "image/png") } returns "xyz"
 
             // When
             val result = machine() answer Machine.Query(Prompt("dragon eating a cookie"))

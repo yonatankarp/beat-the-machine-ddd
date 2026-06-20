@@ -1,7 +1,7 @@
 package com.yonatankarp.beatthemachine.config
 
 import com.yonatankarp.beatthemachine.application.port.output.Machine
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
+import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.output.ai.LocalStableDiffusionMachine
 import com.yonatankarp.beatthemachine.output.ai.SeedMachine
 import com.yonatankarp.beatthemachine.output.ai.SpringAiImageMachine
@@ -22,12 +22,12 @@ class MachineConfig {
     @Bean
     @ConditionalOnProperty(name = ["btm.image.provider"], havingValue = "local-sd")
     fun localStableDiffusionMachine(
-        pictureStore: PictureStore,
+        storePicture: StorePicture,
         properties: LocalStableDiffusionProperties,
     ): Machine =
         LocalStableDiffusionMachine(
             properties.baseUrl,
-            pictureStore,
+            storePicture,
             properties.steps,
             properties.width,
             properties.height,
@@ -38,6 +38,6 @@ class MachineConfig {
     @ConditionalOnProperty(name = ["btm.image.provider"], havingValue = "paid")
     fun springAiImageMachine(
         imageModel: ImageModel,
-        pictureStore: PictureStore,
-    ): Machine = SpringAiImageMachine(imageModel, pictureStore)
+        storePicture: StorePicture,
+    ): Machine = SpringAiImageMachine(imageModel, storePicture)
 }

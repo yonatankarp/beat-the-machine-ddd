@@ -1,14 +1,5 @@
 package com.yonatankarp.beatthemachine.application.port.output
 
-interface PictureStore {
-    suspend fun save(
-        bytes: ByteArray,
-        contentType: String,
-    ): String
-
-    suspend fun load(id: String): StoredImage?
-}
-
 class StoredImage(
     val bytes: ByteArray,
     val contentType: String,

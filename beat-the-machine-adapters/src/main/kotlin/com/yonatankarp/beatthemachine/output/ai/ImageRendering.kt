@@ -1,6 +1,6 @@
 package com.yonatankarp.beatthemachine.output.ai
 
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
+import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import org.slf4j.Logger
@@ -22,14 +22,14 @@ internal fun imageWebClient(baseUrl: String? = null): WebClient {
         .build()
 }
 
-internal suspend fun PictureStore.renderedPicture(
+internal suspend fun StorePicture.renderedPicture(
     logger: Logger,
     prompt: Prompt,
     produce: suspend () -> ByteArray?,
 ): Picture =
     try {
         val bytes = produce() ?: return Picture.Failed
-        Picture.Ready(imageUrl(save(bytes, PNG_CONTENT_TYPE)))
+        Picture.Ready(imageUrl(this handle StorePicture.Command(bytes, PNG_CONTENT_TYPE)))
     } catch (e: Exception) {
         logger.warn("Image generation failed for prompt '{}'", prompt.text, e)
         Picture.Failed

@@ -1,6 +1,7 @@
 package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
+import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.dsl.lives
@@ -29,7 +30,7 @@ class SqliteFindChallengeByIdIntegrationTest {
         runTest {
             // Given
             val c = mediumChallenge(lives = 5.lives(), prompt = "pixel art cat".asPrompt())
-            storeChallenge(c)
+            storeChallenge handle StoreChallenge.Command(c)
 
             // When
             val found = findChallengeById answer FindChallengeById.Query(c.id)

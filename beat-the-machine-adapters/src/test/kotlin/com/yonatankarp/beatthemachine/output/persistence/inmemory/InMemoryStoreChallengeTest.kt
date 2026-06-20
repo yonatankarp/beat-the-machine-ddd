@@ -1,6 +1,7 @@
 package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
+import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -17,7 +18,7 @@ class InMemoryStoreChallengeTest {
             val challenge = mediumChallenge()
 
             // When
-            val saved = storeChallenge(challenge)
+            val saved = storeChallenge handle StoreChallenge.Command(challenge)
 
             // Then
             assertEquals(1L, saved.version)
@@ -30,9 +31,9 @@ class InMemoryStoreChallengeTest {
             val store = InMemoryChallengeStore()
             val storeChallenge = InMemoryStoreChallenge(store)
             val c = mediumChallenge()
-            storeChallenge(c)
+            storeChallenge handle StoreChallenge.Command(c)
 
             // When / Then
-            assertFailsWith<OptimisticLockConflict> { storeChallenge(c) }
+            assertFailsWith<OptimisticLockConflict> { storeChallenge handle StoreChallenge.Command(c) }
         }
 }

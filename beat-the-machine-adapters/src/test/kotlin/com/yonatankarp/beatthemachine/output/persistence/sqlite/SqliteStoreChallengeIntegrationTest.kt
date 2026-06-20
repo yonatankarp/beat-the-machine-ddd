@@ -2,6 +2,7 @@ package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
+import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
@@ -36,7 +37,7 @@ class SqliteStoreChallengeIntegrationTest {
             val challenge = mediumChallenge(prompt = "pixel art cat".asPrompt())
 
             // When
-            val saved = storeChallenge(challenge)
+            val saved = storeChallenge handle StoreChallenge.Command(challenge)
 
             // Then
             assertEquals(1L, saved.version)
@@ -49,8 +50,8 @@ class SqliteStoreChallengeIntegrationTest {
             val challenge = mediumChallenge(prompt = "sequential".asPrompt())
 
             // When
-            val v1 = storeChallenge(challenge)
-            val v2 = storeChallenge(v1)
+            val v1 = storeChallenge handle StoreChallenge.Command(challenge)
+            val v2 = storeChallenge handle StoreChallenge.Command(v1)
 
             // Then
             assertEquals(1L, v1.version)
@@ -62,10 +63,10 @@ class SqliteStoreChallengeIntegrationTest {
         runTest {
             // Given
             val c = mediumChallenge()
-            storeChallenge(c)
+            storeChallenge handle StoreChallenge.Command(c)
 
             // When / Then
-            assertFailsWith<OptimisticLockConflict> { storeChallenge(c) }
+            assertFailsWith<OptimisticLockConflict> { storeChallenge handle StoreChallenge.Command(c) }
         }
 
     @Test
@@ -77,7 +78,7 @@ class SqliteStoreChallengeIntegrationTest {
             // When / Then
             difficulties.forEach { diff ->
                 val c = Challenge.start("test prompt".asPrompt(), 2.lives(), difficulty = diff)
-                storeChallenge(c)
+                storeChallenge handle StoreChallenge.Command(c)
                 val found = findChallengeById answer FindChallengeById.Query(c.id)
                 assertNotNull(found)
                 assertEquals(diff, found.difficulty)
@@ -93,9 +94,9 @@ class SqliteStoreChallengeIntegrationTest {
             val failed = mediumChallenge(prompt = "failed pic".asPrompt(), picture = failedPicture())
 
             // When
-            storeChallenge(pending)
-            storeChallenge(ready)
-            storeChallenge(failed)
+            storeChallenge handle StoreChallenge.Command(pending)
+            storeChallenge handle StoreChallenge.Command(ready)
+            storeChallenge handle StoreChallenge.Command(failed)
 
             // Then
             assertEquals(Picture.Pending, (findChallengeById answer FindChallengeById.Query(pending.id))?.picture)

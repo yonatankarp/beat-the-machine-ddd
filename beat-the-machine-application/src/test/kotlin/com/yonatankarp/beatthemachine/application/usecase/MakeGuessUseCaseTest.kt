@@ -19,7 +19,7 @@ import kotlin.test.assertFailsWith
 class MakeGuessUseCaseTest {
     private val store = FakeChallengeStore()
 
-    private suspend fun seed(): Challenge = store(mediumChallenge())
+    private suspend fun seed(): Challenge = store handle StoreChallenge.Command(mediumChallenge())
 
     @Test
     fun `a hit is persisted`() =
@@ -57,7 +57,11 @@ class MakeGuessUseCaseTest {
         runTest {
             // Given
             val c = seed()
-            val conflicting = StoreChallenge { throw OptimisticLockConflict(it.id) }
+            val conflicting =
+                object : StoreChallenge {
+                    override suspend fun handle(command: StoreChallenge.Command): Challenge =
+                        throw OptimisticLockConflict(command.challenge.id)
+                }
             val makeGuess = MakeGuessUseCase(store, conflicting)
             val guess = "hello".asGuess()
 

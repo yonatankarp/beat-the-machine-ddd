@@ -15,6 +15,6 @@ class MakeGuessUseCase(
         val challenge =
             (findChallengeById answer FindChallengeById.Query(command.id)) ?: throw ChallengeNotFound(command.id)
         val (updated, outcome) = challenge.makeGuess(command.word)
-        return storeChallenge(updated) to outcome
+        return (storeChallenge handle StoreChallenge.Command(updated)) to outcome
     }
 }

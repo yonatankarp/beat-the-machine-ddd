@@ -18,13 +18,6 @@ value class Lives(
         private const val PER_WORD_BASE = 3
         private const val MIN_LIVES = 2
 
-        fun initialFor(difficulty: Difficulty): Lives =
-            when (difficulty) {
-                Difficulty.EASY -> Lives(8)
-                Difficulty.MEDIUM -> Lives(6)
-                Difficulty.HARD -> Lives(4)
-            }
-
         fun forSecret(
             prompt: Prompt,
             difficulty: Difficulty,

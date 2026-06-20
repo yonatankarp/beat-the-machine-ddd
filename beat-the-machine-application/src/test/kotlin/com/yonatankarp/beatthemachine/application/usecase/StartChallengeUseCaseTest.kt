@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.application.usecase
 
+import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
 import com.yonatankarp.beatthemachine.application.port.output.PromptSource
 import com.yonatankarp.beatthemachine.application.port.output.StoredImage
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
@@ -27,7 +28,7 @@ class StartChallengeUseCaseTest {
             val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
 
             // When
-            val challenge = startChallenge(Difficulty.MEDIUM)
+            val challenge = startChallenge handle StartChallenge.Command(Difficulty.MEDIUM)
 
             // Then
             assertEquals(Picture.Pending, challenge.picture)
@@ -43,9 +44,9 @@ class StartChallengeUseCaseTest {
             val startChallenge = StartChallengeUseCase(prompts, store) {}
 
             // When
-            val easy = startChallenge(Difficulty.EASY)
-            val medium = startChallenge(Difficulty.MEDIUM)
-            val hard = startChallenge(Difficulty.HARD)
+            val easy = startChallenge handle StartChallenge.Command(Difficulty.EASY)
+            val medium = startChallenge handle StartChallenge.Command(Difficulty.MEDIUM)
+            val hard = startChallenge handle StartChallenge.Command(Difficulty.HARD)
 
             // Then
             assertEquals(Lives.forSecret(fakePrompt, Difficulty.EASY).remaining, easy.lives.remaining)

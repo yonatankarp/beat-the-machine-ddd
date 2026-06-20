@@ -20,7 +20,7 @@ class ForfeitChallengeControllerTest(
 ) {
     @Test
     fun `forfeit reveals the prompt and reports LOST`() {
-        coEvery { forfeitChallenge(any()) } returns lostChallenge()
+        coEvery { forfeitChallenge handle any() } returns lostChallenge()
 
         client
             .post()
@@ -37,7 +37,7 @@ class ForfeitChallengeControllerTest(
 
     @Test
     fun `forfeit with concurrent modification returns 409`() {
-        coEvery { forfeitChallenge(any()) } throws OptimisticLockConflict(aChallengeId())
+        coEvery { forfeitChallenge handle any() } throws OptimisticLockConflict(aChallengeId())
 
         client
             .post()

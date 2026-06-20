@@ -1,8 +1,11 @@
 package com.yonatankarp.beatthemachine.application.port.input
 
+import com.yonatankarp.beatthemachine.application.port.CommandHandler
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 
-fun interface StartChallenge {
-    suspend operator fun invoke(difficulty: Difficulty): Challenge
+interface StartChallenge : CommandHandler<StartChallenge.Command, Challenge> {
+    data class Command(
+        val difficulty: Difficulty,
+    )
 }

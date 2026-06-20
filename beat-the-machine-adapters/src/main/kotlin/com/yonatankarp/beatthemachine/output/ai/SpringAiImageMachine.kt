@@ -3,7 +3,6 @@ package com.yonatankarp.beatthemachine.output.ai
 import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.PictureStore
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
@@ -21,10 +20,10 @@ class SpringAiImageMachine(
 ) : Machine {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend fun generate(prompt: Prompt): Picture =
-        pictureStore.renderedPicture(logger, prompt) {
+    override suspend fun answer(query: Machine.Query): Picture =
+        pictureStore.renderedPicture(logger, query.prompt) {
             withContext(Dispatchers.IO) {
-                imageModel.call(ImagePrompt(prompt.text)).result?.output
+                imageModel.call(ImagePrompt(query.prompt.text)).result?.output
             }?.resolvedBytes()
         }
 

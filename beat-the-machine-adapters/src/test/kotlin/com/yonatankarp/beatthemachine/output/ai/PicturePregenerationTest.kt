@@ -14,6 +14,8 @@ import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -32,7 +34,7 @@ class PicturePregenerationTest {
     fun `generation flips a pending picture to ready and persists it`() =
         runTest {
             // Given
-            val machine = Machine { Picture.Ready("http://img/1.png") }
+            val machine = mockk<Machine>().also { coEvery { it answer any() } returns Picture.Ready("http://img/1.png") }
             val c = storeChallenge handle StoreChallenge.Command(mediumChallenge())
 
             // When
@@ -47,7 +49,7 @@ class PicturePregenerationTest {
     fun `a failing machine persists a failed picture`() =
         runTest {
             // Given
-            val machine = Machine { error("boom") }
+            val machine = mockk<Machine>().also { coEvery { it answer any() } throws RuntimeException("boom") }
             val c = storeChallenge handle StoreChallenge.Command(mediumChallenge())
 
             // When
@@ -62,7 +64,7 @@ class PicturePregenerationTest {
     fun `enqueue for an unknown challenge is a no-op`() =
         runTest {
             // Given
-            val machine = Machine { Picture.Ready("http://img/1.png") }
+            val machine = mockk<Machine>().also { coEvery { it answer any() } returns Picture.Ready("http://img/1.png") }
 
             // When
             pregeneration(machine, this).enqueue(aChallengeId())
@@ -73,7 +75,7 @@ class PicturePregenerationTest {
     fun `retryPending re-enqueues every challenge still awaiting a picture`() =
         runTest {
             // Given
-            val machine = Machine { Picture.Ready("http://img/retry.png") }
+            val machine = mockk<Machine>().also { coEvery { it answer any() } returns Picture.Ready("http://img/retry.png") }
             val pending = storeChallenge handle StoreChallenge.Command(mediumChallenge())
             val done =
                 storeChallenge handle
@@ -107,7 +109,7 @@ class PicturePregenerationTest {
                         return storeChallenge handle StoreChallenge.Command(challenge)
                     }
                 }
-            val machine = Machine { Picture.Ready("http://img/raced.png") }
+            val machine = mockk<Machine>().also { coEvery { it answer any() } returns Picture.Ready("http://img/raced.png") }
 
             // When
             pregeneration(machine, this, racingStore).enqueue(seeded.id)
@@ -121,7 +123,7 @@ class PicturePregenerationTest {
     fun `enqueue sheds work once the admission bound is full`() =
         runTest {
             // Given
-            val machine = Machine { Picture.Ready("http://img/admitted.png") }
+            val machine = mockk<Machine>().also { coEvery { it answer any() } returns Picture.Ready("http://img/admitted.png") }
             val admitted = storeChallenge handle StoreChallenge.Command(mediumChallenge())
             val shed = storeChallenge handle StoreChallenge.Command(mediumChallenge(prompt = "foo bar".asPrompt()))
             val pregeneration = pregeneration(machine, this, maxQueued = 1)

@@ -20,7 +20,7 @@ class SpringAiPromptSourceTest {
             val source = SpringAiPromptSource(llm, fallback)
 
             // When
-            val result = source next Difficulty.HARD
+            val result = source answer PromptSource.Query(Difficulty.HARD)
 
             // Then
             assertEquals(Prompt("dragon eating a cookie"), result)
@@ -35,7 +35,7 @@ class SpringAiPromptSourceTest {
             val source = SpringAiPromptSource(llm, fallback, maxAttempts = 3)
 
             // When
-            val result = source next Difficulty.EASY
+            val result = source answer PromptSource.Query(Difficulty.EASY)
 
             // Then
             assertEquals(Prompt("ocean wave"), result)
@@ -46,11 +46,11 @@ class SpringAiPromptSourceTest {
         runTest {
             // Given
             val llm = LlmText { _, _ -> throw RuntimeException("model down") }
-            coEvery { fallback next Difficulty.MEDIUM } returns Prompt("dolphin on fire")
+            coEvery { fallback answer PromptSource.Query(Difficulty.MEDIUM) } returns Prompt("dolphin on fire")
             val source = SpringAiPromptSource(llm, fallback, maxAttempts = 2)
 
             // When
-            val result = source next Difficulty.MEDIUM
+            val result = source answer PromptSource.Query(Difficulty.MEDIUM)
 
             // Then
             assertEquals(Prompt("dolphin on fire"), result)
@@ -61,11 +61,11 @@ class SpringAiPromptSourceTest {
         runTest {
             // Given
             val llm = LlmText { _, _ -> "this phrase is far too many words to be easy" }
-            coEvery { fallback next Difficulty.EASY } returns Prompt("red car")
+            coEvery { fallback answer PromptSource.Query(Difficulty.EASY) } returns Prompt("red car")
             val source = SpringAiPromptSource(llm, fallback, maxAttempts = 2)
 
             // When
-            val result = source next Difficulty.EASY
+            val result = source answer PromptSource.Query(Difficulty.EASY)
 
             // Then
             assertEquals(Prompt("red car"), result)

@@ -21,7 +21,7 @@ class GetChallengeControllerTest(
     @Test
     fun `GET returns the challenge state`() {
         val challenge = mediumChallenge()
-        coEvery { getChallenge(any()) } returns challenge
+        coEvery { getChallenge answer any() } returns challenge
 
         client
             .get()
@@ -38,7 +38,7 @@ class GetChallengeControllerTest(
 
     @Test
     fun `GET an unknown challenge returns 404`() {
-        coEvery { getChallenge(any()) } throws ChallengeNotFound(aChallengeId())
+        coEvery { getChallenge answer any() } throws ChallengeNotFound(aChallengeId())
 
         client
             .get()

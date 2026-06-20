@@ -13,5 +13,5 @@ class GetChallengeController(
     private val getChallengeUseCase: GetChallenge,
 ) : GetChallengeApi {
     override suspend fun getChallenge(id: UUID): ResponseEntity<ChallengeResponse> =
-        ResponseEntity.ok(getChallengeUseCase(ChallengeId(id)).toApiResponse())
+        ResponseEntity.ok((getChallengeUseCase answer GetChallenge.Query(ChallengeId(id))).toApiResponse())
 }

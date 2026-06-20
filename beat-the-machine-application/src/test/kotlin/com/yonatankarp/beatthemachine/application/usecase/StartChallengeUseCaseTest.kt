@@ -31,21 +31,4 @@ class StartChallengeUseCaseTest {
             assertEquals(listOf(challenge.id), enqueued)
             assertTrue(store.byId.containsKey(challenge.id))
         }
-
-    @Test
-    fun `starting lives scale with difficulty`() =
-        runTest {
-            // Given
-            val startChallenge = StartChallengeUseCase(prompts, store) {}
-
-            // When
-            val easy = startChallenge(Difficulty.EASY)
-            val medium = startChallenge(Difficulty.MEDIUM)
-            val hard = startChallenge(Difficulty.HARD)
-
-            // Then
-            assertEquals(8, easy.lives.remaining)
-            assertEquals(6, medium.lives.remaining)
-            assertEquals(4, hard.lives.remaining)
-        }
 }

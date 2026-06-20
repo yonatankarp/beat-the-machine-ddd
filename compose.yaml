@@ -1,0 +1,90 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      BTM_PERSISTENCE: sqlite
+      BTM_DB_PATH: /data/beat-the-machine.db
+      BTM_PROMPT_PROVIDER: ${BTM_PROMPT_PROVIDER:-ollama}
+      # SPRING_AI_MODEL_CHAT must match BTM_PROMPT_PROVIDER: it activates
+      # the Spring AI chat auto-config that supplies the ChatClient.Builder
+      # the ollama/openai PromptSource beans need. Mismatch = boot failure.
+      SPRING_AI_MODEL_CHAT: ${SPRING_AI_MODEL_CHAT:-ollama}
+      SPRING_AI_OLLAMA_BASE_URL: ${SPRING_AI_OLLAMA_BASE_URL:-http://ollama:11434}
+      SPRING_AI_OLLAMA_CHAT_OPTIONS_MODEL: ${OLLAMA_MODEL:-llama3.2}
+      BTM_IMAGE_PROVIDER: ${BTM_IMAGE_PROVIDER:-seed}
+      # For BTM_IMAGE_PROVIDER=paid also set SPRING_AI_MODEL_IMAGE=openai
+      # and SPRING_AI_OPENAI_API_KEY. local-sd needs no Spring AI (pure
+      # WebClient), so SPRING_AI_MODEL_IMAGE stays unset (none).
+      BTM_IMAGE_LOCAL_SD_BASE_URL: ${BTM_IMAGE_LOCAL_SD_BASE_URL:-http://stable-diffusion:7860}
+    volumes:
+      - app-data:/data
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  # Linux + NVIDIA GPU — run with: docker compose --profile sd up
+  stable-diffusion:
+    image: universonic/stable-diffusion-webui:latest
+    profiles: ["sd"]
+    ports:
+      - "7860:7860"
+    command: ["--api", "--listen"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: ["gpu"]
+    volumes:
+      - sd-data:/data
+
+  # CPU-only Stable Diffusion for hosts WITHOUT an NVIDIA GPU (incl. Apple
+  # Silicon, where Docker cannot use the Mac GPU). Generation is slow
+  # (minutes per image); meant to feed the background pre-seed pool, not
+  # interactive play. The `stable-diffusion` network alias means the app's
+  # default BTM_IMAGE_LOCAL_SD_BASE_URL works unchanged.
+  #
+  # First run downloads a Stable Diffusion 1.5 checkpoint (~4 GB).
+  # Not runtime-verified in this repo; adjust image/flags to your chosen
+  # A1111 build. Alternative: AbdBarho/stable-diffusion-webui-docker
+  # (--profile auto-cpu).
+  #
+  # Run with: docker compose --profile sd-cpu up
+  stable-diffusion-cpu:
+    image: universonic/stable-diffusion-webui:latest
+    # Apple Silicon: no arm64 image; force amd64 emulation (even slower):
+    # platform: linux/amd64
+    profiles: ["sd-cpu"]
+    ports:
+      - "7860:7860"
+    command:
+      - "--api"
+      - "--listen"
+      - "--skip-torch-cuda-test"
+      - "--use-cpu"
+      - "all"
+      - "--no-half"
+      - "--precision"
+      - "full"
+    networks:
+      default:
+        aliases:
+          - stable-diffusion
+    volumes:
+      - sd-cpu-data:/data
+
+volumes:
+  app-data:
+  ollama-data:
+  sd-data:
+  sd-cpu-data:

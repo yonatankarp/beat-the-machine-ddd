@@ -2,6 +2,7 @@ package com.yonatankarp.beatthemachine.application.usecase
 
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
+import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
@@ -28,7 +29,7 @@ class ForfeitChallengeUseCaseTest {
 
             // Then
             assertEquals(ChallengeStatus.LOST, result.status)
-            assertEquals(ChallengeStatus.LOST, store(c.id)?.status)
+            assertEquals(ChallengeStatus.LOST, (store answer FindChallengeById.Query(c.id))?.status)
         }
 
     @Test

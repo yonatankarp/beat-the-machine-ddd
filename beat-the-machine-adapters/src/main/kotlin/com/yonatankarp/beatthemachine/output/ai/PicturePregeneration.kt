@@ -40,13 +40,13 @@ class PicturePregeneration(
     }
 
     suspend fun retryPending() {
-        findPendingChallenges().forEach { enqueue(it.id) }
+        (findPendingChallenges answer FindPendingChallenges.Query).forEach { enqueue(it.id) }
     }
 
     private suspend fun generate(id: ChallengeId) {
         val picture =
             try {
-                val current = findChallengeById(id) ?: return
+                val current = (findChallengeById answer FindChallengeById.Query(id)) ?: return
                 machine generate current.secretPrompt()
             } catch (e: CancellationException) {
                 throw e
@@ -62,7 +62,7 @@ class PicturePregeneration(
         picture: Picture,
     ) {
         repeat(MAX_SAVE_ATTEMPTS) {
-            val latest = findChallengeById(id) ?: return
+            val latest = (findChallengeById answer FindChallengeById.Query(id)) ?: return
             if (latest.picture !is Picture.Pending) return
             try {
                 storeChallenge(latest.withPicture(picture))

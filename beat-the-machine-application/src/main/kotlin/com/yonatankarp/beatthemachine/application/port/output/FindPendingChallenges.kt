@@ -1,7 +1,8 @@
 package com.yonatankarp.beatthemachine.application.port.output
 
+import com.yonatankarp.beatthemachine.application.port.QueryHandler
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 
-fun interface FindPendingChallenges {
-    suspend operator fun invoke(): List<Challenge>
+interface FindPendingChallenges : QueryHandler<FindPendingChallenges.Query, List<Challenge>> {
+    data object Query
 }

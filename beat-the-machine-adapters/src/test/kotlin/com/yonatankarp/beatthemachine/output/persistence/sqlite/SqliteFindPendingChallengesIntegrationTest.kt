@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
+import com.yonatankarp.beatthemachine.application.port.output.FindPendingChallenges
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.failedPicture
@@ -31,7 +32,7 @@ class SqliteFindPendingChallengesIntegrationTest {
             storeChallenge(mediumChallenge(prompt = "failed pic".asPrompt(), picture = failedPicture()))
 
             // When
-            val ids = findPendingChallenges().map { it.id }.toSet()
+            val ids = (findPendingChallenges answer FindPendingChallenges.Query).map { it.id }.toSet()
 
             // Then
             assertEquals(setOf(pendingA.id, pendingB.id), ids)

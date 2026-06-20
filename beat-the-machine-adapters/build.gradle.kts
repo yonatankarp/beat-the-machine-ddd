@@ -58,6 +58,33 @@ tasks.jacocoTestReport {
     )
 }
 
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.named("test"))
+    classDirectories.setFrom(
+        classDirectories.files.map {
+            fileTree(it) { exclude("**/openapi/**", "**/openapitools/**") }
+        },
+    )
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.70".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.named("check") {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
 val copyWebApp by tasks.registering(Sync::class) {
     dependsOn(":beat-the-machine-frontend:buildWebApp")
     from(project(":beat-the-machine-frontend").layout.projectDirectory.dir("dist"))

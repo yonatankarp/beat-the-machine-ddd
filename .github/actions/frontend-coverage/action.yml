@@ -54,7 +54,9 @@ runs:
       run: npm run test:coverage
 
     - name: Report coverage on the pull request
-      if: ${{ github.event_name == 'pull_request' }}
+      # Run even when the coverage step failed a threshold, so the comment still
+      # shows which metric regressed (vitest writes the summary before failing).
+      if: ${{ !cancelled() && github.event_name == 'pull_request' }}
       uses: davelosert/vitest-coverage-report-action@v2
       with:
         working-directory: ${{ inputs.working-directory }}

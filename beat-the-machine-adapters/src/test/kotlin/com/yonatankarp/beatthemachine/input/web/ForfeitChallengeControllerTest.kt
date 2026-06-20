@@ -23,6 +23,7 @@ class ForfeitChallengeControllerTest(
     @Test
     fun `forfeit reveals the prompt and reports LOST`() {
         coEvery { forfeitChallenge(any()) } returns Challenge.start(Prompt("hello world"), Lives(6)).forfeit()
+
         client
             .post()
             .uri("/api/challenges/${ChallengeId.new().value}/forfeit")
@@ -39,6 +40,7 @@ class ForfeitChallengeControllerTest(
     @Test
     fun `forfeit with concurrent modification returns 409`() {
         coEvery { forfeitChallenge(any()) } throws OptimisticLockConflict(ChallengeId.new())
+
         client
             .post()
             .uri("/api/challenges/${ChallengeId.new().value}/forfeit")

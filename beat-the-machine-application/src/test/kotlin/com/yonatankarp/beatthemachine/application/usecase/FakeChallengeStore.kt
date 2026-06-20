@@ -7,10 +7,6 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 
-/**
- * In-memory test double backing the three segregated storage ports with a single
- * shared map (mirroring why the real persistence adapter is one class).
- */
 class FakeChallengeStore :
     StoreChallenge,
     FindChallengeById,

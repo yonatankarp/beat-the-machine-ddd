@@ -7,21 +7,43 @@ import kotlin.test.assertFailsWith
 class PromptTest {
     @Test
     fun `splits on single space`() {
-        assertEquals(listOf("hello", "world"), Prompt("hello world").words())
+        // Given
+        val prompt = Prompt("hello world")
+
+        // When
+        val words = prompt.words()
+
+        // Then
+        assertEquals(listOf("hello", "world"), words)
     }
 
     @Test
     fun `splits on multiple whitespace characters`() {
-        assertEquals(listOf("a", "b", "c"), Prompt("a\t b\n c").words())
+        // Given
+        val prompt = Prompt("a\t b\n c")
+
+        // When
+        val words = prompt.words()
+
+        // Then
+        assertEquals(listOf("a", "b", "c"), words)
     }
 
     @Test
     fun `rejects blank text`() {
-        assertFailsWith<IllegalArgumentException> { Prompt("   ") }
+        // Given
+        val text = "   "
+
+        // When / Then
+        assertFailsWith<IllegalArgumentException> { Prompt(text) }
     }
 
     @Test
     fun `rejects empty text`() {
-        assertFailsWith<IllegalArgumentException> { Prompt("") }
+        // Given
+        val text = ""
+
+        // When / Then
+        assertFailsWith<IllegalArgumentException> { Prompt(text) }
     }
 }

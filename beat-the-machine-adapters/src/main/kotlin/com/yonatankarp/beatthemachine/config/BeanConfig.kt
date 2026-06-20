@@ -47,7 +47,6 @@ class BeanConfig {
         pictureScope: PictureScope,
     ): ApplicationRunner =
         ApplicationRunner {
-            // Launch the retry sweep into the picture scope; the boot thread must not block.
             pictureScope.launch { picturePregeneration.retryPending() }
         }
 

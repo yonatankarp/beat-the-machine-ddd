@@ -24,6 +24,7 @@ class GetChallengeControllerTest(
     fun `GET returns the challenge state`() {
         val challenge = Challenge.start(Prompt("hello world"), Lives(6))
         coEvery { getChallenge(any()) } returns challenge
+
         client
             .get()
             .uri("/api/challenges/${challenge.id.value}")
@@ -40,6 +41,7 @@ class GetChallengeControllerTest(
     @Test
     fun `GET an unknown challenge returns 404`() {
         coEvery { getChallenge(any()) } throws ChallengeNotFound(ChallengeId.new())
+
         client
             .get()
             .uri("/api/challenges/${ChallengeId.new().value}")

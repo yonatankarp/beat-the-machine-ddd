@@ -8,16 +8,31 @@ import kotlin.test.assertFailsWith
 class GuessTest {
     @Test
     fun `rejects blank word`() {
-        assertFailsWith<InvalidGuess> { Guess("   ") }
+        // Given
+        val word = "   "
+
+        // When / Then
+        assertFailsWith<InvalidGuess> { Guess(word) }
     }
 
     @Test
     fun `rejects empty word`() {
-        assertFailsWith<InvalidGuess> { Guess("") }
+        // Given
+        val word = ""
+
+        // When / Then
+        assertFailsWith<InvalidGuess> { Guess(word) }
     }
 
     @Test
     fun `normalized trims and lowercases`() {
-        assertEquals("hello", Guess("Hello").normalized())
+        // Given
+        val guess = Guess("Hello")
+
+        // When
+        val normalized = guess.normalized()
+
+        // Then
+        assertEquals("hello", normalized)
     }
 }

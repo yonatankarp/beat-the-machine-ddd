@@ -18,9 +18,14 @@ class StartChallengeUseCaseTest {
     @Test
     fun `starts a pending challenge and enqueues picture generation`() =
         runTest {
+            // Given
             val enqueued = mutableListOf<ChallengeId>()
             val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
+
+            // When
             val challenge = startChallenge(Difficulty.MEDIUM)
+
+            // Then
             assertEquals(Picture.Pending, challenge.picture)
             assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
             assertEquals(listOf(challenge.id), enqueued)
@@ -30,9 +35,17 @@ class StartChallengeUseCaseTest {
     @Test
     fun `starting lives scale with difficulty`() =
         runTest {
+            // Given
             val startChallenge = StartChallengeUseCase(prompts, store) {}
-            assertEquals(8, startChallenge(Difficulty.EASY).lives.remaining)
-            assertEquals(6, startChallenge(Difficulty.MEDIUM).lives.remaining)
-            assertEquals(4, startChallenge(Difficulty.HARD).lives.remaining)
+
+            // When
+            val easy = startChallenge(Difficulty.EASY)
+            val medium = startChallenge(Difficulty.MEDIUM)
+            val hard = startChallenge(Difficulty.HARD)
+
+            // Then
+            assertEquals(8, easy.lives.remaining)
+            assertEquals(6, medium.lives.remaining)
+            assertEquals(4, hard.lives.remaining)
         }
 }

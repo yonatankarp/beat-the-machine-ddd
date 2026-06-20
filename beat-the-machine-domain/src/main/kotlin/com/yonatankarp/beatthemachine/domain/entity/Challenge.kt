@@ -11,12 +11,6 @@ import com.yonatankarp.beatthemachine.domain.valueobject.MaskedPrompt
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 
-/**
- * The Challenge aggregate root. Immutable: every state transition returns a new
- * instance and leaves the receiver untouched. The version is never changed by a
- * domain operation; the persistence adapter is the single writer that increments
- * it on save.
- */
 class Challenge private constructor(
     val id: ChallengeId,
     private val prompt: Prompt,
@@ -56,14 +50,8 @@ class Challenge private constructor(
         return copy(status = ChallengeStatus.LOST)
     }
 
-    /**
-     * Returns a copy carrying the new picture. The version is left untouched (the
-     * persistence adapter increments it on save), so the async picture pipeline can
-     * apply this to the latest persisted aggregate without forcing a version bump.
-     */
     fun withPicture(picture: Picture): Challenge = copy(picture = picture)
 
-    // Exposed only to persistence mapping in the adapter module.
     fun secretPrompt(): Prompt = prompt
 
     private fun copy(

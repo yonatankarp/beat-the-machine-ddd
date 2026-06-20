@@ -1,6 +1,6 @@
 package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
@@ -44,7 +44,7 @@ class SqliteFindChallengeByIdIT {
     fun `returns null for an unknown id`() =
         runTest {
             // Given
-            val unknownId = ChallengeId.new()
+            val unknownId = aChallengeId()
 
             // When
             val found = findChallengeById(unknownId)

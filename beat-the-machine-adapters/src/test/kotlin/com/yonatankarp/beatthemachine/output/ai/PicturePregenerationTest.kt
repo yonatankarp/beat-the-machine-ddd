@@ -3,12 +3,12 @@ package com.yonatankarp.beatthemachine.output.ai
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryChallengeStore
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindChallengeById
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindPendingChallenges
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryStoreChallenge
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
@@ -63,7 +63,7 @@ class PicturePregenerationTest {
             val machine = Machine { Picture.Ready("http://img/1.png") }
 
             // When
-            pregeneration(machine, this).enqueue(ChallengeId.new())
+            pregeneration(machine, this).enqueue(aChallengeId())
             advanceUntilIdle()
         }
 

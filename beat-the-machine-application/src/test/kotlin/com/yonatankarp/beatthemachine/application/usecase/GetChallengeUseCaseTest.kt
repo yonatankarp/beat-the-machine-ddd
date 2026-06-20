@@ -1,7 +1,7 @@
 package com.yonatankarp.beatthemachine.application.usecase
 
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
@@ -30,7 +30,7 @@ class GetChallengeUseCaseTest {
     fun `throws ChallengeNotFound for an unknown id`() =
         runTest {
             // Given
-            val unknownId = ChallengeId.new()
+            val unknownId = aChallengeId()
 
             // When / Then
             assertFailsWith<ChallengeNotFound> { getChallenge(unknownId) }

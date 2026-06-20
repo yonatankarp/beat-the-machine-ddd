@@ -5,8 +5,8 @@ import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
 import com.yonatankarp.beatthemachine.domain.exception.ChallengeAlreadyOver
 import com.yonatankarp.beatthemachine.domain.exception.InvalidGuess
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asGuess
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import io.mockk.coEvery
@@ -30,7 +30,7 @@ class MakeGuessControllerTest(
 
         client
             .post()
-            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .uri("/api/challenges/${aChallengeId().value}/guesses")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""{"word":"hello"}""")
             .exchange()
@@ -45,11 +45,11 @@ class MakeGuessControllerTest(
 
     @Test
     fun `guessing an unknown challenge returns 404`() {
-        coEvery { makeGuess(any(), any()) } throws ChallengeNotFound(ChallengeId.new())
+        coEvery { makeGuess(any(), any()) } throws ChallengeNotFound(aChallengeId())
 
         client
             .post()
-            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .uri("/api/challenges/${aChallengeId().value}/guesses")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""{"word":"hello"}""")
             .exchange()
@@ -59,11 +59,11 @@ class MakeGuessControllerTest(
 
     @Test
     fun `guessing on an already-over challenge returns 409`() {
-        coEvery { makeGuess(any(), any()) } throws ChallengeAlreadyOver(ChallengeId.new())
+        coEvery { makeGuess(any(), any()) } throws ChallengeAlreadyOver(aChallengeId())
 
         client
             .post()
-            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .uri("/api/challenges/${aChallengeId().value}/guesses")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""{"word":"hello"}""")
             .exchange()
@@ -77,7 +77,7 @@ class MakeGuessControllerTest(
 
         client
             .post()
-            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .uri("/api/challenges/${aChallengeId().value}/guesses")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""{"word":"two words"}""")
             .exchange()
@@ -89,7 +89,7 @@ class MakeGuessControllerTest(
     fun `guessing with a blank word returns 422`() {
         client
             .post()
-            .uri("/api/challenges/${ChallengeId.new().value}/guesses")
+            .uri("/api/challenges/${aChallengeId().value}/guesses")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""{"word":"   "}""")
             .exchange()

@@ -4,9 +4,9 @@ import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
 import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asGuess
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
@@ -41,7 +41,7 @@ class MakeGuessUseCaseTest {
         runTest {
             // Given
             val makeGuess = MakeGuessUseCase(store, store)
-            val unknownId = ChallengeId.new()
+            val unknownId = aChallengeId()
             val guess = "hello".asGuess()
 
             // When / Then

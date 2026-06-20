@@ -3,7 +3,7 @@ package com.yonatankarp.beatthemachine.input.web
 import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
-import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
+import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
@@ -38,11 +38,11 @@ class GetChallengeControllerTest(
 
     @Test
     fun `GET an unknown challenge returns 404`() {
-        coEvery { getChallenge(any()) } throws ChallengeNotFound(ChallengeId.new())
+        coEvery { getChallenge(any()) } throws ChallengeNotFound(aChallengeId())
 
         client
             .get()
-            .uri("/api/challenges/${ChallengeId.new().value}")
+            .uri("/api/challenges/${aChallengeId().value}")
             .exchange()
             .expectStatus()
             .isNotFound

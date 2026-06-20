@@ -24,6 +24,10 @@ dependencies {
     implementation(libs.kotlin.stdlib.jdk8)
     implementation(libs.bundles.kotlinx.coroutines)
 
+    implementation(platform(libs.spring.ai.bom))
+    implementation(libs.spring.ai.starter.model.openai)
+    implementation(libs.spring.ai.starter.model.ollama)
+
     testImplementation(libs.bundles.unit.test)
     testImplementation(libs.bundles.spring.boot.test) {
         exclude("org.mockito", "mockito-core")

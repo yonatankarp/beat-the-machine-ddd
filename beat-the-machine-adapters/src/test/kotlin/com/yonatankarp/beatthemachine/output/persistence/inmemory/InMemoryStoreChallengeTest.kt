@@ -1,7 +1,6 @@
 package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
-import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -15,7 +14,7 @@ class InMemoryStoreChallengeTest {
             // Given
             val store = InMemoryChallengeStore()
             val storeChallenge = InMemoryStoreChallenge(store)
-            val challenge = mediumChallenge(lives = 3.lives())
+            val challenge = mediumChallenge()
 
             // When
             val saved = storeChallenge(challenge)
@@ -30,7 +29,7 @@ class InMemoryStoreChallengeTest {
             // Given
             val store = InMemoryChallengeStore()
             val storeChallenge = InMemoryStoreChallenge(store)
-            val c = mediumChallenge(lives = 3.lives())
+            val c = mediumChallenge()
             storeChallenge(c)
 
             // When / Then

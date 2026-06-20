@@ -4,7 +4,6 @@ import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
-import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -14,7 +13,7 @@ import kotlin.test.assertFailsWith
 class ForfeitChallengeUseCaseTest {
     private val store = FakeChallengeStore()
 
-    private suspend fun seed(): Challenge = store(mediumChallenge(lives = 3.lives()))
+    private suspend fun seed(): Challenge = store(mediumChallenge())
 
     @Test
     fun `forfeit loads the challenge, sets LOST, and persists it`() =

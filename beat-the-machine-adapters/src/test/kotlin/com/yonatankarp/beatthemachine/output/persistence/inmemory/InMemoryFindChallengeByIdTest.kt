@@ -1,7 +1,6 @@
 package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
@@ -16,7 +15,7 @@ class InMemoryFindChallengeByIdTest {
             val store = InMemoryChallengeStore()
             val storeChallenge = InMemoryStoreChallenge(store)
             val findChallengeById = InMemoryFindChallengeById(store)
-            val saved = storeChallenge(mediumChallenge(lives = 3.lives()))
+            val saved = storeChallenge(mediumChallenge())
 
             // When
             val found = findChallengeById(saved.id)

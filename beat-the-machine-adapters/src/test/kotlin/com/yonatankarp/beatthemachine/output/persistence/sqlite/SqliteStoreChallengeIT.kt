@@ -32,7 +32,7 @@ class SqliteStoreChallengeIT {
     fun `stores a fresh challenge and bumps the version`() =
         runTest {
             // Given
-            val challenge = mediumChallenge(lives = 5.lives(), prompt = "pixel art cat".asPrompt())
+            val challenge = mediumChallenge(prompt = "pixel art cat".asPrompt())
 
             // When
             val saved = storeChallenge(challenge)
@@ -45,7 +45,7 @@ class SqliteStoreChallengeIT {
     fun `allows sequential stores with updated versions`() =
         runTest {
             // Given
-            val challenge = mediumChallenge(lives = 3.lives(), prompt = "sequential".asPrompt())
+            val challenge = mediumChallenge(prompt = "sequential".asPrompt())
 
             // When
             val v1 = storeChallenge(challenge)
@@ -60,7 +60,7 @@ class SqliteStoreChallengeIT {
     fun `rejects a stale version on second store`() =
         runTest {
             // Given
-            val c = mediumChallenge(lives = 3.lives())
+            val c = mediumChallenge()
             storeChallenge(c)
 
             // When / Then
@@ -87,9 +87,9 @@ class SqliteStoreChallengeIT {
     fun `persists picture states correctly`() =
         runTest {
             // Given
-            val pending = mediumChallenge(lives = 2.lives(), prompt = "pending pic".asPrompt())
-            val ready = mediumChallenge(lives = 2.lives(), prompt = "ready pic".asPrompt(), picture = readyPicture())
-            val failed = mediumChallenge(lives = 2.lives(), prompt = "failed pic".asPrompt(), picture = failedPicture())
+            val pending = mediumChallenge(prompt = "pending pic".asPrompt())
+            val ready = mediumChallenge(prompt = "ready pic".asPrompt(), picture = readyPicture())
+            val failed = mediumChallenge(prompt = "failed pic".asPrompt(), picture = failedPicture())
 
             // When
             storeChallenge(pending)

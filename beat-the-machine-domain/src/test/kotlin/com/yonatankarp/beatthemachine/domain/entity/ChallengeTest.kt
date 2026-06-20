@@ -48,7 +48,7 @@ class ChallengeTest {
     @Test
     fun `guessing every word beats the machine`() {
         // Given
-        val challenge = mediumChallenge(lives = 3.lives())
+        val challenge = mediumChallenge()
         val (afterFirst, _) = challenge.makeGuess("hello".asGuess())
 
         // When
@@ -112,7 +112,7 @@ class ChallengeTest {
     @Test
     fun `forfeit reveals the prompt and loses`() {
         // Given
-        val challenge = mediumChallenge(lives = 3.lives())
+        val challenge = mediumChallenge()
 
         // When
         val forfeited = challenge.forfeit()
@@ -125,7 +125,7 @@ class ChallengeTest {
     @Test
     fun `forfeit after the challenge is over is rejected`() {
         // Given
-        val forfeited = mediumChallenge(lives = 3.lives()).forfeit()
+        val forfeited = mediumChallenge().forfeit()
 
         // When / Then
         assertFailsWith<ChallengeAlreadyOver> { forfeited.forfeit() }
@@ -134,7 +134,7 @@ class ChallengeTest {
     @Test
     fun `withPicture returns an independent copy at the same version`() {
         // Given
-        val challenge = mediumChallenge(lives = 3.lives())
+        val challenge = mediumChallenge()
         val newPicture = readyPicture("https://example.com/img.png")
 
         // When

@@ -1,6 +1,7 @@
 package com.yonatankarp.beatthemachine.application.usecase
 
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
+import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
@@ -23,7 +24,7 @@ class ForfeitChallengeUseCaseTest {
             val forfeitChallenge = ForfeitChallengeUseCase(store, store)
 
             // When
-            val result = forfeitChallenge(c.id)
+            val result = forfeitChallenge handle ForfeitChallenge.Command(c.id)
 
             // Then
             assertEquals(ChallengeStatus.LOST, result.status)
@@ -39,7 +40,7 @@ class ForfeitChallengeUseCaseTest {
 
             // When / Then
             assertFailsWith<ChallengeNotFound> {
-                forfeitChallenge(unknownId)
+                forfeitChallenge handle ForfeitChallenge.Command(unknownId)
             }
         }
 }

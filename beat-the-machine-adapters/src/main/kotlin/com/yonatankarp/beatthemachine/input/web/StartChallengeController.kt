@@ -13,5 +13,8 @@ class StartChallengeController(
     private val startChallengeUseCase: StartChallenge,
 ) : StartChallengeApi {
     override suspend fun startChallenge(difficulty: Difficulty?): ResponseEntity<ChallengeResponse> =
-        ResponseEntity.ok(startChallengeUseCase(difficulty?.toDomain() ?: DomainDifficulty.MEDIUM).toApiResponse())
+        ResponseEntity.ok(
+            (startChallengeUseCase handle StartChallenge.Command(difficulty?.toDomain() ?: DomainDifficulty.MEDIUM))
+                .toApiResponse(),
+        )
 }

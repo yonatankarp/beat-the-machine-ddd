@@ -18,7 +18,7 @@ class StartChallengeControllerTest(
 ) {
     @Test
     fun `POST creates a challenge and never leaks the prompt`() {
-        coEvery { startChallenge(any()) } returns mediumChallenge()
+        coEvery { startChallenge handle any() } returns mediumChallenge()
 
         client
             .post()

@@ -60,3 +60,6 @@ runs:
       uses: davelosert/vitest-coverage-report-action@v2
       with:
         working-directory: ${{ inputs.working-directory }}
+        # Default status icon is a neutral blue even when thresholds pass; map
+        # coverage to a traffic light so a healthy metric reads green.
+        threshold-icons: "{ '0': '🔴', '80': '🟡', '90': '🟢' }"

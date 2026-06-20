@@ -28,16 +28,17 @@ tasks.jacocoTestReport {
 tasks.jacocoTestCoverageVerification {
     dependsOn(tasks.named("test"))
     violationRules {
+        // The domain is the core of the model; hold it at full coverage.
         rule {
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = "0.80".toBigDecimal()
+                minimum = "1.00".toBigDecimal()
             }
             limit {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
-                minimum = "0.70".toBigDecimal()
+                minimum = "1.00".toBigDecimal()
             }
         }
     }

@@ -160,7 +160,7 @@ class ChallengeTest {
         val max = challenge.maxLives()
 
         // Then
-        assertEquals(Lives(6), max)
+        assertEquals(Lives(6), max) // round(3 * 2 * 1.0) = 6
     }
 
     @Test

@@ -72,6 +72,6 @@ class LivesTest {
         val result = Lives.forSecret(oneWordPrompt, Difficulty.HARD)
 
         // Then
-        assertEquals(Lives(2), result)
+        assertEquals(Lives(2), result) // round(3 * 1 * 0.7) = 2 >= MIN_LIVES
     }
 }

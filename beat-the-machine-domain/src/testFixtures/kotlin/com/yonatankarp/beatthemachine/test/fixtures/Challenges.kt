@@ -2,10 +2,10 @@ package com.yonatankarp.beatthemachine.test.fixtures
 
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
-import com.yonatankarp.beatthemachine.domain.valueobject.Guess
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asGuess
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 
 object Challenges {
@@ -31,6 +31,6 @@ object Challenges {
 
     fun beatenChallenge(prompt: Prompt = "hello world".asPrompt()): Challenge =
         prompt.words().fold(mediumChallenge(prompt = prompt)) { challenge, word ->
-            challenge.makeGuess(Guess(word)).first
+            challenge.makeGuess(word.asGuess()).first
         }
 }

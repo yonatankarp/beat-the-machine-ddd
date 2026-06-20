@@ -17,11 +17,12 @@ class PromptSourceConfig {
 
     @Bean
     @ConditionalOnProperty(name = ["btm.prompt.provider"], havingValue = "ollama")
-    fun ollamaPromptSource(chatClientBuilder: ChatClient.Builder): PromptSource =
-        SpringAiPromptSource(ChatClientLlmText(chatClientBuilder.build()), SeedPromptSource())
+    fun ollamaPromptSource(chatClientBuilder: ChatClient.Builder): PromptSource = chatPromptSource(chatClientBuilder)
 
     @Bean
     @ConditionalOnProperty(name = ["btm.prompt.provider"], havingValue = "openai")
-    fun openAiPromptSource(chatClientBuilder: ChatClient.Builder): PromptSource =
+    fun openAiPromptSource(chatClientBuilder: ChatClient.Builder): PromptSource = chatPromptSource(chatClientBuilder)
+
+    private fun chatPromptSource(chatClientBuilder: ChatClient.Builder): PromptSource =
         SpringAiPromptSource(ChatClientLlmText(chatClientBuilder.build()), SeedPromptSource())
 }

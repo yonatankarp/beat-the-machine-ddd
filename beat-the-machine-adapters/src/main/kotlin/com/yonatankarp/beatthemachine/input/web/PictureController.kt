@@ -25,11 +25,7 @@ class PictureController(
     }
 
     private fun String.toAllowedMediaType(): MediaType =
-        if (this in ALLOWED_CONTENT_TYPES) {
-            MediaType.parseMediaType(this)
-        } else {
-            MediaType.parseMediaType(FALLBACK_CONTENT_TYPE)
-        }
+        MediaType.parseMediaType(takeIf { it in ALLOWED_CONTENT_TYPES } ?: FALLBACK_CONTENT_TYPE)
 
     private companion object {
         val ALLOWED_CONTENT_TYPES: Set<String> = setOf("image/png", "image/jpeg", "image/webp", "image/gif")

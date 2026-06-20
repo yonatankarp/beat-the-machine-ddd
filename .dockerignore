@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/dist
+*.db
+docs/superpowers
+.superpowers
+# Do NOT add **/build here. CI builds the Spring Boot jar with Gradle, then
+# beat-the-machine-adapters/Dockerfile (single-stage) COPYs it from
+# beat-the-machine-adapters/build/libs/adapters.jar. Excluding build/ removes
+# that jar from the docker build context and breaks the image build.

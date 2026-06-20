@@ -1,7 +1,7 @@
 package com.yonatankarp.beatthemachine.output.ai
 
 import com.yonatankarp.beatthemachine.application.port.output.Machine
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
+import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,13 +15,13 @@ import java.util.Base64
 
 class SpringAiImageMachine(
     private val imageModel: ImageModel,
-    private val pictureStore: PictureStore,
+    private val storePicture: StorePicture,
     private val webClient: WebClient = imageWebClient(),
 ) : Machine {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun answer(query: Machine.Query): Picture =
-        pictureStore.renderedPicture(logger, query.prompt) {
+        storePicture.renderedPicture(logger, query.prompt) {
             withContext(Dispatchers.IO) {
                 imageModel.call(ImagePrompt(query.prompt.text)).result?.output
             }?.resolvedBytes()

@@ -2,7 +2,7 @@ package com.yonatankarp.beatthemachine.output.ai
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.yonatankarp.beatthemachine.application.port.output.Machine
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
+import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,7 +15,7 @@ import kotlin.time.Duration
 
 class LocalStableDiffusionMachine(
     baseUrl: String,
-    private val pictureStore: PictureStore,
+    private val storePicture: StorePicture,
     private val steps: Int,
     private val width: Int,
     private val height: Int,
@@ -25,7 +25,7 @@ class LocalStableDiffusionMachine(
     private val webClient = imageWebClient(baseUrl)
 
     override suspend fun answer(query: Machine.Query): Picture =
-        pictureStore.renderedPicture(logger, query.prompt) {
+        storePicture.renderedPicture(logger, query.prompt) {
             val response =
                 withContext(Dispatchers.IO) {
                     withTimeout(timeout) {

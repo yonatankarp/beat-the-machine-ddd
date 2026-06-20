@@ -1,8 +1,7 @@
 package com.yonatankarp.beatthemachine.config
 
 import com.yonatankarp.beatthemachine.application.port.output.Machine
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
-import com.yonatankarp.beatthemachine.application.port.output.StoredImage
+import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.output.ai.SeedMachine
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
@@ -21,22 +20,17 @@ class MachineConfigTest {
     @Test
     fun `selects local-sd when configured`() {
         runner
-            .withUserConfiguration(StubPictureStoreConfig::class.java)
+            .withUserConfiguration(StubStorePictureConfig::class.java)
             .withPropertyValues("btm.image.provider=local-sd", "btm.image.local-sd.base-url=http://localhost:7860")
             .run { ctx -> assertTrue(ctx.getBean(Machine::class.java)::class.simpleName == "LocalStableDiffusionMachine") }
     }
 
     @Configuration
-    class StubPictureStoreConfig {
+    class StubStorePictureConfig {
         @Bean
-        fun pictureStore(): PictureStore =
-            object : PictureStore {
-                override suspend fun save(
-                    bytes: ByteArray,
-                    contentType: String,
-                ): String = "stub-url"
-
-                override suspend fun load(id: String): StoredImage? = null
+        fun storePicture(): StorePicture =
+            object : StorePicture {
+                override suspend fun handle(command: StorePicture.Command): String = "/stub-url"
             }
     }
 }

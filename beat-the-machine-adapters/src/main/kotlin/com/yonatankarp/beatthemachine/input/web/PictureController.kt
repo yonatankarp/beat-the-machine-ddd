@@ -1,6 +1,6 @@
 package com.yonatankarp.beatthemachine.input.web
 
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
+import com.yonatankarp.beatthemachine.application.port.output.FindPicture
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class PictureController(
-    private val pictureStore: PictureStore,
+    private val findPicture: FindPicture,
 ) {
     @GetMapping("/images/{id}")
     suspend fun image(
         @PathVariable id: String,
     ): ResponseEntity<ByteArray> {
-        val image = pictureStore.load(id) ?: return ResponseEntity.notFound().build()
+        val image = findPicture answer FindPicture.Query(id) ?: return ResponseEntity.notFound().build()
         return ResponseEntity
             .ok()
             .contentType(image.contentType.toAllowedMediaType())

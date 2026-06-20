@@ -1,7 +1,7 @@
 package com.yonatankarp.beatthemachine.output.ai
 
 import com.yonatankarp.beatthemachine.application.port.output.Machine
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
+import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import io.mockk.coEvery
@@ -21,7 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class SpringAiImageMachineTest {
-    private val pictureStore = mockk<PictureStore>()
+    private val storePicture = mockk<StorePicture>()
     private val imageModel = mockk<ImageModel>()
 
     @Test
@@ -30,10 +30,10 @@ class SpringAiImageMachineTest {
             // Given
             val b64 = Base64.getEncoder().encodeToString(byteArrayOf(5, 6, 7))
             every { imageModel.call(any()) } returns ImageResponse(listOf(ImageGeneration(Image(null, b64))))
-            coEvery { pictureStore.save(any(), "image/png") } returns "paid1"
+            coEvery { storePicture handle any<StorePicture.Command>() } returns "paid1"
 
             // When
-            val machine = SpringAiImageMachine(imageModel, pictureStore)
+            val machine = SpringAiImageMachine(imageModel, storePicture)
             val result = machine answer Machine.Query(Prompt("astronaut eating the moon"))
 
             // Then
@@ -50,16 +50,16 @@ class SpringAiImageMachineTest {
             server.enqueue(MockResponse().setBody("PNGDATA"))
             every { imageModel.call(any()) } returns
                 ImageResponse(listOf(ImageGeneration(Image(server.url("/img.png").toString(), null))))
-            val saved = slot<ByteArray>()
-            coEvery { pictureStore.save(capture(saved), "image/png") } returns "paid2"
+            val saved = slot<StorePicture.Command>()
+            coEvery { storePicture handle capture(saved) } returns "paid2"
 
             // When
-            val machine = SpringAiImageMachine(imageModel, pictureStore, imageWebClient())
-            val result = machine.generate(Prompt("astronaut eating the moon"))
+            val machine = SpringAiImageMachine(imageModel, storePicture, imageWebClient())
+            val result = machine answer Machine.Query(Prompt("astronaut eating the moon"))
 
             // Then
             assertEquals(Picture.Ready("/images/paid2"), result)
-            assertTrue(pngBytes.contentEquals(saved.captured))
+            assertTrue(pngBytes.contentEquals(saved.captured.bytes))
             server.shutdown()
         }
 
@@ -70,7 +70,7 @@ class SpringAiImageMachineTest {
             every { imageModel.call(any()) } throws RuntimeException("boom")
 
             // When
-            val machine = SpringAiImageMachine(imageModel, pictureStore)
+            val machine = SpringAiImageMachine(imageModel, storePicture)
 
             // Then
             assertEquals(Picture.Failed, machine answer Machine.Query(Prompt("anything")))

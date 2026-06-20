@@ -1,7 +1,7 @@
 package com.yonatankarp.beatthemachine.input.web
 
 import com.ninjasquad.springmockk.MockkBean
-import com.yonatankarp.beatthemachine.application.port.output.PictureStore
+import com.yonatankarp.beatthemachine.application.port.output.FindPicture
 import com.yonatankarp.beatthemachine.application.port.output.StoredImage
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
@@ -12,16 +12,17 @@ import org.springframework.test.web.reactive.server.expectBody
 import kotlin.test.assertContentEquals
 
 @WebFluxTest(PictureController::class)
-@MockkBean(types = [PictureStore::class])
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 class PictureControllerTest(
     private val client: WebTestClient,
-    private val pictureStore: PictureStore,
 ) {
+    @MockkBean
+    lateinit var findPicture: FindPicture
+
     @Test
     fun `serves image bytes with correct content-type`() {
         // Given
-        coEvery { pictureStore.load("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "image/png")
+        coEvery { findPicture answer FindPicture.Query("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "image/png")
 
         // When
         val response =
@@ -45,7 +46,7 @@ class PictureControllerTest(
     @Test
     fun `returns 404 for unknown id`() {
         // Given
-        coEvery { pictureStore.load("unknown") } returns null
+        coEvery { findPicture answer FindPicture.Query("unknown") } returns null
 
         // When
         val response =
@@ -63,7 +64,7 @@ class PictureControllerTest(
     @Test
     fun `coerces non-image content-type to application octet-stream`() {
         // Given
-        coEvery { pictureStore.load("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "text/plain")
+        coEvery { findPicture answer FindPicture.Query("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "text/plain")
 
         // When
         val response =

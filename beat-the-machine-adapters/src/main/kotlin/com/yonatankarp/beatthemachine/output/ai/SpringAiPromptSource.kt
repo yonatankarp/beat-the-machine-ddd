@@ -12,7 +12,7 @@ class SpringAiPromptSource(
 ) : PromptSource {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend infix fun answer(query: PromptSource.Query): Prompt {
+    override suspend fun answer(query: PromptSource.Query): Prompt {
         val difficulty = query.difficulty
         val band = bandFor(difficulty)
         val userMessage = userPrompt(difficulty, band)

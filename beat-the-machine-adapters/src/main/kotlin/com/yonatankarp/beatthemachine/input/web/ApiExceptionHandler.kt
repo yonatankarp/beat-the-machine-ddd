@@ -13,11 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.bind.support.WebExchangeBindException
 import org.springframework.web.server.ServerWebInputException
 
-/**
- * Maps domain/application failures to HTTP status codes. Messages are fixed,
- * non-reflective strings: client input is never echoed back, so a malformed id or
- * a future invariant message can never leak through the error channel.
- */
 @RestControllerAdvice
 class ApiExceptionHandler {
     @ExceptionHandler(ChallengeNotFound::class)
@@ -36,8 +31,6 @@ class ApiExceptionHandler {
     fun handleInvalidGuess(ex: InvalidGuess): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(HttpStatusCode.valueOf(422)).body(ErrorResponse("invalid guess"))
 
-    // Bean-validation failures on the request body (`@Valid`) surface in WebFlux as
-    // WebExchangeBindException (the MVC MethodArgumentNotValidException equivalent).
     @ExceptionHandler(WebExchangeBindException::class)
     fun handleValidation(ex: WebExchangeBindException): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(HttpStatusCode.valueOf(422)).body(ErrorResponse("invalid request body"))
@@ -46,10 +39,6 @@ class ApiExceptionHandler {
     fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(HttpStatusCode.valueOf(422)).body(ErrorResponse("invalid input"))
 
-    // Query-param conversion failures (e.g. a bad `difficulty` enum) and undeserializable
-    // request bodies surface in WebFlux as ServerWebInputException (the MVC
-    // MethodArgumentTypeMismatchException equivalent). WebExchangeBindException is a
-    // subtype handled above, so it is matched first by Spring's most-specific resolution.
     @ExceptionHandler(ServerWebInputException::class)
     fun handleInputError(ex: ServerWebInputException): ResponseEntity<ErrorResponse> =
         ResponseEntity.status(HttpStatusCode.valueOf(422)).body(ErrorResponse("invalid request parameter"))

@@ -10,20 +10,34 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class InMemoryFindChallengeByIdTest {
-    private val store = InMemoryChallengeStore()
-    private val storeChallenge = InMemoryStoreChallenge(store)
-    private val findChallengeById = InMemoryFindChallengeById(store)
-
     @Test
     fun `finds a stored challenge`() =
         runTest {
+            // Given
+            val store = InMemoryChallengeStore()
+            val storeChallenge = InMemoryStoreChallenge(store)
+            val findChallengeById = InMemoryFindChallengeById(store)
             val saved = storeChallenge(Challenge.start(Prompt("hello world"), Lives(3)))
-            assertEquals(saved.id, findChallengeById(saved.id)?.id)
+
+            // When
+            val found = findChallengeById(saved.id)
+
+            // Then
+            assertEquals(saved.id, found?.id)
         }
 
     @Test
     fun `returns null for an unknown id`() =
         runTest {
-            assertNull(findChallengeById(ChallengeId.new()))
+            // Given
+            val store = InMemoryChallengeStore()
+            val findChallengeById = InMemoryFindChallengeById(store)
+            val unknownId = ChallengeId.new()
+
+            // When
+            val found = findChallengeById(unknownId)
+
+            // Then
+            assertNull(found)
         }
 }

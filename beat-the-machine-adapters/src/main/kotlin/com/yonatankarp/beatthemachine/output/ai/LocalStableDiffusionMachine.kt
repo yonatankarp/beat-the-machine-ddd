@@ -14,13 +14,6 @@ import org.springframework.web.reactive.function.client.awaitBody
 import java.util.Base64
 import kotlin.time.Duration
 
-/**
- * Renders a [Picture] by calling a local Automatic1111 Stable Diffusion server's
- * /sdapi/v1/txt2img endpoint, which returns base64-encoded PNGs. The decoded bytes
- * are handed to [PictureStore], which yields the servable URL. Any failure
- * (network, timeout, non-2xx, empty result, bad base64) maps to [Picture.Failed]
- * so the picture pipeline records it cleanly rather than hanging.
- */
 class LocalStableDiffusionMachine(
     baseUrl: String,
     private val pictureStore: PictureStore,
@@ -31,9 +24,6 @@ class LocalStableDiffusionMachine(
 ) : Machine {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    // The adapter owns its transport. A txt2img response carries a base64 PNG that
-    // routinely exceeds WebClient's 256 KB default decode buffer, so the limit is
-    // raised here where the payload size is known — not leaked into wiring/config.
     private val webClient =
         WebClient
             .builder()
@@ -75,7 +65,6 @@ class LocalStableDiffusionMachine(
     )
 
     private companion object {
-        // 16 MB: comfortably fits a base64-encoded high-resolution PNG.
         const val MAX_RESPONSE_BYTES = 16 * 1024 * 1024
     }
 }

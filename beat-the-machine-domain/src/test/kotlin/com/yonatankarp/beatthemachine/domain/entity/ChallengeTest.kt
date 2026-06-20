@@ -23,7 +23,14 @@ class ChallengeTest {
 
     @Test
     fun `a correct guess reveals the word and stays in progress`() {
-        val (updated, outcome) = newChallenge().makeGuess(Guess("hello"))
+        // Given
+        val challenge = newChallenge()
+        val guess = Guess("hello")
+
+        // When
+        val (updated, outcome) = challenge.makeGuess(guess)
+
+        // Then
         assertEquals(GuessOutcome.HIT, outcome)
         assertEquals(ChallengeStatus.IN_PROGRESS, updated.status)
         assertEquals(3, updated.lives.remaining)
@@ -31,83 +38,134 @@ class ChallengeTest {
 
     @Test
     fun `a wrong guess costs a life`() {
-        val (updated, outcome) = newChallenge().makeGuess(Guess("nope"))
+        // Given
+        val challenge = newChallenge()
+        val guess = Guess("nope")
+
+        // When
+        val (updated, outcome) = challenge.makeGuess(guess)
+
+        // Then
         assertEquals(GuessOutcome.MISS, outcome)
         assertEquals(2, updated.lives.remaining)
     }
 
     @Test
     fun `guessing every word beats the machine`() {
-        val (afterFirst, _) = newChallenge().makeGuess(Guess("hello"))
+        // Given
+        val challenge = newChallenge()
+        val (afterFirst, _) = challenge.makeGuess(Guess("hello"))
+
+        // When
         val (afterSecond, outcome) = afterFirst.makeGuess(Guess("world"))
+
+        // Then
         assertEquals(GuessOutcome.HIT, outcome)
         assertEquals(ChallengeStatus.BEATEN, afterSecond.status)
     }
 
     @Test
     fun `running out of lives loses the challenge`() {
-        val (updated, _) = newChallenge(lives = 1).makeGuess(Guess("nope"))
+        // Given
+        val challenge = newChallenge(lives = 1)
+        val guess = Guess("nope")
+
+        // When
+        val (updated, _) = challenge.makeGuess(guess)
+
+        // Then
         assertEquals(ChallengeStatus.LOST, updated.status)
     }
 
     @Test
     fun `a duplicate guess is a no-op and costs no life`() {
-        val (afterFirst, _) = newChallenge().makeGuess(Guess("nope"))
+        // Given
+        val challenge = newChallenge()
+        val (afterFirst, _) = challenge.makeGuess(Guess("nope"))
+
+        // When
         val (afterSecond, outcome) = afterFirst.makeGuess(Guess("Nope"))
+
+        // Then
         assertEquals(GuessOutcome.DUPLICATE, outcome)
         assertEquals(2, afterSecond.lives.remaining)
     }
 
     @Test
     fun `makeGuess does not mutate the receiver`() {
-        val original = newChallenge()
-        original.makeGuess(Guess("nope"))
-        assertEquals(3, original.lives.remaining)
-        assertTrue(original.guesses.isEmpty())
+        // Given
+        val challenge = newChallenge()
+        val guess = Guess("nope")
+
+        // When
+        challenge.makeGuess(guess)
+
+        // Then
+        assertEquals(3, challenge.lives.remaining)
+        assertTrue(challenge.guesses.isEmpty())
     }
 
     @Test
     fun `guessing after the challenge is over is rejected`() {
+        // Given
         val (lost, _) = newChallenge(lives = 1).makeGuess(Guess("nope"))
+
+        // When / Then
         assertFailsWith<ChallengeAlreadyOver> { lost.makeGuess(Guess("hello")) }
     }
 
     @Test
     fun `forfeit reveals the prompt and loses`() {
-        val forfeited = newChallenge().forfeit()
+        // Given
+        val challenge = newChallenge()
+
+        // When
+        val forfeited = challenge.forfeit()
+
+        // Then
         assertEquals(ChallengeStatus.LOST, forfeited.status)
         assertTrue(forfeited.maskedPrompt().tokens.all { it is MaskedToken.Revealed })
     }
 
     @Test
     fun `forfeit after the challenge is over is rejected`() {
+        // Given
         val forfeited = newChallenge().forfeit()
+
+        // When / Then
         assertFailsWith<ChallengeAlreadyOver> { forfeited.forfeit() }
     }
 
     @Test
     fun `withPicture returns an independent copy at the same version`() {
-        val c = newChallenge()
+        // Given
+        val challenge = newChallenge()
         val newPicture = Picture.Ready("https://example.com/img.png")
 
-        val updated = c.withPicture(newPicture)
+        // When
+        val updated = challenge.withPicture(newPicture)
 
+        // Then
         assertEquals(newPicture, updated.picture)
-        // Version is untouched: the persistence adapter increments it on save.
-        assertEquals(c.version, updated.version)
-        // original is unchanged
-        assertEquals(Picture.Pending, c.picture)
-        assertNotSame(c, updated)
+        assertEquals(challenge.version, updated.version)
+        assertEquals(Picture.Pending, challenge.picture)
+        assertNotSame(challenge, updated)
     }
 
     @Test
     fun `maxLives reflects the secret and difficulty`() {
+        // Given
         val challenge =
             Challenge.start(
                 Prompt("a b c"),
                 Lives.forSecret(Prompt("a b c"), Difficulty.MEDIUM),
                 difficulty = Difficulty.MEDIUM,
             )
-        assertEquals(Lives(9), challenge.maxLives())
+
+        // When
+        val maxLives = challenge.maxLives()
+
+        // Then
+        assertEquals(Lives(9), maxLives)
     }
 }

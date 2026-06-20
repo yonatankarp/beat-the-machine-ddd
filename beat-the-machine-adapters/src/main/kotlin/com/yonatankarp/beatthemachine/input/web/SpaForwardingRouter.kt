@@ -11,10 +11,6 @@ import org.springframework.web.reactive.function.server.buildAndAwait
 import org.springframework.web.reactive.function.server.coRouter
 import java.net.URI
 
-// Forwards SPA client-side routes under /app/** to the SPA entry point so deep
-// links resolve. Scoped to /app/** so it never shadows the /api hierarchy,
-// /actuator, or static resources. Also redirects GET / to /app/ so users
-// land on the SPA when they hit the root.
 @Configuration
 class SpaForwardingRouter {
     @Bean

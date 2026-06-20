@@ -24,12 +24,16 @@ class SqliteFindPendingChallengesIT {
     @Test
     fun `returns only challenges whose picture is pending`() =
         runTest {
+            // Given
             val pendingA = storeChallenge(Challenge.start(Prompt("pending one"), Lives(2), picture = Picture.Pending))
             val pendingB = storeChallenge(Challenge.start(Prompt("pending two"), Lives(2), picture = Picture.Pending))
             storeChallenge(Challenge.start(Prompt("ready pic"), Lives(2), picture = Picture.Ready("https://example.com/img.png")))
             storeChallenge(Challenge.start(Prompt("failed pic"), Lives(2), picture = Picture.Failed))
 
+            // When
             val ids = findPendingChallenges().map { it.id }.toSet()
+
+            // Then
             assertEquals(setOf(pendingA.id, pendingB.id), ids)
         }
 }

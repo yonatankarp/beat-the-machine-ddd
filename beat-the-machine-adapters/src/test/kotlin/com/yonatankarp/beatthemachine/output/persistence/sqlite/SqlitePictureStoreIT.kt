@@ -13,7 +13,14 @@ class SqlitePictureStoreIT {
     @Test
     fun `save then load round-trips the bytes and content type`() =
         runTest {
-            val url = store.save(byteArrayOf(1, 2, 3, 4), "image/png")
+            // Given
+            val bytes = byteArrayOf(1, 2, 3, 4)
+            val contentType = "image/png"
+
+            // When
+            val url = store.save(bytes, contentType)
+
+            // Then
             val id = url.removePrefix("/images/")
             val loaded = store.load(id)!!
             assertEquals("image/png", loaded.contentType)
@@ -23,7 +30,14 @@ class SqlitePictureStoreIT {
     @Test
     fun `bytes live in the picture table, not on challenge`() =
         runTest {
-            store.save(byteArrayOf(1), "image/png")
+            // Given
+            val bytes = byteArrayOf(1)
+            val contentType = "image/png"
+
+            // When
+            store.save(bytes, contentType)
+
+            // Then
             val pictureRows = jdbc.queryForObject("SELECT COUNT(*) FROM picture", Int::class.java)
             val challengeRows = jdbc.queryForObject("SELECT COUNT(*) FROM challenge", Int::class.java)
             assertEquals(1, pictureRows)
@@ -33,6 +47,13 @@ class SqlitePictureStoreIT {
     @Test
     fun `load returns null for unknown id`() =
         runTest {
-            assertNull(store.load("missing"))
+            // Given
+            val unknownId = "missing"
+
+            // When
+            val loaded = store.load(unknownId)
+
+            // Then
+            assertNull(loaded)
         }
 }

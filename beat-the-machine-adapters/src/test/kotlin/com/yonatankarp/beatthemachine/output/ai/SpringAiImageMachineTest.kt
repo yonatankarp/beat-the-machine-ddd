@@ -22,19 +22,30 @@ class SpringAiImageMachineTest {
     @Test
     fun `decodes b64 image, stores it, and returns Ready`() =
         runTest {
+            // Given
             val b64 = Base64.getEncoder().encodeToString(byteArrayOf(5, 6, 7))
             every { imageModel.call(any()) } returns ImageResponse(listOf(ImageGeneration(Image(null, b64))))
             coEvery { pictureStore.save(any(), "image/png") } returns "/images/paid1"
-
             val machine = SpringAiImageMachine(imageModel, pictureStore)
-            assertEquals(Picture.Ready("/images/paid1"), machine.generate(Prompt("astronaut eating the moon")))
+
+            // When
+            val result = machine.generate(Prompt("astronaut eating the moon"))
+
+            // Then
+            assertEquals(Picture.Ready("/images/paid1"), result)
         }
 
     @Test
     fun `model failure yields Failed`() =
         runTest {
+            // Given
             every { imageModel.call(any()) } throws RuntimeException("boom")
             val machine = SpringAiImageMachine(imageModel, pictureStore)
-            assertEquals(Picture.Failed, machine.generate(Prompt("anything")))
+
+            // When
+            val result = machine.generate(Prompt("anything"))
+
+            // Then
+            assertEquals(Picture.Failed, result)
         }
 }

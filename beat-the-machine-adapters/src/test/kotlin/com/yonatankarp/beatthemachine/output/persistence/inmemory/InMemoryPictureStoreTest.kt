@@ -7,12 +7,18 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class InMemoryPictureStoreTest {
-    private val store = InMemoryPictureStore()
-
     @Test
     fun `save returns an images url and load round-trips`() =
         runTest {
-            val url = store.save(byteArrayOf(9, 8, 7), "image/png")
+            // Given
+            val store = InMemoryPictureStore()
+            val bytes = byteArrayOf(9, 8, 7)
+            val contentType = "image/png"
+
+            // When
+            val url = store.save(bytes, contentType)
+
+            // Then
             assertTrue(url.startsWith("/images/"))
             val id = url.removePrefix("/images/")
             val loaded = store.load(id)!!
@@ -23,6 +29,14 @@ class InMemoryPictureStoreTest {
     @Test
     fun `load returns null for unknown id`() =
         runTest {
-            assertNull(store.load("nope"))
+            // Given
+            val store = InMemoryPictureStore()
+            val unknownId = "nope"
+
+            // When
+            val loaded = store.load(unknownId)
+
+            // Then
+            assertNull(loaded)
         }
 }

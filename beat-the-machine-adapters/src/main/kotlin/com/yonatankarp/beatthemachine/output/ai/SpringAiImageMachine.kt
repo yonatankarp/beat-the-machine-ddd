@@ -13,21 +13,12 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import java.util.Base64
 
-/**
- * Renders a [Picture] via a hosted Spring AI [ImageModel] (e.g. OpenAI DALL-E or
- * Stability). Providers return either inline base64 or a URL; both are resolved to
- * bytes and persisted through [PictureStore] so serving is uniform with the local
- * path. Failures map to [Picture.Failed].
- */
 class SpringAiImageMachine(
     private val imageModel: ImageModel,
     private val pictureStore: PictureStore,
 ) : Machine {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    // The adapter owns its transport, used only to fetch a provider-returned image
-    // URL. The decode buffer is raised since image bytes can exceed WebClient's
-    // 256 KB default.
     private val webClient =
         WebClient
             .builder()
@@ -66,7 +57,6 @@ class SpringAiImageMachine(
         }
 
     private companion object {
-        // 16 MB: comfortably fits a provider-returned image.
         const val MAX_RESPONSE_BYTES = 16 * 1024 * 1024
     }
 }

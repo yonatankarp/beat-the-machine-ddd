@@ -21,6 +21,7 @@ class StartChallengeControllerTest(
     @Test
     fun `POST creates a challenge and never leaks the prompt`() {
         coEvery { startChallenge(any()) } returns Challenge.start(Prompt("hello world"), Lives(6))
+
         client
             .post()
             .uri("/api/challenges")

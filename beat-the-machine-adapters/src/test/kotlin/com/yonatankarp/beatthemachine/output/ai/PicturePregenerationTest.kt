@@ -29,33 +29,40 @@ class PicturePregenerationTest {
     @Test
     fun `generation flips a pending picture to ready and persists it`() =
         runTest {
+            // Given
             val machine = Machine { Picture.Ready("http://img/1.png") }
             val c = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
 
+            // When
             pregeneration(machine, this).enqueue(c.id)
             advanceUntilIdle()
 
+            // Then
             assertEquals(Picture.Ready("http://img/1.png"), findById(c.id)?.picture)
         }
 
     @Test
     fun `a failing machine persists a failed picture`() =
         runTest {
+            // Given
             val machine = Machine { error("boom") }
             val c = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
 
+            // When
             pregeneration(machine, this).enqueue(c.id)
             advanceUntilIdle()
 
+            // Then
             assertEquals(Picture.Failed, findById(c.id)?.picture)
         }
 
     @Test
     fun `enqueue for an unknown challenge is a no-op`() =
         runTest {
+            // Given
             val machine = Machine { Picture.Ready("http://img/1.png") }
 
-            // Must not throw; nothing to persist.
+            // When
             pregeneration(machine, this).enqueue(ChallengeId.new())
             advanceUntilIdle()
         }
@@ -63,57 +70,62 @@ class PicturePregenerationTest {
     @Test
     fun `retryPending re-enqueues every challenge still awaiting a picture`() =
         runTest {
+            // Given
             val machine = Machine { Picture.Ready("http://img/retry.png") }
             val pending = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
             val done = storeChallenge(Challenge.start(Prompt("foo bar"), Lives(6)).withPicture(Picture.Ready("http://img/done.png")))
 
+            // When
             pregeneration(machine, this).retryPending()
             advanceUntilIdle()
 
+            // Then
             assertEquals(Picture.Ready("http://img/retry.png"), findById(pending.id)?.picture)
-            // an already-ready picture is left untouched
             assertEquals(Picture.Ready("http://img/done.png"), findById(done.id)?.picture)
         }
 
     @Test
     fun `a concurrent version bump is retried so the picture still persists`() =
         runTest {
+            // Given
             val seeded = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
 
-            // Simulate a guess landing exactly once between generation and the picture
-            // save: the first store sees a stale version and conflicts, the reload wins.
             var firstStore = true
             val racingStore =
                 StoreChallenge { challenge ->
                     if (firstStore && challenge.picture is Picture.Ready) {
                         firstStore = false
-                        storeChallenge(findById(challenge.id) ?: challenge) // competing write bumps the version
+                        storeChallenge(findById(challenge.id) ?: challenge)
                         throw OptimisticLockConflict(challenge.id)
                     }
                     storeChallenge(challenge)
                 }
             val machine = Machine { Picture.Ready("http://img/raced.png") }
 
+            // When
             pregeneration(machine, this, racingStore).enqueue(seeded.id)
             advanceUntilIdle()
 
+            // Then
             assertEquals(Picture.Ready("http://img/raced.png"), findById(seeded.id)?.picture)
         }
 
     @Test
     fun `enqueue sheds work once the admission bound is full`() =
         runTest {
+            // Given
             val machine = Machine { Picture.Ready("http://img/admitted.png") }
             val admitted = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
             val shed = storeChallenge(Challenge.start(Prompt("foo bar"), Lives(6)))
-
             val pregeneration = pregeneration(machine, this, maxQueued = 1)
-            pregeneration.enqueue(admitted.id) // takes the only permit; work queued, not yet run
-            pregeneration.enqueue(shed.id) // no permit free → shed, returns immediately
+
+            // When
+            pregeneration.enqueue(admitted.id)
+            pregeneration.enqueue(shed.id)
             advanceUntilIdle()
 
+            // Then
             assertEquals(Picture.Ready("http://img/admitted.png"), findById(admitted.id)?.picture)
-            // the shed challenge was never generated; it stays pending for retry-on-restart
             assertEquals(Picture.Pending, findById(shed.id)?.picture)
         }
 

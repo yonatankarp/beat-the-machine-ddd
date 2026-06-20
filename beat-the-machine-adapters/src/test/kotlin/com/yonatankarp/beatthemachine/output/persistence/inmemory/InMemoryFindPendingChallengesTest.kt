@@ -9,18 +9,21 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class InMemoryFindPendingChallengesTest {
-    private val store = InMemoryChallengeStore()
-    private val storeChallenge = InMemoryStoreChallenge(store)
-    private val findPendingChallenges = InMemoryFindPendingChallenges(store)
-
     @Test
     fun `returns only challenges whose picture is pending`() =
         runTest {
+            // Given
+            val store = InMemoryChallengeStore()
+            val storeChallenge = InMemoryStoreChallenge(store)
+            val findPendingChallenges = InMemoryFindPendingChallenges(store)
             val pendingA = storeChallenge(Challenge.start(Prompt("hello world"), Lives(3)))
             val pendingB = storeChallenge(Challenge.start(Prompt("red fox"), Lives(3)))
             storeChallenge(Challenge.start(Prompt("foo bar"), Lives(3)).withPicture(Picture.Ready("http://img/1.png")))
 
+            // When
             val ids = findPendingChallenges().map { it.id }.toSet()
+
+            // Then
             assertEquals(setOf(pendingA.id, pendingB.id), ids)
         }
 }

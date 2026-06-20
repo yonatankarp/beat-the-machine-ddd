@@ -15,35 +15,59 @@ class SpringAiPromptSourceTest {
     @Test
     fun `returns a valid phrase within the difficulty band`() =
         runTest {
+            // Given
             val llm = LlmText { _, _ -> "  dragon eating a cookie  " }
             val source = SpringAiPromptSource(llm, fallback)
-            assertEquals(Prompt("dragon eating a cookie"), source next Difficulty.HARD)
+
+            // When
+            val prompt = source next Difficulty.HARD
+
+            // Then
+            assertEquals(Prompt("dragon eating a cookie"), prompt)
         }
 
     @Test
     fun `retries past invalid output then succeeds`() =
         runTest {
+            // Given
             var calls = 0
             val llm = LlmText { _, _ -> if (calls++ == 0) "" else "ocean wave" }
             val source = SpringAiPromptSource(llm, fallback, maxAttempts = 3)
-            assertEquals(Prompt("ocean wave"), source next Difficulty.EASY)
+
+            // When
+            val prompt = source next Difficulty.EASY
+
+            // Then
+            assertEquals(Prompt("ocean wave"), prompt)
         }
 
     @Test
     fun `falls back when the model keeps failing`() =
         runTest {
+            // Given
             val llm = LlmText { _, _ -> throw RuntimeException("model down") }
             coEvery { fallback next Difficulty.MEDIUM } returns Prompt("dolphin on fire")
             val source = SpringAiPromptSource(llm, fallback, maxAttempts = 2)
-            assertEquals(Prompt("dolphin on fire"), source next Difficulty.MEDIUM)
+
+            // When
+            val prompt = source next Difficulty.MEDIUM
+
+            // Then
+            assertEquals(Prompt("dolphin on fire"), prompt)
         }
 
     @Test
     fun `falls back when output never fits the band`() =
         runTest {
+            // Given
             val llm = LlmText { _, _ -> "this phrase is far too many words to be easy" }
             coEvery { fallback next Difficulty.EASY } returns Prompt("red car")
             val source = SpringAiPromptSource(llm, fallback, maxAttempts = 2)
-            assertEquals(Prompt("red car"), source next Difficulty.EASY)
+
+            // When
+            val prompt = source next Difficulty.EASY
+
+            // Then
+            assertEquals(Prompt("red car"), prompt)
         }
 }

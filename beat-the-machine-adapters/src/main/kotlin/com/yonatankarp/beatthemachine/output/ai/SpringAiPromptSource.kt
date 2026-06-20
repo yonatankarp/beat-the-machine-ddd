@@ -5,13 +5,6 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import org.slf4j.LoggerFactory
 
-/**
- * Picks the secret phrase with an LLM via [LlmText]. Asks for a concrete,
- * visualizable phrase whose word count fits the difficulty band, validates the
- * output, retries a few times, and falls back to [fallback] (the seed source) if
- * the model errors or keeps producing invalid output, so StartChallenge never
- * breaks on a flaky local model.
- */
 class SpringAiPromptSource(
     private val llm: LlmText,
     private val fallback: PromptSource,

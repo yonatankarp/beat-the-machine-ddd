@@ -18,67 +18,120 @@ class ChallengeApiMapperTest {
 
     @Test
     fun `maps a pending picture`() {
-        val r = challenge().toApiResponse()
+        // Given
+        val challenge = challenge()
+
+        // When
+        val r = challenge.toApiResponse()
+
+        // Then
         assertEquals(PictureStatus.PENDING, r.picture.status)
         assertEquals(null, r.picture.url)
     }
 
     @Test
     fun `maps a ready picture with its url`() {
-        val r = challenge().withPicture(Picture.Ready("http://img/1.png")).toApiResponse()
+        // Given
+        val challenge = challenge().withPicture(Picture.Ready("http://img/1.png"))
+
+        // When
+        val r = challenge.toApiResponse()
+
+        // Then
         assertEquals(PictureStatus.READY, r.picture.status)
         assertEquals(URI.create("http://img/1.png"), r.picture.url)
     }
 
     @Test
     fun `maps a failed picture`() {
-        val r = challenge().withPicture(Picture.Failed).toApiResponse()
+        // Given
+        val challenge = challenge().withPicture(Picture.Failed)
+
+        // When
+        val r = challenge.toApiResponse()
+
+        // Then
         assertEquals(PictureStatus.FAILED, r.picture.status)
         assertEquals(null, r.picture.url)
     }
 
     @Test
     fun `degrades a ready picture with a malformed url to FAILED`() {
-        val r = challenge().withPicture(Picture.Ready("http:// bad url with spaces")).toApiResponse()
+        // Given
+        val challenge = challenge().withPicture(Picture.Ready("http:// bad url with spaces"))
+
+        // When
+        val r = challenge.toApiResponse()
+
+        // Then
         assertEquals(PictureStatus.FAILED, r.picture.status)
         assertEquals(null, r.picture.url)
     }
 
     @Test
     fun `hides every word while the challenge is in progress`() {
-        val r = challenge().toApiResponse()
+        // Given
+        val challenge = challenge()
+
+        // When
+        val r = challenge.toApiResponse()
+
+        // Then
         assertEquals(listOf(MaskedToken(false, null, 5), MaskedToken(false, null, 5)), r.maskedPrompt)
         assertEquals(ChallengeStatus.IN_PROGRESS, r.status)
     }
 
     @Test
     fun `reveals the whole prompt once the challenge is lost`() {
-        val r = challenge().forfeit().toApiResponse()
+        // Given
+        val challenge = challenge().forfeit()
+
+        // When
+        val r = challenge.toApiResponse()
+
+        // Then
         assertEquals(listOf(MaskedToken(true, "hello", 5), MaskedToken(true, "world", 5)), r.maskedPrompt)
         assertEquals("LOST", r.status.value)
     }
 
     @Test
     fun `maps livesRemaining and the difficulty-derived maxLives`() {
+        // Given
         val prompt = Prompt("hello world")
-        val medium = challenge().toApiResponse()
-        assertEquals(6, medium.livesRemaining)
-        assertEquals(Lives.forSecret(prompt, DomainDifficulty.MEDIUM).remaining, medium.maxLives)
-
-        val easy =
+        val mediumChallenge = challenge()
+        val easyChallenge =
             Challenge
                 .start(
                     prompt,
                     Lives.forSecret(prompt, DomainDifficulty.EASY),
                     difficulty = DomainDifficulty.EASY,
-                ).toApiResponse()
+                )
+
+        // When
+        val medium = mediumChallenge.toApiResponse()
+        val easy = easyChallenge.toApiResponse()
+
+        // Then
+        assertEquals(6, medium.livesRemaining)
+        assertEquals(Lives.forSecret(prompt, DomainDifficulty.MEDIUM).remaining, medium.maxLives)
         assertEquals(Lives.forSecret(prompt, DomainDifficulty.EASY).remaining, easy.maxLives)
     }
 
     @Test
     fun `Difficulty toDomain maps each value to the same-named domain Difficulty`() {
-        assertEquals(DomainDifficulty.EASY, Difficulty.EASY.toDomain())
-        assertEquals(DomainDifficulty.MEDIUM, Difficulty.MEDIUM.toDomain())
-        assertEquals(DomainDifficulty.HARD, Difficulty.HARD.toDomain())
+        // Given
+        val easy = Difficulty.EASY
+        val medium = Difficulty.MEDIUM
+        val hard = Difficulty.HARD
+
+        // When
+        val easyDomain = easy.toDomain()
+        val mediumDomain = medium.toDomain()
+        val hardDomain = hard.toDomain()
+
+        // Then
+        assertEquals(DomainDifficulty.EASY, easyDomain)
+        assertEquals(DomainDifficulty.MEDIUM, mediumDomain)
+        assertEquals(DomainDifficulty.HARD, hardDomain)
     }
 }

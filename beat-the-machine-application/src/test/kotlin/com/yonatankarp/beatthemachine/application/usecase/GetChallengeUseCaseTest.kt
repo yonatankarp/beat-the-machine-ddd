@@ -17,14 +17,23 @@ class GetChallengeUseCaseTest {
     @Test
     fun `returns a challenge that exists`() =
         runTest {
+            // Given
             val challenge = store(Challenge.start(Prompt("red fox"), Lives(6)))
 
-            assertEquals(challenge, getChallenge(challenge.id))
+            // When
+            val result = getChallenge(challenge.id)
+
+            // Then
+            assertEquals(challenge, result)
         }
 
     @Test
     fun `throws ChallengeNotFound for an unknown id`() =
         runTest {
-            assertFailsWith<ChallengeNotFound> { getChallenge(ChallengeId.new()) }
+            // Given
+            val unknownId = ChallengeId.new()
+
+            // When / Then
+            assertFailsWith<ChallengeNotFound> { getChallenge(unknownId) }
         }
 }

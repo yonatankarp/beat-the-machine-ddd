@@ -6,11 +6,6 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
-// Adds defence-in-depth security headers to every response. The SPA is served
-// same-origin by this backend, so the policy is restrictive: scripts only from
-// self, the AI image host allowed over https (tighten to the concrete host once
-// image generation is wired), inline styles permitted for the motion runtime,
-// and framing denied.
 @Component
 class SecurityHeadersFilter : WebFilter {
     override fun filter(

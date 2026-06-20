@@ -19,6 +19,7 @@ class PictureControllerTest(
     @Test
     fun `serves stored bytes with content type`() {
         coEvery { pictureStore.load("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "image/png")
+
         client
             .get()
             .uri("/images/abc")
@@ -34,6 +35,7 @@ class PictureControllerTest(
     @Test
     fun `unknown id returns 404`() {
         coEvery { pictureStore.load("missing") } returns null
+
         client
             .get()
             .uri("/images/missing")
@@ -49,6 +51,7 @@ class PictureControllerTest(
                 byteArrayOf(60, 104, 116, 109, 108, 62),
                 "text/html",
             )
+
         client
             .get()
             .uri("/images/malicious")

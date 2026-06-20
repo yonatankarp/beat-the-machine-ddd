@@ -43,6 +43,7 @@ class LocalStableDiffusionMachineTest {
     @Test
     fun `stores the decoded image and returns Ready`() =
         runTest {
+            // Given
             val pngBytes = byteArrayOf(1, 2, 3)
             val b64 = Base64.getEncoder().encodeToString(pngBytes)
             server.enqueue(
@@ -52,24 +53,38 @@ class LocalStableDiffusionMachineTest {
             )
             coEvery { pictureStore.save(pngBytes, "image/png") } returns "/images/xyz"
 
+            // When
             val result = machine().generate(Prompt("dragon eating a cookie"))
 
+            // Then
             assertEquals(Picture.Ready("/images/xyz"), result)
         }
 
     @Test
     fun `server error yields Failed`() =
         runTest {
+            // Given
             server.enqueue(MockResponse().setResponseCode(500))
-            assertEquals(Picture.Failed, machine().generate(Prompt("anything")))
+
+            // When
+            val result = machine().generate(Prompt("anything"))
+
+            // Then
+            assertEquals(Picture.Failed, result)
         }
 
     @Test
     fun `empty image list yields Failed`() =
         runTest {
+            // Given
             server.enqueue(
                 MockResponse().setHeader("Content-Type", "application/json").setBody("""{"images":[]}"""),
             )
-            assertEquals(Picture.Failed, machine().generate(Prompt("anything")))
+
+            // When
+            val result = machine().generate(Prompt("anything"))
+
+            // Then
+            assertEquals(Picture.Failed, result)
         }
 }

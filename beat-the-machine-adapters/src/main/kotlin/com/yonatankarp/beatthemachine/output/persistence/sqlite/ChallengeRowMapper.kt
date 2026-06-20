@@ -11,15 +11,6 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import org.springframework.jdbc.core.RowMapper
 import java.util.UUID
 
-/**
- * Translates between the [Challenge] aggregate, the [ChallengeRow] persistence
- * representation, and a JDBC [java.sql.ResultSet]. Single responsibility: the
- * domain <-> row mapping; it changes only when the row schema or representation
- * changes. The persistence operation adapters share one instance.
- *
- * guesses are stored as a pipe-delimited (|) string; the pipe cannot appear in a
- * valid single-word guess.
- */
 class ChallengeRowMapper {
     val rowMapper: RowMapper<ChallengeRow> =
         RowMapper { rs, _ ->

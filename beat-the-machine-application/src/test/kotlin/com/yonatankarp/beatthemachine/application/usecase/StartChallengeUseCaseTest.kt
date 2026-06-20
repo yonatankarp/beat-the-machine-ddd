@@ -20,9 +20,14 @@ class StartChallengeUseCaseTest {
     @Test
     fun `starts a pending challenge and enqueues picture generation`() =
         runTest {
+            // Given
             val enqueued = mutableListOf<ChallengeId>()
             val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
+
+            // When
             val challenge = startChallenge(Difficulty.MEDIUM)
+
+            // Then
             assertEquals(Picture.Pending, challenge.picture)
             assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
             assertEquals(listOf(challenge.id), enqueued)
@@ -32,9 +37,17 @@ class StartChallengeUseCaseTest {
     @Test
     fun `starting lives scale with difficulty`() =
         runTest {
+            // Given
             val startChallenge = StartChallengeUseCase(prompts, store) {}
-            assertEquals(Lives.forSecret(fakePrompt, Difficulty.EASY).remaining, startChallenge(Difficulty.EASY).lives.remaining)
-            assertEquals(Lives.forSecret(fakePrompt, Difficulty.MEDIUM).remaining, startChallenge(Difficulty.MEDIUM).lives.remaining)
-            assertEquals(Lives.forSecret(fakePrompt, Difficulty.HARD).remaining, startChallenge(Difficulty.HARD).lives.remaining)
+
+            // When
+            val easy = startChallenge(Difficulty.EASY)
+            val medium = startChallenge(Difficulty.MEDIUM)
+            val hard = startChallenge(Difficulty.HARD)
+
+            // Then
+            assertEquals(Lives.forSecret(fakePrompt, Difficulty.EASY).remaining, easy.lives.remaining)
+            assertEquals(Lives.forSecret(fakePrompt, Difficulty.MEDIUM).remaining, medium.lives.remaining)
+            assertEquals(Lives.forSecret(fakePrompt, Difficulty.HARD).remaining, hard.lives.remaining)
         }
 }

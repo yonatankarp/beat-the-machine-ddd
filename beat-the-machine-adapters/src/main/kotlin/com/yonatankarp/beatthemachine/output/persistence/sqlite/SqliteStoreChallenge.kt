@@ -37,8 +37,6 @@ class SqliteStoreChallenge(
                 )
 
             if (updated == 0) {
-                // Either the record does not yet exist (INSERT) or a concurrent
-                // write changed the version (conflict). Disambiguate by presence.
                 val exists =
                     jdbc.queryForObject(
                         "SELECT COUNT(*) FROM challenge WHERE id = ?",

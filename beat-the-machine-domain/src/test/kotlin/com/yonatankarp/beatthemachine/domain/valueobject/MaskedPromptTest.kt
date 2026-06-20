@@ -10,21 +10,42 @@ class MaskedPromptTest {
 
     @Test
     fun `hides every word when there are no guesses`() {
-        val masked = MaskedPrompt.of(prompt("hello world"), emptySet())
+        // Given
+        val secret = prompt("hello world")
+        val guesses = emptySet<Guess>()
+
+        // When
+        val masked = MaskedPrompt.of(secret, guesses)
+
+        // Then
         assertEquals(listOf(MaskedToken.Hidden(5), MaskedToken.Hidden(5)), masked.tokens)
         assertFalse(masked.isFullyRevealed())
     }
 
     @Test
     fun `reveals a matching word case-insensitively`() {
-        val masked = MaskedPrompt.of(prompt("Hello World"), setOf(Guess("hello")))
+        // Given
+        val secret = prompt("Hello World")
+        val guesses = setOf(Guess("hello"))
+
+        // When
+        val masked = MaskedPrompt.of(secret, guesses)
+
+        // Then
         assertEquals(MaskedToken.Revealed("Hello"), masked.tokens[0])
         assertEquals(MaskedToken.Hidden(5), masked.tokens[1])
     }
 
     @Test
     fun `reveals every occurrence of a repeated word`() {
-        val masked = MaskedPrompt.of(prompt("na na batman"), setOf(Guess("na")))
+        // Given
+        val secret = prompt("na na batman")
+        val guesses = setOf(Guess("na"))
+
+        // When
+        val masked = MaskedPrompt.of(secret, guesses)
+
+        // Then
         assertEquals(
             listOf(MaskedToken.Revealed("na"), MaskedToken.Revealed("na"), MaskedToken.Hidden(6)),
             masked.tokens,
@@ -33,14 +54,28 @@ class MaskedPromptTest {
 
     @Test
     fun `collapses arbitrary whitespace using one rule`() {
-        val masked = MaskedPrompt.of(prompt("hello\t \nworld"), setOf(Guess("world")))
+        // Given
+        val secret = prompt("hello\t \nworld")
+        val guesses = setOf(Guess("world"))
+
+        // When
+        val masked = MaskedPrompt.of(secret, guesses)
+
+        // Then
         assertEquals(2, masked.tokens.size)
         assertEquals(MaskedToken.Revealed("world"), masked.tokens[1])
     }
 
     @Test
     fun `is fully revealed when all words are guessed`() {
-        val masked = MaskedPrompt.of(prompt("hello world"), setOf(Guess("hello"), Guess("world")))
+        // Given
+        val secret = prompt("hello world")
+        val guesses = setOf(Guess("hello"), Guess("world"))
+
+        // When
+        val masked = MaskedPrompt.of(secret, guesses)
+
+        // Then
         assertTrue(masked.isFullyRevealed())
     }
 }

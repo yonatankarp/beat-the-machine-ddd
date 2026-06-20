@@ -20,10 +20,14 @@ class MachineConfigTest {
 
     @Test
     fun `selects local-sd when configured`() {
-        runner
-            .withUserConfiguration(StubPictureStoreConfig::class.java)
-            .withPropertyValues("btm.image.provider=local-sd", "btm.image.local-sd.base-url=http://localhost:7860")
-            .run { ctx -> assertTrue(ctx.getBean(Machine::class.java)::class.simpleName == "LocalStableDiffusionMachine") }
+        // Given
+        val configured =
+            runner
+                .withUserConfiguration(StubPictureStoreConfig::class.java)
+                .withPropertyValues("btm.image.provider=local-sd", "btm.image.local-sd.base-url=http://localhost:7860")
+
+        // When / Then
+        configured.run { ctx -> assertTrue(ctx.getBean(Machine::class.java)::class.simpleName == "LocalStableDiffusionMachine") }
     }
 
     @Configuration

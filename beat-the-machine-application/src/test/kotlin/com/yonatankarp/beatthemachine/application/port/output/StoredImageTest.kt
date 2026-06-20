@@ -6,9 +6,11 @@ import kotlin.test.assertEquals
 class StoredImageTest {
     @Test
     fun `equal by content`() {
-        assertEquals(
-            StoredImage(byteArrayOf(1, 2, 3), "image/png"),
-            StoredImage(byteArrayOf(1, 2, 3), "image/png"),
-        )
+        // Given
+        val left = StoredImage(byteArrayOf(1, 2, 3), "image/png")
+        val right = StoredImage(byteArrayOf(1, 2, 3), "image/png")
+
+        // Then
+        assertEquals(left, right)
     }
 }

@@ -108,7 +108,7 @@ class ChallengeApiMapperTest {
     }
 
     @Test
-    fun `maps livesRemaining and the difficulty-derived maxLives`() {
+    fun `maps livesRemaining and the prompt-derived maxLives`() {
         // Given
         val mediumChallenge = mediumChallenge()
         val easyChallenge = easyChallenge()
@@ -119,8 +119,8 @@ class ChallengeApiMapperTest {
 
         // Then
         assertEquals(6, medium.livesRemaining)
-        assertEquals(6, medium.maxLives)
-        assertEquals(8, easy.maxLives)
+        assertEquals(mediumChallenge.maxLives().remaining, medium.maxLives)
+        assertEquals(easyChallenge.maxLives().remaining, easy.maxLives)
     }
 
     @Test

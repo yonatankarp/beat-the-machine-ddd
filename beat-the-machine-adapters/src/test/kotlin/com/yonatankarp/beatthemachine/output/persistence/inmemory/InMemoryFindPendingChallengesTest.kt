@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
+import com.yonatankarp.beatthemachine.application.port.output.FindPendingChallenges
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
@@ -20,7 +21,7 @@ class InMemoryFindPendingChallengesTest {
             storeChallenge(mediumChallenge(prompt = "foo bar".asPrompt()).withPicture(readyPicture("http://img/1.png")))
 
             // When
-            val ids = findPendingChallenges().map { it.id }.toSet()
+            val ids = (findPendingChallenges answer FindPendingChallenges.Query).map { it.id }.toSet()
 
             // Then
             assertEquals(setOf(pendingA.id, pendingB.id), ids)

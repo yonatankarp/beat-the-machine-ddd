@@ -1,6 +1,7 @@
 package com.yonatankarp.beatthemachine.output.ai
 
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
+import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
@@ -38,7 +39,7 @@ class PicturePregenerationTest {
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Ready("http://img/1.png"), findById(c.id)?.picture)
+            assertEquals(Picture.Ready("http://img/1.png"), (findById answer FindChallengeById.Query(c.id))?.picture)
         }
 
     @Test
@@ -53,7 +54,7 @@ class PicturePregenerationTest {
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Failed, findById(c.id)?.picture)
+            assertEquals(Picture.Failed, (findById answer FindChallengeById.Query(c.id))?.picture)
         }
 
     @Test
@@ -80,8 +81,8 @@ class PicturePregenerationTest {
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Ready("http://img/retry.png"), findById(pending.id)?.picture)
-            assertEquals(Picture.Ready("http://img/done.png"), findById(done.id)?.picture)
+            assertEquals(Picture.Ready("http://img/retry.png"), (findById answer FindChallengeById.Query(pending.id))?.picture)
+            assertEquals(Picture.Ready("http://img/done.png"), (findById answer FindChallengeById.Query(done.id))?.picture)
         }
 
     @Test
@@ -95,7 +96,7 @@ class PicturePregenerationTest {
                 StoreChallenge { challenge ->
                     if (firstStore && challenge.picture is Picture.Ready) {
                         firstStore = false
-                        storeChallenge(findById(challenge.id) ?: challenge)
+                        storeChallenge(findById answer FindChallengeById.Query(challenge.id) ?: challenge)
                         throw OptimisticLockConflict(challenge.id)
                     }
                     storeChallenge(challenge)
@@ -107,7 +108,7 @@ class PicturePregenerationTest {
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Ready("http://img/raced.png"), findById(seeded.id)?.picture)
+            assertEquals(Picture.Ready("http://img/raced.png"), (findById answer FindChallengeById.Query(seeded.id))?.picture)
         }
 
     @Test
@@ -125,8 +126,8 @@ class PicturePregenerationTest {
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Ready("http://img/admitted.png"), findById(admitted.id)?.picture)
-            assertEquals(Picture.Pending, findById(shed.id)?.picture)
+            assertEquals(Picture.Ready("http://img/admitted.png"), (findById answer FindChallengeById.Query(admitted.id))?.picture)
+            assertEquals(Picture.Pending, (findById answer FindChallengeById.Query(shed.id))?.picture)
         }
 
     private fun pregeneration(

@@ -10,7 +10,7 @@ class SqliteFindPendingChallenges(
     private val jdbc: JdbcTemplate,
     private val mapper: ChallengeRowMapper,
 ) : FindPendingChallenges {
-    override suspend fun invoke(): List<Challenge> =
+    override suspend fun answer(query: FindPendingChallenges.Query): List<Challenge> =
         withContext(Dispatchers.IO) {
             jdbc
                 .query("SELECT * FROM challenge WHERE picture_status = ?", mapper.rowMapper, "PENDING")

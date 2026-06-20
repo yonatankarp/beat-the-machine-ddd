@@ -8,5 +8,6 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 class GetChallengeUseCase(
     private val findChallengeById: FindChallengeById,
 ) : GetChallenge {
-    override suspend fun answer(query: GetChallenge.Query): Challenge = findChallengeById(query.id) ?: throw ChallengeNotFound(query.id)
+    override suspend fun answer(query: GetChallenge.Query): Challenge =
+        (findChallengeById answer FindChallengeById.Query(query.id)) ?: throw ChallengeNotFound(query.id)
 }

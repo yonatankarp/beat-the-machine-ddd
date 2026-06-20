@@ -12,7 +12,8 @@ class MakeGuessUseCase(
     private val storeChallenge: StoreChallenge,
 ) : MakeGuess {
     override suspend fun handle(command: MakeGuess.Command): Pair<Challenge, GuessOutcome> {
-        val challenge = findChallengeById(command.id) ?: throw ChallengeNotFound(command.id)
+        val challenge =
+            (findChallengeById answer FindChallengeById.Query(command.id)) ?: throw ChallengeNotFound(command.id)
         val (updated, outcome) = challenge.makeGuess(command.word)
         return storeChallenge(updated) to outcome
     }

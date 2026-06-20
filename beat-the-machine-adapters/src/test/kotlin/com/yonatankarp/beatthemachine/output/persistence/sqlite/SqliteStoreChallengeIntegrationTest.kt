@@ -1,6 +1,7 @@
 package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
+import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
@@ -77,7 +78,7 @@ class SqliteStoreChallengeIntegrationTest {
             difficulties.forEach { diff ->
                 val c = Challenge.start("test prompt".asPrompt(), 2.lives(), difficulty = diff)
                 storeChallenge(c)
-                val found = findChallengeById(c.id)
+                val found = findChallengeById answer FindChallengeById.Query(c.id)
                 assertNotNull(found)
                 assertEquals(diff, found.difficulty)
             }
@@ -97,8 +98,11 @@ class SqliteStoreChallengeIntegrationTest {
             storeChallenge(failed)
 
             // Then
-            assertEquals(Picture.Pending, findChallengeById(pending.id)?.picture)
-            assertEquals(Picture.Ready("https://example.com/img.png"), findChallengeById(ready.id)?.picture)
-            assertEquals(Picture.Failed, findChallengeById(failed.id)?.picture)
+            assertEquals(Picture.Pending, (findChallengeById answer FindChallengeById.Query(pending.id))?.picture)
+            assertEquals(
+                Picture.Ready("https://example.com/img.png"),
+                (findChallengeById answer FindChallengeById.Query(ready.id))?.picture,
+            )
+            assertEquals(Picture.Failed, (findChallengeById answer FindChallengeById.Query(failed.id))?.picture)
         }
 }

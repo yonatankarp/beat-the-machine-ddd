@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
+import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.dsl.lives
@@ -31,7 +32,7 @@ class SqliteFindChallengeByIdIntegrationTest {
             storeChallenge(c)
 
             // When
-            val found = findChallengeById(c.id)
+            val found = findChallengeById answer FindChallengeById.Query(c.id)
 
             // Then
             assertNotNull(found)
@@ -47,7 +48,7 @@ class SqliteFindChallengeByIdIntegrationTest {
             val unknownId = aChallengeId()
 
             // When
-            val found = findChallengeById(unknownId)
+            val found = findChallengeById answer FindChallengeById.Query(unknownId)
 
             // Then
             assertNull(found)

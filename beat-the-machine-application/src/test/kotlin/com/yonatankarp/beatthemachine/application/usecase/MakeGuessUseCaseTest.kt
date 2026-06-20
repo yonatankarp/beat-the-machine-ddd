@@ -3,6 +3,7 @@ package com.yonatankarp.beatthemachine.application.usecase
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
+import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
@@ -34,7 +35,7 @@ class MakeGuessUseCaseTest {
             // Then
             assertEquals(GuessOutcome.HIT, outcome)
             assertEquals(MaskedToken.Revealed("hello"), updated.maskedPrompt().tokens[0])
-            assertEquals(MaskedToken.Revealed("hello"), store(c.id)?.maskedPrompt()?.tokens?.get(0))
+            assertEquals(MaskedToken.Revealed("hello"), (store answer FindChallengeById.Query(c.id))?.maskedPrompt()?.tokens?.get(0))
         }
 
     @Test

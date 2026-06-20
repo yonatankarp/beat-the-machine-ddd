@@ -10,20 +10,20 @@ import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 
 object Challenges {
     fun easyChallenge(
-        lives: Lives = Lives.initialFor(Difficulty.EASY),
         prompt: Prompt = "hello world".asPrompt(),
+        lives: Lives = Lives.forSecret(prompt, Difficulty.EASY),
         picture: Picture = Picture.Pending,
     ): Challenge = Challenge.start(prompt, lives, picture, Difficulty.EASY)
 
     fun mediumChallenge(
-        lives: Lives = Lives.initialFor(Difficulty.MEDIUM),
         prompt: Prompt = "hello world".asPrompt(),
+        lives: Lives = Lives.forSecret(prompt, Difficulty.MEDIUM),
         picture: Picture = Picture.Pending,
     ): Challenge = Challenge.start(prompt, lives, picture, Difficulty.MEDIUM)
 
     fun hardChallenge(
-        lives: Lives = Lives.initialFor(Difficulty.HARD),
         prompt: Prompt = "hello world".asPrompt(),
+        lives: Lives = Lives.forSecret(prompt, Difficulty.HARD),
         picture: Picture = Picture.Pending,
     ): Challenge = Challenge.start(prompt, lives, picture, Difficulty.HARD)
 

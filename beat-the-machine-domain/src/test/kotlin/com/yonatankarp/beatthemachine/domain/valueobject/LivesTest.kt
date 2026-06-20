@@ -1,5 +1,6 @@
 package com.yonatankarp.beatthemachine.domain.valueobject
 
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -47,15 +48,30 @@ class LivesTest {
     }
 
     @Test
-    fun `initial lives are granted per difficulty`() {
+    fun `forSecret scales lives by word count and difficulty`() {
+        // Given
+        val twoWordPrompt = "hello world".asPrompt()
+
         // When
-        val easy = Lives.initialFor(Difficulty.EASY)
-        val medium = Lives.initialFor(Difficulty.MEDIUM)
-        val hard = Lives.initialFor(Difficulty.HARD)
+        val easy = Lives.forSecret(twoWordPrompt, Difficulty.EASY)
+        val medium = Lives.forSecret(twoWordPrompt, Difficulty.MEDIUM)
+        val hard = Lives.forSecret(twoWordPrompt, Difficulty.HARD)
 
         // Then
-        assertEquals(Lives(8), easy)
+        assertEquals(Lives(9), easy)
         assertEquals(Lives(6), medium)
         assertEquals(Lives(4), hard)
+    }
+
+    @Test
+    fun `forSecret floors at MIN_LIVES for very short secrets`() {
+        // Given
+        val oneWordPrompt = "x".asPrompt()
+
+        // When
+        val result = Lives.forSecret(oneWordPrompt, Difficulty.HARD)
+
+        // Then
+        assertEquals(Lives(2), result)
     }
 }

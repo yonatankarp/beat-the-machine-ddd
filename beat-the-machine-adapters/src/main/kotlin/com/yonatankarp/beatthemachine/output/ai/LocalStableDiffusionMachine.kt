@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.slf4j.LoggerFactory
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import java.util.Base64
 import kotlin.time.Duration
@@ -29,17 +30,19 @@ class LocalStableDiffusionMachine(
             val response =
                 withContext(Dispatchers.IO) {
                     withTimeout(timeout) {
-                        webClient
-                            .post()
-                            .uri("/sdapi/v1/txt2img")
-                            .bodyValue(Txt2ImgRequest(prompt.text, steps, width, height))
-                            .retrieve()
-                            .awaitBody<Txt2ImgResponse>()
+                        webClient.textToImage(Txt2ImgRequest(prompt.text, steps, width, height))
                     }
                 }
             val b64 = response.images.firstOrNull() ?: return@renderedPicture null
             Base64.getDecoder().decode(b64)
         }
+
+    private suspend fun WebClient.textToImage(request: Txt2ImgRequest): Txt2ImgResponse =
+        post()
+            .uri("/sdapi/v1/txt2img")
+            .bodyValue(request)
+            .retrieve()
+            .awaitBody()
 
     private data class Txt2ImgRequest(
         val prompt: String,

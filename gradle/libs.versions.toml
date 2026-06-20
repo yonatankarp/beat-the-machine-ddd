@@ -65,6 +65,11 @@ spring-boot-test = [
     "spring-boot-starter-webflux-test",
     "springmockk",
 ]
+# Spring AI model starters (versions resolved by the spring-ai-bom platform).
+spring-ai-starters = [
+    "spring-ai-starter-model-openai",
+    "spring-ai-starter-model-ollama",
+]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

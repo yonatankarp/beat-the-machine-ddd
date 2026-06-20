@@ -22,7 +22,7 @@ class SqlitePictureStore(
                 bytes,
                 contentType,
             )
-            "/images/$id"
+            id
         }
 
     override suspend fun load(id: String): StoredImage? =

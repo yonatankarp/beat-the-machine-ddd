@@ -17,25 +17,25 @@ import java.util.Base64
 class SpringAiImageMachine(
     private val imageModel: ImageModel,
     private val pictureStore: PictureStore,
+    private val webClient: WebClient = imageWebClient(),
 ) : Machine {
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val webClient = imageWebClient()
 
     override suspend fun generate(prompt: Prompt): Picture =
         pictureStore.renderedPicture(logger, prompt) {
             withContext(Dispatchers.IO) {
                 imageModel.call(ImagePrompt(prompt.text)).result?.output
-            }?.resolvedBytes(webClient)
+            }?.resolvedBytes()
         }
 
-    private suspend fun Image.resolvedBytes(client: WebClient): ByteArray? =
+    private suspend fun Image.resolvedBytes(): ByteArray? =
         when {
             !b64Json.isNullOrBlank() -> {
                 Base64.getDecoder().decode(b64Json)
             }
 
             !url.isNullOrBlank() -> {
-                client
+                webClient
                     .get()
                     .uri(url!!)
                     .retrieve()

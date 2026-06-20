@@ -8,27 +8,15 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import java.util.Base64
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
 class LocalStableDiffusionMachineTest {
-    private lateinit var server: MockWebServer
     private val pictureStore = mockk<PictureStore>()
-
-    @BeforeEach
-    fun setUp() {
-        server = MockWebServer()
-        server.start()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        server.shutdown()
-    }
 
     private fun machine(): LocalStableDiffusionMachine =
         LocalStableDiffusionMachine(
@@ -51,7 +39,7 @@ class LocalStableDiffusionMachineTest {
                     .setHeader("Content-Type", "application/json")
                     .setBody("""{"images":["$b64"]}"""),
             )
-            coEvery { pictureStore.save(pngBytes, "image/png") } returns "/images/xyz"
+            coEvery { pictureStore.save(pngBytes, "image/png") } returns "xyz"
 
             // When
             val result = machine().generate(Prompt("dragon eating a cookie"))
@@ -81,4 +69,20 @@ class LocalStableDiffusionMachineTest {
             // When / Then
             assertEquals(Picture.Failed, machine().generate(Prompt("anything")))
         }
+
+    companion object {
+        private val server = MockWebServer()
+
+        @JvmStatic
+        @BeforeAll
+        fun startServer() {
+            server.start()
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun stopServer() {
+            server.shutdown()
+        }
+    }
 }

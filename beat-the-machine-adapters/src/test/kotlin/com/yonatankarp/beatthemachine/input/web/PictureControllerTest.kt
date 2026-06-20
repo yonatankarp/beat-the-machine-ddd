@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.expectBody
+import kotlin.test.assertContentEquals
 
 @WebFluxTest(PictureController::class)
 class PictureControllerTest(
@@ -36,8 +38,8 @@ class PictureControllerTest(
             .contentType("image/png")
             .expectHeader()
             .valueEquals("Cache-Control", "public, max-age=31536000, immutable")
-            .expectBody()
-            .consumeWith { assert(it.responseBody!!.contentEquals(byteArrayOf(1, 2, 3))) }
+            .expectBody<ByteArray>()
+            .consumeWith { assertContentEquals(byteArrayOf(1, 2, 3), it.responseBody) }
     }
 
     @Test

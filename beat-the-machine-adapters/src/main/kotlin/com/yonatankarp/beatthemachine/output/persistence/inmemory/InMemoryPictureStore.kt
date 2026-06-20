@@ -14,7 +14,7 @@ class InMemoryPictureStore : PictureStore {
     ): String {
         val id = UUID.randomUUID().toString()
         byId[id] = StoredImage(bytes.copyOf(), contentType)
-        return "/images/$id"
+        return id
     }
 
     override suspend fun load(id: String): StoredImage? = byId[id]

@@ -25,8 +25,7 @@ dependencies {
     implementation(libs.bundles.kotlinx.coroutines)
 
     implementation(platform(libs.spring.ai.bom))
-    implementation(libs.spring.ai.starter.model.openai)
-    implementation(libs.spring.ai.starter.model.ollama)
+    implementation(libs.bundles.spring.ai.starters)
 
     testImplementation(libs.bundles.unit.test)
     testImplementation(libs.bundles.spring.boot.test) {

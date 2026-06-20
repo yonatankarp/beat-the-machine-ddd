@@ -10,6 +10,10 @@ internal const val MAX_IMAGE_BYTES = 16 * 1024 * 1024
 
 internal const val PNG_CONTENT_TYPE = "image/png"
 
+internal const val IMAGE_PATH_PREFIX = "/images/"
+
+internal fun imageUrl(id: String): String = "$IMAGE_PATH_PREFIX$id"
+
 internal fun imageWebClient(baseUrl: String? = null): WebClient {
     val builder = WebClient.builder()
     if (baseUrl != null) builder.baseUrl(baseUrl)
@@ -25,7 +29,7 @@ internal suspend fun PictureStore.renderedPicture(
 ): Picture =
     try {
         val bytes = produce() ?: return Picture.Failed
-        Picture.Ready(save(bytes, PNG_CONTENT_TYPE))
+        Picture.Ready(imageUrl(save(bytes, PNG_CONTENT_TYPE)))
     } catch (e: Exception) {
         logger.warn("Image generation failed for prompt '{}'", prompt.text, e)
         Picture.Failed

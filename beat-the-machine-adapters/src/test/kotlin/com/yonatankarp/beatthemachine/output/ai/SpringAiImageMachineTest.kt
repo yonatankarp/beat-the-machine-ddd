@@ -6,7 +6,10 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.test.runTest
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Test
 import org.springframework.ai.image.Image
 import org.springframework.ai.image.ImageGeneration
@@ -14,6 +17,7 @@ import org.springframework.ai.image.ImageModel
 import org.springframework.ai.image.ImageResponse
 import java.util.Base64
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SpringAiImageMachineTest {
     private val pictureStore = mockk<PictureStore>()
@@ -25,7 +29,7 @@ class SpringAiImageMachineTest {
             // Given
             val b64 = Base64.getEncoder().encodeToString(byteArrayOf(5, 6, 7))
             every { imageModel.call(any()) } returns ImageResponse(listOf(ImageGeneration(Image(null, b64))))
-            coEvery { pictureStore.save(any(), "image/png") } returns "/images/paid1"
+            coEvery { pictureStore.save(any(), "image/png") } returns "paid1"
 
             // When
             val machine = SpringAiImageMachine(imageModel, pictureStore)
@@ -33,6 +37,29 @@ class SpringAiImageMachineTest {
 
             // Then
             assertEquals(Picture.Ready("/images/paid1"), result)
+        }
+
+    @Test
+    fun `fetches image bytes when the model returns a url`() =
+        runTest {
+            // Given
+            val server = MockWebServer()
+            server.start()
+            val pngBytes = "PNGDATA".toByteArray()
+            server.enqueue(MockResponse().setBody("PNGDATA"))
+            every { imageModel.call(any()) } returns
+                ImageResponse(listOf(ImageGeneration(Image(server.url("/img.png").toString(), null))))
+            val saved = slot<ByteArray>()
+            coEvery { pictureStore.save(capture(saved), "image/png") } returns "paid2"
+
+            // When
+            val machine = SpringAiImageMachine(imageModel, pictureStore, imageWebClient())
+            val result = machine.generate(Prompt("astronaut eating the moon"))
+
+            // Then
+            assertEquals(Picture.Ready("/images/paid2"), result)
+            assertTrue(pngBytes.contentEquals(saved.captured))
+            server.shutdown()
         }
 
     @Test

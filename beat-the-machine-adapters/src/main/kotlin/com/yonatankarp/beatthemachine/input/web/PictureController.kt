@@ -17,21 +17,22 @@ class PictureController(
         @PathVariable id: String,
     ): ResponseEntity<ByteArray> {
         val image = pictureStore.load(id) ?: return ResponseEntity.notFound().build()
-        val safeContentType =
-            if (image.contentType in ALLOWED_CONTENT_TYPES) {
-                image.contentType
-            } else {
-                FALLBACK_CONTENT_TYPE
-            }
         return ResponseEntity
             .ok()
-            .contentType(MediaType.parseMediaType(safeContentType))
+            .contentType(image.contentType.toAllowedMediaType())
             .header(HttpHeaders.CACHE_CONTROL, CACHE_CONTROL_VALUE)
             .body(image.bytes)
     }
 
+    private fun String.toAllowedMediaType(): MediaType =
+        if (this in ALLOWED_CONTENT_TYPES) {
+            MediaType.parseMediaType(this)
+        } else {
+            MediaType.parseMediaType(FALLBACK_CONTENT_TYPE)
+        }
+
     private companion object {
-        val ALLOWED_CONTENT_TYPES = setOf("image/png", "image/jpeg", "image/webp", "image/gif")
+        val ALLOWED_CONTENT_TYPES: Set<String> = setOf("image/png", "image/jpeg", "image/webp", "image/gif")
         const val FALLBACK_CONTENT_TYPE = "application/octet-stream"
         const val MAX_AGE_SECONDS = 31536000
         const val CACHE_CONTROL_VALUE = "public, max-age=$MAX_AGE_SECONDS, immutable"

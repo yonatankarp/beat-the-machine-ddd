@@ -51,7 +51,7 @@ class SpringAiPromptSource(
         val EASY_BAND = 1..2
         val MEDIUM_BAND = 2..3
         val HARD_BAND = 3..5
-        val WHITESPACE_REGEX = Regex("\\s+")
+        val WHITESPACE_REGEX = """\s+""".toRegex()
         const val SYSTEM_PROMPT =
             "You generate short, concrete, family-friendly subjects for an AI image-guessing game. " +
                 "Favour vivid, drawable nouns and scenes. Never use proper names or offensive content."

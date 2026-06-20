@@ -4,6 +4,7 @@ import com.yonatankarp.beatthemachine.domain.exception.ChallengeAlreadyOver
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
+import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
@@ -148,6 +149,18 @@ class ChallengeTest {
         assertEquals(challenge.version, updated.version)
         assertEquals(Picture.Pending, challenge.picture)
         assertNotSame(challenge, updated)
+    }
+
+    @Test
+    fun `maxLives derives from the challenge secret and difficulty`() {
+        // Given
+        val challenge = mediumChallenge()
+
+        // When
+        val max = challenge.maxLives()
+
+        // Then
+        assertEquals(Lives(6), max)
     }
 
     @Test

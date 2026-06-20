@@ -9,3 +9,9 @@ CREATE TABLE IF NOT EXISTS challenge (
     difficulty     TEXT    NOT NULL,
     version        INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS picture (
+    id           TEXT PRIMARY KEY,
+    bytes        BLOB NOT NULL,
+    content_type TEXT NOT NULL
+);

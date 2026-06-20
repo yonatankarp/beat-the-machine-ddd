@@ -1,25 +1,24 @@
 package com.yonatankarp.beatthemachine.input.web
 
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import com.yonatankarp.beatthemachine.openapi.v1.models.ChallengeStatus
 import com.yonatankarp.beatthemachine.openapi.v1.models.Difficulty
 import com.yonatankarp.beatthemachine.openapi.v1.models.MaskedToken
 import com.yonatankarp.beatthemachine.openapi.v1.models.PictureStatus
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.easyChallenge
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.lostChallenge
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
+import com.yonatankarp.beatthemachine.test.fixtures.Pictures.failedPicture
+import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
 import org.junit.jupiter.api.Test
 import java.net.URI
 import kotlin.test.assertEquals
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty as DomainDifficulty
 
 class ChallengeApiMapperTest {
-    private fun challenge() = Challenge.start(Prompt("hello world"), Lives(6))
-
     @Test
     fun `maps a pending picture`() {
         // Given
-        val subject = challenge()
+        val subject = mediumChallenge()
 
         // When
         val response = subject.toApiResponse()
@@ -32,7 +31,7 @@ class ChallengeApiMapperTest {
     @Test
     fun `maps a ready picture with its url`() {
         // Given
-        val subject = challenge().withPicture(Picture.Ready("http://img/1.png"))
+        val subject = mediumChallenge().withPicture(readyPicture("http://img/1.png"))
 
         // When
         val response = subject.toApiResponse()
@@ -45,7 +44,7 @@ class ChallengeApiMapperTest {
     @Test
     fun `maps a failed picture`() {
         // Given
-        val subject = challenge().withPicture(Picture.Failed)
+        val subject = mediumChallenge().withPicture(failedPicture())
 
         // When
         val response = subject.toApiResponse()
@@ -58,7 +57,7 @@ class ChallengeApiMapperTest {
     @Test
     fun `degrades a ready picture with a malformed url to FAILED`() {
         // Given
-        val subject = challenge().withPicture(Picture.Ready("http:// bad url with spaces"))
+        val subject = mediumChallenge().withPicture(readyPicture("http:// bad url with spaces"))
 
         // When
         val response = subject.toApiResponse()
@@ -71,7 +70,7 @@ class ChallengeApiMapperTest {
     @Test
     fun `hides every word while the challenge is in progress`() {
         // Given
-        val subject = challenge()
+        val subject = mediumChallenge()
 
         // When
         val response = subject.toApiResponse()
@@ -84,7 +83,7 @@ class ChallengeApiMapperTest {
     @Test
     fun `reveals the whole prompt once the challenge is lost`() {
         // Given
-        val subject = challenge().forfeit()
+        val subject = lostChallenge()
 
         // When
         val response = subject.toApiResponse()
@@ -97,8 +96,8 @@ class ChallengeApiMapperTest {
     @Test
     fun `maps livesRemaining and the difficulty-derived maxLives`() {
         // Given
-        val mediumChallenge = challenge()
-        val easyChallenge = Challenge.start(Prompt("hello world"), Lives(8), difficulty = DomainDifficulty.EASY)
+        val mediumChallenge = mediumChallenge()
+        val easyChallenge = easyChallenge()
 
         // When
         val medium = mediumChallenge.toApiResponse()

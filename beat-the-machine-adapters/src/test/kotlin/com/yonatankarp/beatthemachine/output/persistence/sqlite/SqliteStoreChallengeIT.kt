@@ -3,9 +3,12 @@ package com.yonatankarp.beatthemachine.output.persistence.sqlite
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
+import com.yonatankarp.beatthemachine.test.dsl.lives
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
+import com.yonatankarp.beatthemachine.test.fixtures.Pictures.failedPicture
+import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,7 +32,7 @@ class SqliteStoreChallengeIT {
     fun `stores a fresh challenge and bumps the version`() =
         runTest {
             // Given
-            val challenge = Challenge.start(Prompt("pixel art cat"), Lives(5))
+            val challenge = mediumChallenge(lives = 5.lives(), prompt = "pixel art cat".asPrompt())
 
             // When
             val saved = storeChallenge(challenge)
@@ -42,7 +45,7 @@ class SqliteStoreChallengeIT {
     fun `allows sequential stores with updated versions`() =
         runTest {
             // Given
-            val challenge = Challenge.start(Prompt("sequential"), Lives(3))
+            val challenge = mediumChallenge(lives = 3.lives(), prompt = "sequential".asPrompt())
 
             // When
             val v1 = storeChallenge(challenge)
@@ -57,7 +60,7 @@ class SqliteStoreChallengeIT {
     fun `rejects a stale version on second store`() =
         runTest {
             // Given
-            val c = Challenge.start(Prompt("hello world"), Lives(3))
+            val c = mediumChallenge(lives = 3.lives())
             storeChallenge(c)
 
             // When / Then
@@ -72,7 +75,7 @@ class SqliteStoreChallengeIT {
 
             // When / Then
             difficulties.forEach { diff ->
-                val c = Challenge.start(Prompt("test prompt"), Lives(2), difficulty = diff)
+                val c = Challenge.start("test prompt".asPrompt(), 2.lives(), difficulty = diff)
                 storeChallenge(c)
                 val found = findChallengeById(c.id)
                 assertNotNull(found)
@@ -84,9 +87,9 @@ class SqliteStoreChallengeIT {
     fun `persists picture states correctly`() =
         runTest {
             // Given
-            val pending = Challenge.start(Prompt("pending pic"), Lives(2), picture = Picture.Pending)
-            val ready = Challenge.start(Prompt("ready pic"), Lives(2), picture = Picture.Ready("https://example.com/img.png"))
-            val failed = Challenge.start(Prompt("failed pic"), Lives(2), picture = Picture.Failed)
+            val pending = mediumChallenge(lives = 2.lives(), prompt = "pending pic".asPrompt())
+            val ready = mediumChallenge(lives = 2.lives(), prompt = "ready pic".asPrompt(), picture = readyPicture())
+            val failed = mediumChallenge(lives = 2.lives(), prompt = "failed pic".asPrompt(), picture = failedPicture())
 
             // When
             storeChallenge(pending)

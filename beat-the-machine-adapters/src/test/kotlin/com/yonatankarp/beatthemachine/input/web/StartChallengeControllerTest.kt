@@ -2,9 +2,7 @@ package com.yonatankarp.beatthemachine.input.web
 
 import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +18,7 @@ class StartChallengeControllerTest(
 
     @Test
     fun `POST creates a challenge and never leaks the prompt`() {
-        coEvery { startChallenge(any()) } returns Challenge.start(Prompt("hello world"), Lives(6))
+        coEvery { startChallenge(any()) } returns mediumChallenge()
 
         client
             .post()

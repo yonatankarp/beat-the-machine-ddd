@@ -1,9 +1,10 @@
 package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
+import com.yonatankarp.beatthemachine.test.dsl.lives
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
+import com.yonatankarp.beatthemachine.test.fixtures.Pictures.failedPicture
+import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,10 +26,10 @@ class SqliteFindPendingChallengesIT {
     fun `returns only challenges whose picture is pending`() =
         runTest {
             // Given
-            val pendingA = storeChallenge(Challenge.start(Prompt("pending one"), Lives(2), picture = Picture.Pending))
-            val pendingB = storeChallenge(Challenge.start(Prompt("pending two"), Lives(2), picture = Picture.Pending))
-            storeChallenge(Challenge.start(Prompt("ready pic"), Lives(2), picture = Picture.Ready("https://example.com/img.png")))
-            storeChallenge(Challenge.start(Prompt("failed pic"), Lives(2), picture = Picture.Failed))
+            val pendingA = storeChallenge(mediumChallenge(lives = 2.lives(), prompt = "pending one".asPrompt()))
+            val pendingB = storeChallenge(mediumChallenge(lives = 2.lives(), prompt = "pending two".asPrompt()))
+            storeChallenge(mediumChallenge(lives = 2.lives(), prompt = "ready pic".asPrompt(), picture = readyPicture()))
+            storeChallenge(mediumChallenge(lives = 2.lives(), prompt = "failed pic".asPrompt(), picture = failedPicture()))
 
             // When
             val ids = findPendingChallenges().map { it.id }.toSet()

@@ -3,14 +3,12 @@ package com.yonatankarp.beatthemachine.input.web
 import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.MakeGuess
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.exception.ChallengeAlreadyOver
 import com.yonatankarp.beatthemachine.domain.exception.InvalidGuess
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.domain.valueobject.Guess
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asGuess
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,7 +25,7 @@ class MakeGuessControllerTest(
 
     @Test
     fun `a successful guess returns the updated masked prompt`() {
-        val (afterHit, _) = Challenge.start(Prompt("hello world"), Lives(6)).makeGuess(Guess("hello"))
+        val (afterHit, _) = mediumChallenge().makeGuess("hello".asGuess())
         coEvery { makeGuess(any(), any()) } returns (afterHit to GuessOutcome.HIT)
 
         client

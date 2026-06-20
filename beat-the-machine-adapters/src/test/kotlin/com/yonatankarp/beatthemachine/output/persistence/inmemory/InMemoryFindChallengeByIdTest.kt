@@ -1,9 +1,8 @@
 package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.lives
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -17,7 +16,7 @@ class InMemoryFindChallengeByIdTest {
             val store = InMemoryChallengeStore()
             val storeChallenge = InMemoryStoreChallenge(store)
             val findChallengeById = InMemoryFindChallengeById(store)
-            val saved = storeChallenge(Challenge.start(Prompt("hello world"), Lives(3)))
+            val saved = storeChallenge(mediumChallenge(lives = 3.lives()))
 
             // When
             val found = findChallengeById(saved.id)

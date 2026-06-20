@@ -3,10 +3,8 @@ package com.yonatankarp.beatthemachine.input.web
 import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.lostChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +20,7 @@ class ForfeitChallengeControllerTest(
 
     @Test
     fun `forfeit reveals the prompt and reports LOST`() {
-        coEvery { forfeitChallenge(any()) } returns Challenge.start(Prompt("hello world"), Lives(6)).forfeit()
+        coEvery { forfeitChallenge(any()) } returns lostChallenge()
 
         client
             .post()

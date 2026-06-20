@@ -5,14 +5,14 @@ import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class StartChallengeUseCaseTest {
-    private val prompts = PromptSource { Prompt("hello world") }
+    private val prompts = PromptSource { "hello world".asPrompt() }
     private val store = FakeChallengeStore()
 
     @Test

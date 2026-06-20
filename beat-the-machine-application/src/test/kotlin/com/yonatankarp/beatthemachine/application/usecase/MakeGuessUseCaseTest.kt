@@ -5,11 +5,11 @@ import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConfli
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.domain.valueobject.Guess
 import com.yonatankarp.beatthemachine.domain.valueobject.GuessOutcome
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asGuess
+import com.yonatankarp.beatthemachine.test.dsl.lives
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -18,7 +18,7 @@ import kotlin.test.assertFailsWith
 class MakeGuessUseCaseTest {
     private val store = FakeChallengeStore()
 
-    private suspend fun seed(): Challenge = store(Challenge.start(Prompt("hello world"), Lives(3)))
+    private suspend fun seed(): Challenge = store(mediumChallenge(lives = 3.lives()))
 
     @Test
     fun `a hit is persisted`() =
@@ -26,7 +26,7 @@ class MakeGuessUseCaseTest {
             // Given
             val c = seed()
             val makeGuess = MakeGuessUseCase(store, store)
-            val guess = Guess("hello")
+            val guess = "hello".asGuess()
 
             // When
             val (updated, outcome) = makeGuess(c.id, guess)
@@ -43,7 +43,7 @@ class MakeGuessUseCaseTest {
             // Given
             val makeGuess = MakeGuessUseCase(store, store)
             val unknownId = ChallengeId.new()
-            val guess = Guess("hello")
+            val guess = "hello".asGuess()
 
             // When / Then
             assertFailsWith<ChallengeNotFound> {
@@ -58,7 +58,7 @@ class MakeGuessUseCaseTest {
             val c = seed()
             val conflicting = StoreChallenge { throw OptimisticLockConflict(it.id) }
             val makeGuess = MakeGuessUseCase(store, conflicting)
-            val guess = Guess("hello")
+            val guess = "hello".asGuess()
 
             // When / Then
             assertFailsWith<OptimisticLockConflict> {

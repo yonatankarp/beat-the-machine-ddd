@@ -7,6 +7,7 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
+import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 
 class StartChallengeUseCase(
     private val promptSource: PromptSource,
@@ -14,7 +15,8 @@ class StartChallengeUseCase(
     private val enqueuePicture: (ChallengeId) -> Unit,
 ) : StartChallenge {
     override suspend fun invoke(difficulty: Difficulty): Challenge {
-        val challenge = Challenge.start(promptSource next difficulty, Lives.initialFor(difficulty))
+        val prompt = promptSource next difficulty
+        val challenge = Challenge.start(prompt, Lives.forSecret(prompt, difficulty), difficulty = difficulty)
         val persisted = storeChallenge(challenge)
         enqueuePicture(persisted.id)
         return persisted

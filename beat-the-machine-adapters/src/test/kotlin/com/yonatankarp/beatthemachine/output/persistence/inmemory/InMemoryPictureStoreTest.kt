@@ -10,17 +10,15 @@ class InMemoryPictureStoreTest {
     private val store = InMemoryPictureStore()
 
     @Test
-    fun `save returns an images url and load round-trips`() =
+    fun `save returns an id and load round-trips`() =
         runTest {
             // Given
             val bytes = byteArrayOf(9, 8, 7)
 
             // When
-            val url = store.save(bytes, "image/png")
+            val id = store.save(bytes, "image/png")
 
             // Then
-            assertTrue(url.startsWith("/images/"))
-            val id = url.removePrefix("/images/")
             val loaded = store.load(id)!!
             assertEquals("image/png", loaded.contentType)
             assertTrue(bytes.contentEquals(loaded.bytes))

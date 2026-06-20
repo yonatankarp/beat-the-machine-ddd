@@ -17,8 +17,7 @@ class SqlitePictureStoreIT {
             val bytes = byteArrayOf(1, 2, 3, 4)
 
             // When
-            val url = store.save(bytes, "image/png")
-            val id = url.removePrefix("/images/")
+            val id = store.save(bytes, "image/png")
             val loaded = store.load(id)!!
 
             // Then

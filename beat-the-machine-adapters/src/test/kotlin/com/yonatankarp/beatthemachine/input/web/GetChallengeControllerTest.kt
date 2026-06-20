@@ -3,10 +3,8 @@ package com.yonatankarp.beatthemachine.input.web
 import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.GetChallenge
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import io.mockk.coEvery
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +20,7 @@ class GetChallengeControllerTest(
 
     @Test
     fun `GET returns the challenge state`() {
-        val challenge = Challenge.start(Prompt("hello world"), Lives(6))
+        val challenge = mediumChallenge()
         coEvery { getChallenge(any()) } returns challenge
 
         client

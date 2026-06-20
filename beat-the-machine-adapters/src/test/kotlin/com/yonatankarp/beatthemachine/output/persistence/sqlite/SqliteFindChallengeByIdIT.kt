@@ -1,9 +1,9 @@
 package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
+import com.yonatankarp.beatthemachine.test.dsl.lives
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,7 +27,7 @@ class SqliteFindChallengeByIdIT {
     fun `finds a stored challenge with its fields intact`() =
         runTest {
             // Given
-            val c = Challenge.start(Prompt("pixel art cat"), Lives(5))
+            val c = mediumChallenge(lives = 5.lives(), prompt = "pixel art cat".asPrompt())
             storeChallenge(c)
 
             // When

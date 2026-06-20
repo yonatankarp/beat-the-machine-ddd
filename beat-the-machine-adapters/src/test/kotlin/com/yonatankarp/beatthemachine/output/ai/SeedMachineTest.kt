@@ -1,7 +1,7 @@
 package com.yonatankarp.beatthemachine.output.ai
 
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -26,7 +26,7 @@ class SeedMachineTest {
     fun `returns Failed for an unknown prompt`() =
         runTest {
             // Given
-            val prompt = Prompt("a prompt that is not seeded")
+            val prompt = "a prompt that is not seeded".asPrompt()
 
             // When
             val result = machine.generate(prompt)

@@ -1,9 +1,8 @@
 package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.lives
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -16,7 +15,7 @@ class InMemoryStoreChallengeTest {
             // Given
             val store = InMemoryChallengeStore()
             val storeChallenge = InMemoryStoreChallenge(store)
-            val challenge = Challenge.start(Prompt("hello world"), Lives(3))
+            val challenge = mediumChallenge(lives = 3.lives())
 
             // When
             val saved = storeChallenge(challenge)
@@ -31,7 +30,7 @@ class InMemoryStoreChallengeTest {
             // Given
             val store = InMemoryChallengeStore()
             val storeChallenge = InMemoryStoreChallenge(store)
-            val c = Challenge.start(Prompt("hello world"), Lives(3))
+            val c = mediumChallenge(lives = 3.lives())
             storeChallenge(c)
 
             // When / Then

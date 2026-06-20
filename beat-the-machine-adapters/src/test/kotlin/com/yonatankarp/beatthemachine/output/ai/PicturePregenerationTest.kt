@@ -3,15 +3,15 @@ package com.yonatankarp.beatthemachine.output.ai
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
-import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
-import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryChallengeStore
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindChallengeById
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryFindPendingChallenges
 import com.yonatankarp.beatthemachine.output.persistence.inmemory.InMemoryStoreChallenge
+import com.yonatankarp.beatthemachine.test.dsl.asPrompt
+import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
+import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -31,7 +31,7 @@ class PicturePregenerationTest {
         runTest {
             // Given
             val machine = Machine { Picture.Ready("http://img/1.png") }
-            val c = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
+            val c = storeChallenge(mediumChallenge())
 
             // When
             pregeneration(machine, this).enqueue(c.id)
@@ -46,7 +46,7 @@ class PicturePregenerationTest {
         runTest {
             // Given
             val machine = Machine { error("boom") }
-            val c = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
+            val c = storeChallenge(mediumChallenge())
 
             // When
             pregeneration(machine, this).enqueue(c.id)
@@ -72,8 +72,8 @@ class PicturePregenerationTest {
         runTest {
             // Given
             val machine = Machine { Picture.Ready("http://img/retry.png") }
-            val pending = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
-            val done = storeChallenge(Challenge.start(Prompt("foo bar"), Lives(6)).withPicture(Picture.Ready("http://img/done.png")))
+            val pending = storeChallenge(mediumChallenge())
+            val done = storeChallenge(mediumChallenge(prompt = "foo bar".asPrompt()).withPicture(readyPicture("http://img/done.png")))
 
             // When
             pregeneration(machine, this).retryPending()
@@ -88,7 +88,7 @@ class PicturePregenerationTest {
     fun `a concurrent version bump is retried so the picture still persists`() =
         runTest {
             // Given
-            val seeded = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
+            val seeded = storeChallenge(mediumChallenge())
 
             var firstStore = true
             val racingStore =
@@ -115,8 +115,8 @@ class PicturePregenerationTest {
         runTest {
             // Given
             val machine = Machine { Picture.Ready("http://img/admitted.png") }
-            val admitted = storeChallenge(Challenge.start(Prompt("hello world"), Lives(6)))
-            val shed = storeChallenge(Challenge.start(Prompt("foo bar"), Lives(6)))
+            val admitted = storeChallenge(mediumChallenge())
+            val shed = storeChallenge(mediumChallenge(prompt = "foo bar".asPrompt()))
             val pregeneration = pregeneration(machine, this, maxQueued = 1)
 
             // When

@@ -8,9 +8,6 @@ class InMemoryStoreChallenge(
     private val store: InMemoryChallengeStore,
 ) : StoreChallenge {
     override suspend fun invoke(challenge: Challenge): Challenge =
-        // Atomic check-then-act: compute runs the version check and the write under the
-        // map's per-key lock, so two concurrent coroutines on the same id cannot both pass
-        // the check and defeat optimistic locking (the picture pipeline races MakeGuess).
         store.byId.compute(challenge.id) { _, existing ->
             if (existing != null && existing.version != challenge.version) {
                 throw OptimisticLockConflict(challenge.id)

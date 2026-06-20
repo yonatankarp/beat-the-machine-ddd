@@ -29,6 +29,7 @@ class MakeGuessControllerTest(
     fun `a successful guess returns the updated masked prompt`() {
         val (afterHit, _) = Challenge.start(Prompt("hello world"), Lives(6)).makeGuess(Guess("hello"))
         coEvery { makeGuess(any(), any()) } returns (afterHit to GuessOutcome.HIT)
+
         client
             .post()
             .uri("/api/challenges/${ChallengeId.new().value}/guesses")
@@ -47,6 +48,7 @@ class MakeGuessControllerTest(
     @Test
     fun `guessing an unknown challenge returns 404`() {
         coEvery { makeGuess(any(), any()) } throws ChallengeNotFound(ChallengeId.new())
+
         client
             .post()
             .uri("/api/challenges/${ChallengeId.new().value}/guesses")
@@ -60,6 +62,7 @@ class MakeGuessControllerTest(
     @Test
     fun `guessing on an already-over challenge returns 409`() {
         coEvery { makeGuess(any(), any()) } throws ChallengeAlreadyOver(ChallengeId.new())
+
         client
             .post()
             .uri("/api/challenges/${ChallengeId.new().value}/guesses")
@@ -73,6 +76,7 @@ class MakeGuessControllerTest(
     @Test
     fun `a domain-rejected guess returns 422`() {
         coEvery { makeGuess(any(), any()) } throws InvalidGuess("not a single word")
+
         client
             .post()
             .uri("/api/challenges/${ChallengeId.new().value}/guesses")

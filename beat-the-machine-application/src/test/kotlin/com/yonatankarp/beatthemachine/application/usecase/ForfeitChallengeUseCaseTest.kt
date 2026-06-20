@@ -19,9 +19,14 @@ class ForfeitChallengeUseCaseTest {
     @Test
     fun `forfeit loads the challenge, sets LOST, and persists it`() =
         runTest {
+            // Given
             val c = seed()
             val forfeitChallenge = ForfeitChallengeUseCase(store, store)
+
+            // When
             val result = forfeitChallenge(c.id)
+
+            // Then
             assertEquals(ChallengeStatus.LOST, result.status)
             assertEquals(ChallengeStatus.LOST, store(c.id)?.status)
         }
@@ -29,9 +34,13 @@ class ForfeitChallengeUseCaseTest {
     @Test
     fun `an unknown challenge throws ChallengeNotFound`() =
         runTest {
+            // Given
             val forfeitChallenge = ForfeitChallengeUseCase(store, store)
+            val unknownId = ChallengeId.new()
+
+            // When / Then
             assertFailsWith<ChallengeNotFound> {
-                forfeitChallenge(ChallengeId.new())
+                forfeitChallenge(unknownId)
             }
         }
 }

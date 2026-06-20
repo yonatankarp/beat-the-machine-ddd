@@ -26,10 +26,14 @@ class SqliteFindChallengeByIdIT {
     @Test
     fun `finds a stored challenge with its fields intact`() =
         runTest {
+            // Given
             val c = Challenge.start(Prompt("pixel art cat"), Lives(5))
             storeChallenge(c)
 
+            // When
             val found = findChallengeById(c.id)
+
+            // Then
             assertNotNull(found)
             assertEquals(c.id, found.id)
             assertEquals("pixel art cat", found.secretPrompt().text)
@@ -39,6 +43,13 @@ class SqliteFindChallengeByIdIT {
     @Test
     fun `returns null for an unknown id`() =
         runTest {
-            assertNull(findChallengeById(ChallengeId.new()))
+            // Given
+            val unknownId = ChallengeId.new()
+
+            // When
+            val found = findChallengeById(unknownId)
+
+            // Then
+            assertNull(found)
         }
 }

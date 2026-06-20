@@ -7,18 +7,32 @@ import kotlin.test.assertIs
 class PictureTest {
     @Test
     fun `Pending is a Picture`() {
-        assertIs<Picture.Pending>(Picture.Pending)
+        // When
+        val picture = Picture.Pending
+
+        // Then
+        assertIs<Picture.Pending>(picture)
     }
 
     @Test
     fun `Ready carries url`() {
-        val pic = Picture.Ready("https://example.com/img.png")
+        // Given
+        val url = "https://example.com/img.png"
+
+        // When
+        val pic = Picture.Ready(url)
+
+        // Then
         assertIs<Picture.Ready>(pic)
         assertEquals("https://example.com/img.png", pic.url)
     }
 
     @Test
     fun `Failed is a Picture`() {
-        assertIs<Picture.Failed>(Picture.Failed)
+        // When
+        val picture = Picture.Failed
+
+        // Then
+        assertIs<Picture.Failed>(picture)
     }
 }

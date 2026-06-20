@@ -23,9 +23,15 @@ class MakeGuessUseCaseTest {
     @Test
     fun `a hit is persisted`() =
         runTest {
+            // Given
             val c = seed()
             val makeGuess = MakeGuessUseCase(store, store)
-            val (updated, outcome) = makeGuess(c.id, Guess("hello"))
+            val guess = Guess("hello")
+
+            // When
+            val (updated, outcome) = makeGuess(c.id, guess)
+
+            // Then
             assertEquals(GuessOutcome.HIT, outcome)
             assertEquals(MaskedToken.Revealed("hello"), updated.maskedPrompt().tokens[0])
             assertEquals(MaskedToken.Revealed("hello"), store(c.id)?.maskedPrompt()?.tokens?.get(0))
@@ -34,19 +40,29 @@ class MakeGuessUseCaseTest {
     @Test
     fun `an unknown challenge throws ChallengeNotFound`() =
         runTest {
+            // Given
             val makeGuess = MakeGuessUseCase(store, store)
+            val unknownId = ChallengeId.new()
+            val guess = Guess("hello")
+
+            // When / Then
             assertFailsWith<ChallengeNotFound> {
-                makeGuess(ChallengeId.new(), Guess("hello"))
+                makeGuess(unknownId, guess)
             }
         }
 
     @Test
     fun `an optimistic-lock conflict on store propagates`() =
         runTest {
+            // Given
             val c = seed()
             val conflicting = StoreChallenge { throw OptimisticLockConflict(it.id) }
+            val makeGuess = MakeGuessUseCase(store, conflicting)
+            val guess = Guess("hello")
+
+            // When / Then
             assertFailsWith<OptimisticLockConflict> {
-                MakeGuessUseCase(store, conflicting)(c.id, Guess("hello"))
+                makeGuess(c.id, guess)
             }
         }
 }

@@ -31,9 +31,7 @@ dependencies {
     implementation(libs.bundles.spring.ai.starters)
 
     testImplementation(libs.bundles.unit.test)
-    testImplementation(libs.bundles.spring.boot.test) {
-        exclude("org.mockito", "mockito-core")
-    }
+    testImplementation(libs.bundles.spring.boot.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":beat-the-machine-domain")))
     testRuntimeOnly(libs.junit.platform.launcher)

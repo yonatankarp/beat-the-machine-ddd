@@ -5,11 +5,11 @@ import com.yonatankarp.beatthemachine.application.port.output.StoredImage
 import com.yonatankarp.testballoon.spring.SpringTestConfig
 import com.yonatankarp.testballoon.spring.springTest
 import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
-import kotlin.test.assertContentEquals
 
 @WebFluxTest(PictureController::class)
 class PictureWebContext : SpringTestConfig()
@@ -35,7 +35,7 @@ val PictureControllerSuite by testSuite {
                 .expectHeader()
                 .valueEquals("Cache-Control", "public, max-age=31536000, immutable")
                 .expectBody<ByteArray>()
-                .consumeWith { assertContentEquals(byteArrayOf(1, 2, 3), it.responseBody) }
+                .consumeWith { it.responseBody shouldBe byteArrayOf(1, 2, 3) }
         }
 
         test("returns 404 for unknown id") {

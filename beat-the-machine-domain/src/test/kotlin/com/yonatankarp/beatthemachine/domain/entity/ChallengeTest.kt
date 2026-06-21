@@ -27,17 +27,23 @@ val ChallengeSuite by testSuite {
 
         whenever("a correct guess is made") {
             val (updated, outcome) = challenge.makeGuess("hello".asGuess())
-            then("outcome is HIT, status IN_PROGRESS, lives unchanged") {
+            then("the outcome is a hit") {
                 outcome shouldBe GuessOutcome.HIT
+            }
+            then("the challenge stays in progress") {
                 updated.status shouldBe ChallengeStatus.IN_PROGRESS
+            }
+            then("no life is lost") {
                 updated.lives.remaining shouldBe 3
             }
         }
 
         whenever("a wrong guess is made") {
             val (updated, outcome) = challenge.makeGuess("nope".asGuess())
-            then("outcome is MISS and one life is lost") {
+            then("the outcome is a miss") {
                 outcome shouldBe GuessOutcome.MISS
+            }
+            then("one life is lost") {
                 updated.lives.remaining shouldBe 2
             }
         }
@@ -45,16 +51,20 @@ val ChallengeSuite by testSuite {
         whenever("a duplicate guess is made") {
             val (afterFirst, _) = challenge.makeGuess("nope".asGuess())
             val (afterSecond, outcome) = afterFirst.makeGuess("Nope".asGuess())
-            then("outcome is DUPLICATE and no additional life is lost") {
+            then("the outcome is a duplicate") {
                 outcome shouldBe GuessOutcome.DUPLICATE
+            }
+            then("no additional life is lost") {
                 afterSecond.lives.remaining shouldBe 2
             }
         }
 
         whenever("a guess is made") {
-            then("the receiver is not mutated") {
-                challenge.makeGuess("nope".asGuess())
+            challenge.makeGuess("nope".asGuess())
+            then("the receiver lives are not mutated") {
                 challenge.lives.remaining shouldBe 3
+            }
+            then("the receiver guesses are not mutated") {
                 challenge.guesses.isEmpty().shouldBeTrue()
             }
         }
@@ -74,8 +84,10 @@ val ChallengeSuite by testSuite {
             val challenge = mediumChallenge()
             val (afterFirst, _) = challenge.makeGuess("hello".asGuess())
             val (afterSecond, outcome) = afterFirst.makeGuess("world".asGuess())
-            then("outcome is HIT and status is BEATEN") {
+            then("the outcome is a hit") {
                 outcome shouldBe GuessOutcome.HIT
+            }
+            then("the status is beaten") {
                 afterSecond.status shouldBe ChallengeStatus.BEATEN
             }
         }
@@ -99,8 +111,10 @@ val ChallengeSuite by testSuite {
     given("a medium challenge") {
         whenever("forfeited") {
             val forfeited = mediumChallenge().forfeit()
-            then("status is LOST and all tokens are revealed") {
+            then("status is LOST") {
                 forfeited.status shouldBe ChallengeStatus.LOST
+            }
+            then("all tokens are revealed") {
                 forfeited
                     .maskedPrompt()
                     .tokens
@@ -111,9 +125,12 @@ val ChallengeSuite by testSuite {
 
         whenever("maskedPrompt after one hit") {
             val (afterHit, _) = mediumChallenge().makeGuess("hello".asGuess())
-            then("first token revealed, second hidden") {
+            then("the first token is revealed") {
                 val masked = afterHit.maskedPrompt()
                 masked.tokens[0] shouldBe MaskedToken.Revealed("hello")
+            }
+            then("the second token is hidden") {
+                val masked = afterHit.maskedPrompt()
                 masked.tokens[1] shouldBe MaskedToken.Hidden(5)
             }
         }
@@ -128,10 +145,16 @@ val ChallengeSuite by testSuite {
             val challenge = mediumChallenge()
             val newPicture = readyPicture("https://example.com/img.png")
             val updated = challenge.withPicture(newPicture)
-            then("picture updated, version same, original untouched, not same reference") {
+            then("the picture is updated") {
                 updated.picture shouldBe newPicture
+            }
+            then("the version is unchanged") {
                 updated.version shouldBe challenge.version
+            }
+            then("the original picture is still pending") {
                 challenge.picture shouldBe Picture.Pending
+            }
+            then("the updated challenge is a new instance") {
                 (challenge !== updated).shouldBeTrue()
             }
         }
@@ -140,9 +163,13 @@ val ChallengeSuite by testSuite {
     given("Challenge.start") {
         whenever("called with a prompt and lives") {
             val challenge = Challenge.start("hello world".asPrompt(), 6.lives())
-            then("defaults to pending picture and medium difficulty in progress") {
+            then("the picture defaults to pending") {
                 challenge.picture shouldBe Picture.Pending
+            }
+            then("the difficulty defaults to medium") {
                 challenge.difficulty shouldBe Difficulty.MEDIUM
+            }
+            then("the status is in progress") {
                 challenge.status shouldBe ChallengeStatus.IN_PROGRESS
             }
         }
@@ -162,12 +189,22 @@ val ChallengeSuite by testSuite {
                     difficulty = Difficulty.HARD,
                     version = 7L,
                 )
-            then("reconstitutes the challenge and preserves all fields") {
+            then("the secret prompt is preserved") {
                 challenge.secretPrompt() shouldBe prompt
+            }
+            then("the lives remaining is preserved") {
                 challenge.lives.remaining shouldBe 4
+            }
+            then("the status is preserved") {
                 challenge.status shouldBe ChallengeStatus.IN_PROGRESS
+            }
+            then("the picture is preserved") {
                 challenge.picture shouldBe Picture.Failed
+            }
+            then("the difficulty is preserved") {
                 challenge.difficulty shouldBe Difficulty.HARD
+            }
+            then("the version is preserved") {
                 challenge.version shouldBe 7L
             }
         }

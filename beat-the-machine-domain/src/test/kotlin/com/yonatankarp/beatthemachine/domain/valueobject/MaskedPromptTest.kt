@@ -13,9 +13,12 @@ import io.kotest.matchers.shouldBe
 val MaskedPromptSuite by testSuite {
     given("a two-word prompt with no guesses") {
         whenever("masking") {
-            then("all tokens are hidden and not fully revealed") {
+            then("all tokens are hidden") {
                 val masked = MaskedPrompt.of("hello world".asPrompt(), emptySet())
                 masked.tokens shouldBe listOf(MaskedToken.Hidden(5), MaskedToken.Hidden(5))
+            }
+            then("the prompt is not fully revealed") {
+                val masked = MaskedPrompt.of("hello world".asPrompt(), emptySet())
                 masked.isFullyRevealed().shouldBeFalse()
             }
         }
@@ -23,9 +26,12 @@ val MaskedPromptSuite by testSuite {
 
     given("a prompt with one word guessed") {
         whenever("masking") {
-            then("first token is revealed and second is hidden") {
+            then("the first token is revealed") {
                 val masked = MaskedPrompt.of("Hello World".asPrompt(), setOf("hello".asGuess()))
                 masked.tokens[0] shouldBe MaskedToken.Revealed("Hello")
+            }
+            then("the second token is hidden") {
+                val masked = MaskedPrompt.of("Hello World".asPrompt(), setOf("hello".asGuess()))
                 masked.tokens[1] shouldBe MaskedToken.Hidden(5)
             }
         }
@@ -47,9 +53,12 @@ val MaskedPromptSuite by testSuite {
 
     given("a prompt with mixed whitespace") {
         whenever("masking with one word guessed") {
-            then("produces 2 tokens with the last revealed") {
+            then("produces exactly 2 tokens") {
                 val masked = MaskedPrompt.of("hello\t \nworld".asPrompt(), setOf("world".asGuess()))
                 masked.tokens.size shouldBe 2
+            }
+            then("the last token is revealed") {
+                val masked = MaskedPrompt.of("hello\t \nworld".asPrompt(), setOf("world".asGuess()))
                 masked.tokens[1] shouldBe MaskedToken.Revealed("world")
             }
         }

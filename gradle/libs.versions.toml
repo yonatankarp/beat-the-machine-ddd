@@ -14,6 +14,9 @@ jvm = "25"
 kotlinx-coroutines = "1.11.0"
 mockwebserver = "4.12.0"
 spring-ai = "2.0.0"
+testballoon = "1.0.1-K2.4.0"
+kotest = "6.0.3"
+junit-platform-launcher = "6.0.3"
 
 [libraries]
 # --- Versions managed by Spring Boot's BOM (no version declared here) ---
@@ -39,6 +42,10 @@ springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmoc
 spring-ai-bom = { module = "org.springframework.ai:spring-ai-bom", version.ref = "spring-ai" }
 spring-ai-starter-model-openai = { module = "org.springframework.ai:spring-ai-starter-model-openai" }
 spring-ai-starter-model-ollama = { module = "org.springframework.ai:spring-ai-starter-model-ollama" }
+testballoon-core = { module = "de.infix.testBalloon:testBalloon-framework-core", version.ref = "testballoon" }
+testballoon-spring = { module = "com.yonatankarp:testballoon-spring", version = "0.1.1" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform-launcher" }
 
 [bundles]
 # Production Spring Boot starters used by the adapters module.
@@ -55,12 +62,15 @@ kotlinx-coroutines = [
 ]
 # Plain unit-testing stack shared by every module.
 unit-test = [
+    "testballoon-core",
+    "kotest-assertions-core",
     "kotlin-test",
     "mockk",
     "mockwebserver",
 ]
 # Spring slice/integration testing plus the springmockk @MockkBean bridge.
 spring-boot-test = [
+    "testballoon-spring",
     "spring-boot-starter-test",
     "spring-boot-starter-webflux-test",
     "springmockk",
@@ -79,3 +89,4 @@ spring-dependency-management = { id = "io.spring.dependency-management", version
 openapi-contracts = { id = "com.yonatankarp.openapi.contracts", version.ref = "openapiContracts" }
 node-gradle = { id = "com.github.node-gradle.node", version.ref = "node-gradle" }
 openapi-generator = { id = "org.openapi.generator", version.ref = "openapi-generator" }
+testballoon = { id = "de.infix.testBalloon", version.ref = "testballoon" }

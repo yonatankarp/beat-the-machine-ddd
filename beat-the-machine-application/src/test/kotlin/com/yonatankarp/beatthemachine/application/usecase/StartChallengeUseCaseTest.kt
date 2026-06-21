@@ -6,46 +6,42 @@ import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 
-class StartChallengeUseCaseTest {
-    private val prompts = PromptSource { "hello world".asPrompt() }
-    private val store = FakeChallengeStore()
+val StartChallengeUseCaseSuite by testSuite {
+    val prompts = PromptSource { "hello world".asPrompt() } // stateless, safe at suite scope
 
-    @Test
-    fun `starts a pending challenge and enqueues picture generation`() =
-        runTest {
-            // Given
-            val enqueued = mutableListOf<ChallengeId>()
-            val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
+    test("starts a pending challenge and enqueues picture generation") {
+        // Given
+        val store = FakeChallengeStore() // mutable: fresh per test
+        val enqueued = mutableListOf<ChallengeId>()
+        val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
 
-            // When
-            val challenge = startChallenge(Difficulty.MEDIUM)
+        // When
+        val challenge = startChallenge(Difficulty.MEDIUM)
 
-            // Then
-            assertEquals(Picture.Pending, challenge.picture)
-            assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
-            assertEquals(listOf(challenge.id), enqueued)
-            assertTrue(store.byId.containsKey(challenge.id))
-        }
+        // Then
+        challenge.picture shouldBe Picture.Pending
+        challenge.status shouldBe ChallengeStatus.IN_PROGRESS
+        enqueued shouldBe listOf(challenge.id)
+        store.byId.containsKey(challenge.id).shouldBeTrue()
+    }
 
-    @Test
-    fun `starting lives scale with difficulty`() =
-        runTest {
-            // Given
-            val startChallenge = StartChallengeUseCase(prompts, store) {}
+    test("starting lives scale with difficulty") {
+        // Given
+        val store = FakeChallengeStore()
+        val startChallenge = StartChallengeUseCase(prompts, store) {}
 
-            // When
-            val easy = startChallenge(Difficulty.EASY)
-            val medium = startChallenge(Difficulty.MEDIUM)
-            val hard = startChallenge(Difficulty.HARD)
+        // When
+        val easy = startChallenge(Difficulty.EASY)
+        val medium = startChallenge(Difficulty.MEDIUM)
+        val hard = startChallenge(Difficulty.HARD)
 
-            // Then
-            assertEquals(8, easy.lives.remaining)
-            assertEquals(6, medium.lives.remaining)
-            assertEquals(4, hard.lives.remaining)
-        }
+        // Then
+        easy.lives.remaining shouldBe 8
+        medium.lives.remaining shouldBe 6
+        hard.lives.remaining shouldBe 4
+    }
 }

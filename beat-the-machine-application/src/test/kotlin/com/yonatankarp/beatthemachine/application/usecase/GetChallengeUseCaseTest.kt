@@ -4,35 +4,31 @@ import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 
-class GetChallengeUseCaseTest {
-    private val store = FakeChallengeStore()
-    private val getChallenge = GetChallengeUseCase(store)
+val GetChallengeUseCaseSuite by testSuite {
+    test("returns a challenge that exists") {
+        // Given
+        val store = FakeChallengeStore() // mutable: fresh per test
+        val getChallenge = GetChallengeUseCase(store)
+        val challenge = store(mediumChallenge(prompt = "red fox".asPrompt()))
 
-    @Test
-    fun `returns a challenge that exists`() =
-        runTest {
-            // Given
-            val challenge = store(mediumChallenge(prompt = "red fox".asPrompt()))
+        // When
+        val result = getChallenge(challenge.id)
 
-            // When
-            val result = getChallenge(challenge.id)
+        // Then
+        result shouldBe challenge
+    }
 
-            // Then
-            assertEquals(challenge, result)
-        }
+    test("throws ChallengeNotFound for an unknown id") {
+        // Given
+        val store = FakeChallengeStore()
+        val getChallenge = GetChallengeUseCase(store)
+        val unknownId = aChallengeId()
 
-    @Test
-    fun `throws ChallengeNotFound for an unknown id`() =
-        runTest {
-            // Given
-            val unknownId = aChallengeId()
-
-            // When / Then
-            assertFailsWith<ChallengeNotFound> { getChallenge(unknownId) }
-        }
+        // When / Then
+        shouldThrow<ChallengeNotFound> { getChallenge(unknownId) }
+    }
 }

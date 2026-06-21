@@ -5,41 +5,34 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 
-class ForfeitChallengeUseCaseTest {
-    private val store = FakeChallengeStore()
+val ForfeitChallengeUseCaseSuite by testSuite {
+    test("forfeit loads the challenge, sets LOST, and persists it") {
+        // Given
+        val store = FakeChallengeStore() // mutable: fresh per test
+        val c: Challenge = store(mediumChallenge())
+        val forfeitChallenge = ForfeitChallengeUseCase(store, store)
 
-    private suspend fun seed(): Challenge = store(mediumChallenge())
+        // When
+        val result = forfeitChallenge(c.id)
 
-    @Test
-    fun `forfeit loads the challenge, sets LOST, and persists it`() =
-        runTest {
-            // Given
-            val c = seed()
-            val forfeitChallenge = ForfeitChallengeUseCase(store, store)
+        // Then
+        result.status shouldBe ChallengeStatus.LOST
+        store(c.id)?.status shouldBe ChallengeStatus.LOST
+    }
 
-            // When
-            val result = forfeitChallenge(c.id)
+    test("an unknown challenge throws ChallengeNotFound") {
+        // Given
+        val store = FakeChallengeStore()
+        val forfeitChallenge = ForfeitChallengeUseCase(store, store)
+        val unknownId = aChallengeId()
 
-            // Then
-            assertEquals(ChallengeStatus.LOST, result.status)
-            assertEquals(ChallengeStatus.LOST, store(c.id)?.status)
+        // When / Then
+        shouldThrow<ChallengeNotFound> {
+            forfeitChallenge(unknownId)
         }
-
-    @Test
-    fun `an unknown challenge throws ChallengeNotFound`() =
-        runTest {
-            // Given
-            val forfeitChallenge = ForfeitChallengeUseCase(store, store)
-            val unknownId = aChallengeId()
-
-            // When / Then
-            assertFailsWith<ChallengeNotFound> {
-                forfeitChallenge(unknownId)
-            }
-        }
+    }
 }

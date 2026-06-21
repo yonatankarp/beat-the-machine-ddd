@@ -1,38 +1,32 @@
 package com.yonatankarp.beatthemachine.domain.valueobject
 
 import com.yonatankarp.beatthemachine.domain.exception.InvalidGuess
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import com.yonatankarp.beatthemachine.test.dsl.given
+import com.yonatankarp.beatthemachine.test.dsl.then
+import com.yonatankarp.beatthemachine.test.dsl.whenever
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 
-class GuessTest {
-    @Test
-    fun `rejects blank word`() {
-        // Given
-        val word = "   "
-
-        // When / Then
-        assertFailsWith<InvalidGuess> { Guess(word) }
+val GuessSuite by testSuite {
+    given("constructing a Guess") {
+        whenever("the word is blank") {
+            then("it is rejected") {
+                shouldThrow<InvalidGuess> { Guess("   ") }
+            }
+        }
+        whenever("the word is empty") {
+            then("it is rejected") {
+                shouldThrow<InvalidGuess> { Guess("") }
+            }
+        }
     }
 
-    @Test
-    fun `rejects empty word`() {
-        // Given
-        val word = ""
-
-        // When / Then
-        assertFailsWith<InvalidGuess> { Guess(word) }
-    }
-
-    @Test
-    fun `normalized trims and lowercases`() {
-        // Given
-        val guess = Guess("Hello")
-
-        // When
-        val normalized = guess.normalized()
-
-        // Then
-        assertEquals("hello", normalized)
+    given("a Guess with mixed case") {
+        whenever("normalized") {
+            then("trims and lowercases") {
+                Guess("Hello").normalized() shouldBe "hello"
+            }
+        }
     }
 }

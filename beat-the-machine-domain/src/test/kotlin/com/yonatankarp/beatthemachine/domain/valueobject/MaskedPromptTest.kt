@@ -2,80 +2,69 @@ package com.yonatankarp.beatthemachine.domain.valueobject
 
 import com.yonatankarp.beatthemachine.test.dsl.asGuess
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import com.yonatankarp.beatthemachine.test.dsl.given
+import com.yonatankarp.beatthemachine.test.dsl.then
+import com.yonatankarp.beatthemachine.test.dsl.whenever
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 
-class MaskedPromptTest {
-    @Test
-    fun `hides every word when there are no guesses`() {
-        // Given
-        val secret = "hello world".asPrompt()
-        val guesses = emptySet<Guess>()
-
-        // When
-        val masked = MaskedPrompt.of(secret, guesses)
-
-        // Then
-        assertEquals(listOf(MaskedToken.Hidden(5), MaskedToken.Hidden(5)), masked.tokens)
-        assertFalse(masked.isFullyRevealed())
+val MaskedPromptSuite by testSuite {
+    given("a two-word prompt with no guesses") {
+        whenever("masking") {
+            then("all tokens are hidden and not fully revealed") {
+                val masked = MaskedPrompt.of("hello world".asPrompt(), emptySet())
+                masked.tokens shouldBe listOf(MaskedToken.Hidden(5), MaskedToken.Hidden(5))
+                masked.isFullyRevealed().shouldBeFalse()
+            }
+        }
     }
 
-    @Test
-    fun `reveals a matching word case-insensitively`() {
-        // Given
-        val secret = "Hello World".asPrompt()
-        val guesses = setOf("hello".asGuess())
-
-        // When
-        val masked = MaskedPrompt.of(secret, guesses)
-
-        // Then
-        assertEquals(MaskedToken.Revealed("Hello"), masked.tokens[0])
-        assertEquals(MaskedToken.Hidden(5), masked.tokens[1])
+    given("a prompt with one word guessed") {
+        whenever("masking") {
+            then("first token is revealed and second is hidden") {
+                val masked = MaskedPrompt.of("Hello World".asPrompt(), setOf("hello".asGuess()))
+                masked.tokens[0] shouldBe MaskedToken.Revealed("Hello")
+                masked.tokens[1] shouldBe MaskedToken.Hidden(5)
+            }
+        }
     }
 
-    @Test
-    fun `reveals every occurrence of a repeated word`() {
-        // Given
-        val secret = "na na batman".asPrompt()
-        val guesses = setOf("na".asGuess())
-
-        // When
-        val masked = MaskedPrompt.of(secret, guesses)
-
-        // Then
-        assertEquals(
-            listOf(MaskedToken.Revealed("na"), MaskedToken.Revealed("na"), MaskedToken.Hidden(6)),
-            masked.tokens,
-        )
+    given("a prompt with a repeated word guessed") {
+        whenever("masking") {
+            then("both occurrences are revealed and batman is hidden") {
+                val masked = MaskedPrompt.of("na na batman".asPrompt(), setOf("na".asGuess()))
+                masked.tokens shouldBe
+                    listOf(
+                        MaskedToken.Revealed("na"),
+                        MaskedToken.Revealed("na"),
+                        MaskedToken.Hidden(6),
+                    )
+            }
+        }
     }
 
-    @Test
-    fun `collapses arbitrary whitespace using one rule`() {
-        // Given
-        val secret = "hello\t \nworld".asPrompt()
-        val guesses = setOf("world".asGuess())
-
-        // When
-        val masked = MaskedPrompt.of(secret, guesses)
-
-        // Then
-        assertEquals(2, masked.tokens.size)
-        assertEquals(MaskedToken.Revealed("world"), masked.tokens[1])
+    given("a prompt with mixed whitespace") {
+        whenever("masking with one word guessed") {
+            then("produces 2 tokens with the last revealed") {
+                val masked = MaskedPrompt.of("hello\t \nworld".asPrompt(), setOf("world".asGuess()))
+                masked.tokens.size shouldBe 2
+                masked.tokens[1] shouldBe MaskedToken.Revealed("world")
+            }
+        }
     }
 
-    @Test
-    fun `is fully revealed when all words are guessed`() {
-        // Given
-        val secret = "hello world".asPrompt()
-        val guesses = setOf("hello".asGuess(), "world".asGuess())
-
-        // When
-        val masked = MaskedPrompt.of(secret, guesses)
-
-        // Then
-        assertTrue(masked.isFullyRevealed())
+    given("all words guessed") {
+        whenever("masking") {
+            then("isFullyRevealed is true") {
+                val masked =
+                    MaskedPrompt.of(
+                        "hello world".asPrompt(),
+                        setOf("hello".asGuess(), "world".asGuess()),
+                    )
+                masked.isFullyRevealed().shouldBeTrue()
+            }
+        }
     }
 }

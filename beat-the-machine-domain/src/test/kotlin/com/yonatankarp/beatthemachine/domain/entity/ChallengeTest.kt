@@ -10,211 +10,166 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asGuess
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
+import com.yonatankarp.beatthemachine.test.dsl.given
 import com.yonatankarp.beatthemachine.test.dsl.lives
+import com.yonatankarp.beatthemachine.test.dsl.then
+import com.yonatankarp.beatthemachine.test.dsl.whenever
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotSame
-import kotlin.test.assertTrue
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 
-class ChallengeTest {
-    @Test
-    fun `a correct guess reveals the word and stays in progress`() {
-        // Given
+val ChallengeSuite by testSuite {
+    given("a medium challenge with 3 lives") {
         val challenge = mediumChallenge(lives = 3.lives())
-        val guess = "hello".asGuess()
 
-        // When
-        val (updated, outcome) = challenge.makeGuess(guess)
+        whenever("a correct guess is made") {
+            val (updated, outcome) = challenge.makeGuess("hello".asGuess())
+            then("outcome is HIT, status IN_PROGRESS, lives unchanged") {
+                outcome shouldBe GuessOutcome.HIT
+                updated.status shouldBe ChallengeStatus.IN_PROGRESS
+                updated.lives.remaining shouldBe 3
+            }
+        }
 
-        // Then
-        assertEquals(GuessOutcome.HIT, outcome)
-        assertEquals(ChallengeStatus.IN_PROGRESS, updated.status)
-        assertEquals(3, updated.lives.remaining)
+        whenever("a wrong guess is made") {
+            val (updated, outcome) = challenge.makeGuess("nope".asGuess())
+            then("outcome is MISS and one life is lost") {
+                outcome shouldBe GuessOutcome.MISS
+                updated.lives.remaining shouldBe 2
+            }
+        }
+
+        whenever("a duplicate guess is made") {
+            val (afterFirst, _) = challenge.makeGuess("nope".asGuess())
+            val (afterSecond, outcome) = afterFirst.makeGuess("Nope".asGuess())
+            then("outcome is DUPLICATE and no additional life is lost") {
+                outcome shouldBe GuessOutcome.DUPLICATE
+                afterSecond.lives.remaining shouldBe 2
+            }
+        }
+
+        whenever("a guess is made") {
+            then("the receiver is not mutated") {
+                challenge.makeGuess("nope".asGuess())
+                challenge.lives.remaining shouldBe 3
+                challenge.guesses.isEmpty().shouldBeTrue()
+            }
+        }
     }
 
-    @Test
-    fun `a wrong guess costs a life`() {
-        // Given
-        val challenge = mediumChallenge(lives = 3.lives())
-        val guess = "nope".asGuess()
-
-        // When
-        val (updated, outcome) = challenge.makeGuess(guess)
-
-        // Then
-        assertEquals(GuessOutcome.MISS, outcome)
-        assertEquals(2, updated.lives.remaining)
+    given("a medium challenge with 1 life") {
+        whenever("a wrong guess is made") {
+            val (updated, _) = mediumChallenge(lives = 1.lives()).makeGuess("nope".asGuess())
+            then("status is LOST") {
+                updated.status shouldBe ChallengeStatus.LOST
+            }
+        }
     }
 
-    @Test
-    fun `guessing every word beats the machine`() {
-        // Given
-        val challenge = mediumChallenge()
-        val (afterFirst, _) = challenge.makeGuess("hello".asGuess())
-
-        // When
-        val (afterSecond, outcome) = afterFirst.makeGuess("world".asGuess())
-
-        // Then
-        assertEquals(GuessOutcome.HIT, outcome)
-        assertEquals(ChallengeStatus.BEATEN, afterSecond.status)
+    given("guessing every word") {
+        whenever("all words are guessed") {
+            val challenge = mediumChallenge()
+            val (afterFirst, _) = challenge.makeGuess("hello".asGuess())
+            val (afterSecond, outcome) = afterFirst.makeGuess("world".asGuess())
+            then("outcome is HIT and status is BEATEN") {
+                outcome shouldBe GuessOutcome.HIT
+                afterSecond.status shouldBe ChallengeStatus.BEATEN
+            }
+        }
     }
 
-    @Test
-    fun `running out of lives loses the challenge`() {
-        // Given
-        val challenge = mediumChallenge(lives = 1.lives())
-        val guess = "nope".asGuess()
-
-        // When
-        val (updated, _) = challenge.makeGuess(guess)
-
-        // Then
-        assertEquals(ChallengeStatus.LOST, updated.status)
+    given("a finished challenge") {
+        whenever("makeGuess is called after the challenge is over") {
+            then("it is rejected") {
+                val (lost, _) = mediumChallenge(lives = 1.lives()).makeGuess("nope".asGuess())
+                shouldThrow<ChallengeAlreadyOver> { lost.makeGuess("hello".asGuess()) }
+            }
+        }
+        whenever("forfeit is called after the challenge is over") {
+            then("it is rejected") {
+                val forfeited = mediumChallenge().forfeit()
+                shouldThrow<ChallengeAlreadyOver> { forfeited.forfeit() }
+            }
+        }
     }
 
-    @Test
-    fun `a duplicate guess is a no-op and costs no life`() {
-        // Given
-        val challenge = mediumChallenge(lives = 3.lives())
-        val (afterFirst, _) = challenge.makeGuess("nope".asGuess())
+    given("a medium challenge") {
+        whenever("forfeited") {
+            val forfeited = mediumChallenge().forfeit()
+            then("status is LOST and all tokens are revealed") {
+                forfeited.status shouldBe ChallengeStatus.LOST
+                forfeited
+                    .maskedPrompt()
+                    .tokens
+                    .all { it is MaskedToken.Revealed }
+                    .shouldBeTrue()
+            }
+        }
 
-        // When
-        val (afterSecond, outcome) = afterFirst.makeGuess("Nope".asGuess())
+        whenever("maskedPrompt after one hit") {
+            val (afterHit, _) = mediumChallenge().makeGuess("hello".asGuess())
+            then("first token revealed, second hidden") {
+                val masked = afterHit.maskedPrompt()
+                masked.tokens[0] shouldBe MaskedToken.Revealed("hello")
+                masked.tokens[1] shouldBe MaskedToken.Hidden(5)
+            }
+        }
 
-        // Then
-        assertEquals(GuessOutcome.DUPLICATE, outcome)
-        assertEquals(2, afterSecond.lives.remaining)
+        whenever("maxLives is queried") {
+            then("derives from secret and difficulty") {
+                mediumChallenge().maxLives() shouldBe Lives(6)
+            }
+        }
+
+        whenever("withPicture is called") {
+            val challenge = mediumChallenge()
+            val newPicture = readyPicture("https://example.com/img.png")
+            val updated = challenge.withPicture(newPicture)
+            then("picture updated, version same, original untouched, not same reference") {
+                updated.picture shouldBe newPicture
+                updated.version shouldBe challenge.version
+                challenge.picture shouldBe Picture.Pending
+                (challenge !== updated).shouldBeTrue()
+            }
+        }
     }
 
-    @Test
-    fun `makeGuess does not mutate the receiver`() {
-        // Given
-        val challenge = mediumChallenge(lives = 3.lives())
-        val guess = "nope".asGuess()
-
-        // When
-        challenge.makeGuess(guess)
-
-        // Then
-        assertEquals(3, challenge.lives.remaining)
-        assertTrue(challenge.guesses.isEmpty())
+    given("Challenge.start") {
+        whenever("called with a prompt and lives") {
+            val challenge = Challenge.start("hello world".asPrompt(), 6.lives())
+            then("defaults to pending picture and medium difficulty in progress") {
+                challenge.picture shouldBe Picture.Pending
+                challenge.difficulty shouldBe Difficulty.MEDIUM
+                challenge.status shouldBe ChallengeStatus.IN_PROGRESS
+            }
+        }
     }
 
-    @Test
-    fun `guessing after the challenge is over is rejected`() {
-        // Given
-        val (lost, _) = mediumChallenge(lives = 1.lives()).makeGuess("nope".asGuess())
-
-        // When / Then
-        assertFailsWith<ChallengeAlreadyOver> { lost.makeGuess("hello".asGuess()) }
-    }
-
-    @Test
-    fun `forfeit reveals the prompt and loses`() {
-        // Given
-        val challenge = mediumChallenge()
-
-        // When
-        val forfeited = challenge.forfeit()
-
-        // Then
-        assertEquals(ChallengeStatus.LOST, forfeited.status)
-        assertTrue(forfeited.maskedPrompt().tokens.all { it is MaskedToken.Revealed })
-    }
-
-    @Test
-    fun `forfeit after the challenge is over is rejected`() {
-        // Given
-        val forfeited = mediumChallenge().forfeit()
-
-        // When / Then
-        assertFailsWith<ChallengeAlreadyOver> { forfeited.forfeit() }
-    }
-
-    @Test
-    fun `withPicture returns an independent copy at the same version`() {
-        // Given
-        val challenge = mediumChallenge()
-        val newPicture = readyPicture("https://example.com/img.png")
-
-        // When
-        val updated = challenge.withPicture(newPicture)
-
-        // Then
-        assertEquals(newPicture, updated.picture)
-        assertEquals(challenge.version, updated.version)
-        assertEquals(Picture.Pending, challenge.picture)
-        assertNotSame(challenge, updated)
-    }
-
-    @Test
-    fun `maxLives derives from the challenge secret and difficulty`() {
-        // Given
-        val challenge = mediumChallenge()
-
-        // When
-        val max = challenge.maxLives()
-
-        // Then
-        assertEquals(Lives(6), max)
-    }
-
-    @Test
-    fun `maskedPrompt hides unguessed words while still in progress`() {
-        // Given
-        val (afterHit, _) = mediumChallenge().makeGuess("hello".asGuess())
-
-        // When
-        val masked = afterHit.maskedPrompt()
-
-        // Then
-        assertEquals(MaskedToken.Revealed("hello"), masked.tokens[0])
-        assertEquals(MaskedToken.Hidden(5), masked.tokens[1])
-    }
-
-    @Test
-    fun `start defaults to a pending picture and medium difficulty`() {
-        // Given
-        val prompt = "hello world".asPrompt()
-        val lives = 6.lives()
-
-        // When
-        val challenge = Challenge.start(prompt, lives)
-
-        // Then
-        assertEquals(Picture.Pending, challenge.picture)
-        assertEquals(Difficulty.MEDIUM, challenge.difficulty)
-        assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
-    }
-
-    @Test
-    fun `rehydrate reconstitutes a challenge and preserves the secret prompt`() {
-        // Given
-        val prompt = "secret phrase".asPrompt()
-
-        // When
-        val challenge =
-            Challenge.rehydrate(
-                id = aChallengeId(),
-                prompt = prompt,
-                guesses = emptySet(),
-                lives = 4.lives(),
-                status = ChallengeStatus.IN_PROGRESS,
-                picture = Picture.Failed,
-                difficulty = Difficulty.HARD,
-                version = 7L,
-            )
-
-        // Then
-        assertEquals(prompt, challenge.secretPrompt())
-        assertEquals(4, challenge.lives.remaining)
-        assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
-        assertEquals(Picture.Failed, challenge.picture)
-        assertEquals(Difficulty.HARD, challenge.difficulty)
-        assertEquals(7L, challenge.version)
+    given("Challenge.rehydrate") {
+        whenever("called with full state") {
+            val prompt = "secret phrase".asPrompt()
+            val challenge =
+                Challenge.rehydrate(
+                    id = aChallengeId(),
+                    prompt = prompt,
+                    guesses = emptySet(),
+                    lives = 4.lives(),
+                    status = ChallengeStatus.IN_PROGRESS,
+                    picture = Picture.Failed,
+                    difficulty = Difficulty.HARD,
+                    version = 7L,
+                )
+            then("reconstitutes the challenge and preserves all fields") {
+                challenge.secretPrompt() shouldBe prompt
+                challenge.lives.remaining shouldBe 4
+                challenge.status shouldBe ChallengeStatus.IN_PROGRESS
+                challenge.picture shouldBe Picture.Failed
+                challenge.difficulty shouldBe Difficulty.HARD
+                challenge.version shouldBe 7L
+            }
+        }
     }
 }

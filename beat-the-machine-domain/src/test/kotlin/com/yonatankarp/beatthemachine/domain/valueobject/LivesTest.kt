@@ -1,77 +1,73 @@
 package com.yonatankarp.beatthemachine.domain.valueobject
 
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import com.yonatankarp.beatthemachine.test.dsl.given
+import com.yonatankarp.beatthemachine.test.dsl.then
+import com.yonatankarp.beatthemachine.test.dsl.whenever
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 
-class LivesTest {
-    @Test
-    fun `cannot be negative`() {
-        // Given
-        val count = -1
-
-        // When / Then
-        assertFailsWith<IllegalArgumentException> { Lives(count) }
+val LivesSuite by testSuite {
+    given("constructing Lives") {
+        whenever("count is negative") {
+            then("it is rejected") {
+                shouldThrow<IllegalArgumentException> { Lives(-1) }
+            }
+        }
     }
 
-    @Test
-    fun `lose decrements and floors at zero`() {
-        // Given
-        val oneLife = Lives(1)
-        val noLives = Lives(0)
-
-        // When
-        val afterLosingFromOne = oneLife.lose()
-        val afterLosingFromZero = noLives.lose()
-
-        // Then
-        assertEquals(Lives(0), afterLosingFromOne)
-        assertEquals(Lives(0), afterLosingFromZero)
+    given("Lives with one remaining") {
+        whenever("losing") {
+            then("decrements to zero") {
+                Lives(1).lose() shouldBe Lives(0)
+            }
+        }
     }
 
-    @Test
-    fun `is exhausted at zero`() {
-        // Given
-        val noLives = Lives(0)
-        val oneLife = Lives(1)
-
-        // When
-        val exhausted = noLives.isExhausted()
-        val notExhausted = oneLife.isExhausted()
-
-        // Then
-        assertTrue(exhausted)
-        assertFalse(notExhausted)
+    given("Lives at zero") {
+        whenever("losing") {
+            then("floors at zero") {
+                Lives(0).lose() shouldBe Lives(0)
+            }
+        }
     }
 
-    @Test
-    fun `forSecret scales lives by word count and difficulty`() {
-        // Given
+    given("Lives count") {
+        whenever("checking isExhausted") {
+            then("returns true at zero") {
+                Lives(0).isExhausted().shouldBeTrue()
+            }
+            then("returns false above zero") {
+                Lives(1).isExhausted().shouldBeFalse()
+            }
+        }
+    }
+
+    given("scaling lives with forSecret") {
         val twoWordPrompt = "hello world".asPrompt()
 
-        // When
-        val easy = Lives.forSecret(twoWordPrompt, Difficulty.EASY)
-        val medium = Lives.forSecret(twoWordPrompt, Difficulty.MEDIUM)
-        val hard = Lives.forSecret(twoWordPrompt, Difficulty.HARD)
-
-        // Then
-        assertEquals(Lives(9), easy)
-        assertEquals(Lives(6), medium)
-        assertEquals(Lives(4), hard)
-    }
-
-    @Test
-    fun `forSecret floors at MIN_LIVES for very short secrets`() {
-        // Given
-        val oneWordPrompt = "x".asPrompt()
-
-        // When
-        val result = Lives.forSecret(oneWordPrompt, Difficulty.HARD)
-
-        // Then
-        assertEquals(Lives(2), result) // round(3 * 1 * 0.7) = 2 >= MIN_LIVES
+        whenever("difficulty is EASY") {
+            then("scales up") {
+                Lives.forSecret(twoWordPrompt, Difficulty.EASY) shouldBe Lives(9)
+            }
+        }
+        whenever("difficulty is MEDIUM") {
+            then("scales moderately") {
+                Lives.forSecret(twoWordPrompt, Difficulty.MEDIUM) shouldBe Lives(6)
+            }
+        }
+        whenever("difficulty is HARD") {
+            then("scales down") {
+                Lives.forSecret(twoWordPrompt, Difficulty.HARD) shouldBe Lives(4)
+            }
+        }
+        whenever("a very short secret would produce fewer than MIN_LIVES") {
+            then("floors at MIN_LIVES") {
+                Lives.forSecret("x".asPrompt(), Difficulty.HARD) shouldBe Lives(2)
+            }
+        }
     }
 }

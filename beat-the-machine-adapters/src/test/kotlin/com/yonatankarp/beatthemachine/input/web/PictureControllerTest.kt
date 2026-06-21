@@ -1,83 +1,71 @@
 package com.yonatankarp.beatthemachine.input.web
 
-import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.port.output.FindPicture
 import com.yonatankarp.beatthemachine.application.port.output.StoredImage
+import com.yonatankarp.testballoon.spring.SpringTestConfig
+import com.yonatankarp.testballoon.spring.springTest
+import de.infix.testBalloon.framework.core.testSuite
 import io.mockk.coEvery
-import org.junit.jupiter.api.Test
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
-import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import kotlin.test.assertContentEquals
 
 @WebFluxTest(PictureController::class)
-@TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
-class PictureControllerTest(
-    private val client: WebTestClient,
-) {
-    @MockkBean
-    lateinit var findPicture: FindPicture
+class PictureWebContext : SpringTestConfig()
 
-    @Test
-    fun `serves image bytes with correct content-type`() {
-        // Given
-        coEvery { findPicture answer FindPicture.Query("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "image/png")
+val PictureControllerSuite by testSuite {
+    springTest<PictureWebContext> {
+        val findPicture = mockBean<FindPicture>()
 
-        // When
-        val response =
-            client
-                .get()
-                .uri("/images/abc")
-                .exchange()
+        test("serves image bytes with correct content-type") {
+            coEvery { findPicture answer FindPicture.Query("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "image/png")
 
-        // Then
-        response
-            .expectStatus()
-            .isOk
-            .expectHeader()
-            .contentType("image/png")
-            .expectHeader()
-            .valueEquals("Cache-Control", "public, max-age=31536000, immutable")
-            .expectBody<ByteArray>()
-            .consumeWith { assertContentEquals(byteArrayOf(1, 2, 3), it.responseBody) }
-    }
+            val response =
+                bean<WebTestClient>()
+                    .get()
+                    .uri("/images/abc")
+                    .exchange()
 
-    @Test
-    fun `returns 404 for unknown id`() {
-        // Given
-        coEvery { findPicture answer FindPicture.Query("unknown") } returns null
+            response
+                .expectStatus()
+                .isOk
+                .expectHeader()
+                .contentType("image/png")
+                .expectHeader()
+                .valueEquals("Cache-Control", "public, max-age=31536000, immutable")
+                .expectBody<ByteArray>()
+                .consumeWith { assertContentEquals(byteArrayOf(1, 2, 3), it.responseBody) }
+        }
 
-        // When
-        val response =
-            client
-                .get()
-                .uri("/images/unknown")
-                .exchange()
+        test("returns 404 for unknown id") {
+            coEvery { findPicture answer FindPicture.Query("unknown") } returns null
 
-        // Then
-        response
-            .expectStatus()
-            .isNotFound
-    }
+            val response =
+                bean<WebTestClient>()
+                    .get()
+                    .uri("/images/unknown")
+                    .exchange()
 
-    @Test
-    fun `coerces non-image content-type to application octet-stream`() {
-        // Given
-        coEvery { findPicture answer FindPicture.Query("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "text/plain")
+            response
+                .expectStatus()
+                .isNotFound
+        }
 
-        // When
-        val response =
-            client
-                .get()
-                .uri("/images/abc")
-                .exchange()
+        test("coerces non-image content-type to application octet-stream") {
+            coEvery { findPicture answer FindPicture.Query("abc") } returns StoredImage(byteArrayOf(1, 2, 3), "text/plain")
 
-        // Then
-        response
-            .expectStatus()
-            .isOk
-            .expectHeader()
-            .contentType("application/octet-stream")
+            val response =
+                bean<WebTestClient>()
+                    .get()
+                    .uri("/images/abc")
+                    .exchange()
+
+            response
+                .expectStatus()
+                .isOk
+                .expectHeader()
+                .contentType("application/octet-stream")
+        }
     }
 }

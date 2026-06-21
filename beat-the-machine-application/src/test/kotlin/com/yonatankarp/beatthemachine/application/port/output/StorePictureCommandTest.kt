@@ -1,58 +1,38 @@
 package com.yonatankarp.beatthemachine.application.port.output
 
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 
-class StorePictureCommandTest {
-    @Test
-    fun `commands with the same bytes and content type are equal`() {
-        // Given
+val StorePictureCommandSuite by testSuite {
+    test("commands with the same bytes and content type are equal") {
         val command = StorePicture.Command(byteArrayOf(1, 2, 3), "image/png")
         val same = StorePicture.Command(byteArrayOf(1, 2, 3), "image/png")
-
-        // Then
-        assertEquals(command, same)
-        assertEquals(command.hashCode(), same.hashCode())
+        command shouldBe same
+        command.hashCode() shouldBe same.hashCode()
     }
 
-    @Test
-    fun `a command equals itself`() {
-        // Given
+    test("a command equals itself") {
         val command = StorePicture.Command(byteArrayOf(1, 2, 3), "image/png")
-
-        // Then
-        assertTrue(command.equals(command))
+        (command.equals(command)).shouldBeTrue()
     }
 
-    @Test
-    fun `a command does not equal a value of another type`() {
-        // Given
+    test("a command does not equal a value of another type") {
         val command = StorePicture.Command(byteArrayOf(1, 2, 3), "image/png")
-
-        // Then
-        assertFalse(command.equals("image/png"))
+        (command.equals("image/png")).shouldBeFalse()
     }
 
-    @Test
-    fun `commands differing in content type are not equal`() {
-        // Given
+    test("commands differing in content type are not equal") {
         val command = StorePicture.Command(byteArrayOf(1, 2, 3), "image/png")
         val other = StorePicture.Command(byteArrayOf(1, 2, 3), "image/jpeg")
-
-        // Then
-        assertNotEquals(command, other)
+        command shouldNotBe other
     }
 
-    @Test
-    fun `commands differing in bytes are not equal`() {
-        // Given
+    test("commands differing in bytes are not equal") {
         val command = StorePicture.Command(byteArrayOf(1, 2, 3), "image/png")
         val other = StorePicture.Command(byteArrayOf(9, 9, 9), "image/png")
-
-        // Then
-        assertNotEquals(command, other)
+        command shouldNotBe other
     }
 }

@@ -11,99 +11,56 @@ import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.failedPicture
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 
-class SqliteStoreChallengeIntegrationTest {
-    private lateinit var storeChallenge: SqliteStoreChallenge
-    private lateinit var findChallengeById: SqliteFindChallengeById
-
-    @BeforeEach
-    fun setup() {
-        val jdbc = newSqliteJdbc()
-        val mapper = ChallengeRowMapper()
-        storeChallenge = SqliteStoreChallenge(jdbc, mapper)
-        findChallengeById = SqliteFindChallengeById(jdbc, mapper)
+val SqliteStoreChallengeITSuite by testSuite {
+    test("stores a fresh challenge and bumps the version") {
+        val (storeChallenge) = newSqliteAdapters()
+        val challenge = mediumChallenge(prompt = "pixel art cat".asPrompt())
+        val saved = storeChallenge handle StoreChallenge.Command(challenge)
+        saved.version shouldBe 1L
     }
 
-    @Test
-    fun `stores a fresh challenge and bumps the version`() =
-        runTest {
-            // Given
-            val challenge = mediumChallenge(prompt = "pixel art cat".asPrompt())
+    test("allows sequential stores with updated versions") {
+        val (storeChallenge) = newSqliteAdapters()
+        val challenge = mediumChallenge(prompt = "sequential".asPrompt())
+        val v1 = storeChallenge handle StoreChallenge.Command(challenge)
+        val v2 = storeChallenge handle StoreChallenge.Command(v1)
+        v1.version shouldBe 1L
+        v2.version shouldBe 2L
+    }
 
-            // When
-            val saved = storeChallenge handle StoreChallenge.Command(challenge)
+    test("rejects a stale version on second store") {
+        val (storeChallenge) = newSqliteAdapters()
+        val c = mediumChallenge()
+        storeChallenge handle StoreChallenge.Command(c)
+        shouldThrow<OptimisticLockConflict> { storeChallenge handle StoreChallenge.Command(c) }
+    }
 
-            // Then
-            assertEquals(1L, saved.version)
-        }
-
-    @Test
-    fun `allows sequential stores with updated versions`() =
-        runTest {
-            // Given
-            val challenge = mediumChallenge(prompt = "sequential".asPrompt())
-
-            // When
-            val v1 = storeChallenge handle StoreChallenge.Command(challenge)
-            val v2 = storeChallenge handle StoreChallenge.Command(v1)
-
-            // Then
-            assertEquals(1L, v1.version)
-            assertEquals(2L, v2.version)
-        }
-
-    @Test
-    fun `rejects a stale version on second store`() =
-        runTest {
-            // Given
-            val c = mediumChallenge()
+    test("persists all difficulty levels") {
+        val (storeChallenge, findChallengeById) = newSqliteAdapters()
+        Difficulty.entries.forEach { diff ->
+            val c = Challenge.start("test prompt".asPrompt(), 2.lives(), difficulty = diff)
             storeChallenge handle StoreChallenge.Command(c)
-
-            // When / Then
-            assertFailsWith<OptimisticLockConflict> { storeChallenge handle StoreChallenge.Command(c) }
+            val found = findChallengeById answer FindChallengeById.Query(c.id)
+            found.shouldNotBeNull()
+            found.difficulty shouldBe diff
         }
+    }
 
-    @Test
-    fun `persists all difficulty levels`() =
-        runTest {
-            // Given
-            val difficulties = Difficulty.entries
-
-            // When / Then
-            difficulties.forEach { diff ->
-                val c = Challenge.start("test prompt".asPrompt(), 2.lives(), difficulty = diff)
-                storeChallenge handle StoreChallenge.Command(c)
-                val found = findChallengeById answer FindChallengeById.Query(c.id)
-                assertNotNull(found)
-                assertEquals(diff, found.difficulty)
-            }
-        }
-
-    @Test
-    fun `persists picture states correctly`() =
-        runTest {
-            // Given
-            val pending = mediumChallenge(prompt = "pending pic".asPrompt())
-            val ready = mediumChallenge(prompt = "ready pic".asPrompt(), picture = readyPicture())
-            val failed = mediumChallenge(prompt = "failed pic".asPrompt(), picture = failedPicture())
-
-            // When
-            storeChallenge handle StoreChallenge.Command(pending)
-            storeChallenge handle StoreChallenge.Command(ready)
-            storeChallenge handle StoreChallenge.Command(failed)
-
-            // Then
-            assertEquals(Picture.Pending, (findChallengeById answer FindChallengeById.Query(pending.id))?.picture)
-            assertEquals(
-                Picture.Ready("https://example.com/img.png"),
-                (findChallengeById answer FindChallengeById.Query(ready.id))?.picture,
-            )
-            assertEquals(Picture.Failed, (findChallengeById answer FindChallengeById.Query(failed.id))?.picture)
-        }
+    test("persists picture states correctly") {
+        val (storeChallenge, findChallengeById) = newSqliteAdapters()
+        val pending = mediumChallenge(prompt = "pending pic".asPrompt())
+        val ready = mediumChallenge(prompt = "ready pic".asPrompt(), picture = readyPicture())
+        val failed = mediumChallenge(prompt = "failed pic".asPrompt(), picture = failedPicture())
+        storeChallenge handle StoreChallenge.Command(pending)
+        storeChallenge handle StoreChallenge.Command(ready)
+        storeChallenge handle StoreChallenge.Command(failed)
+        (findChallengeById answer FindChallengeById.Query(pending.id))?.picture shouldBe Picture.Pending
+        (findChallengeById answer FindChallengeById.Query(ready.id))?.picture shouldBe Picture.Ready("https://example.com/img.png")
+        (findChallengeById answer FindChallengeById.Query(failed.id))?.picture shouldBe Picture.Failed
+    }
 }

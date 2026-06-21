@@ -19,3 +19,25 @@ internal fun newSqliteJdbc(): JdbcTemplate {
         .forEach { jdbc.execute(it) }
     return jdbc
 }
+
+internal data class SqliteAdapters(
+    val storeChallenge: SqliteStoreChallenge,
+    val findChallengeById: SqliteFindChallengeById,
+    val findPendingChallenges: SqliteFindPendingChallenges,
+    val storePicture: SqliteStorePicture,
+    val findPicture: SqliteFindPicture,
+    val jdbc: JdbcTemplate,
+)
+
+internal fun newSqliteAdapters(): SqliteAdapters {
+    val jdbc = newSqliteJdbc()
+    val mapper = ChallengeRowMapper()
+    return SqliteAdapters(
+        storeChallenge = SqliteStoreChallenge(jdbc, mapper),
+        findChallengeById = SqliteFindChallengeById(jdbc, mapper),
+        findPendingChallenges = SqliteFindPendingChallenges(jdbc, mapper),
+        storePicture = SqliteStorePicture(jdbc),
+        findPicture = SqliteFindPicture(jdbc),
+        jdbc = jdbc,
+    )
+}

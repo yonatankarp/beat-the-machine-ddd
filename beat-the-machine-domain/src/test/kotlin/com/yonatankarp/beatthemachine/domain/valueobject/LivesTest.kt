@@ -1,23 +1,21 @@
 package com.yonatankarp.beatthemachine.domain.valueobject
 
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 
-class LivesTest {
-    @Test
-    fun `cannot be negative`() {
+val LivesSuite by testSuite {
+    test("cannot be negative") {
         // Given
         val count = -1
 
         // When / Then
-        assertFailsWith<IllegalArgumentException> { Lives(count) }
+        shouldThrow<IllegalArgumentException> { Lives(count) }
     }
 
-    @Test
-    fun `lose decrements and floors at zero`() {
+    test("lose decrements and floors at zero") {
         // Given
         val oneLife = Lives(1)
         val noLives = Lives(0)
@@ -27,12 +25,11 @@ class LivesTest {
         val afterLosingFromZero = noLives.lose()
 
         // Then
-        assertEquals(Lives(0), afterLosingFromOne)
-        assertEquals(Lives(0), afterLosingFromZero)
+        afterLosingFromOne shouldBe Lives(0)
+        afterLosingFromZero shouldBe Lives(0)
     }
 
-    @Test
-    fun `is exhausted at zero`() {
+    test("is exhausted at zero") {
         // Given
         val noLives = Lives(0)
         val oneLife = Lives(1)
@@ -42,20 +39,19 @@ class LivesTest {
         val notExhausted = oneLife.isExhausted()
 
         // Then
-        assertTrue(exhausted)
-        assertFalse(notExhausted)
+        exhausted.shouldBeTrue()
+        notExhausted.shouldBeFalse()
     }
 
-    @Test
-    fun `initial lives are granted per difficulty`() {
+    test("initial lives are granted per difficulty") {
         // When
         val easy = Lives.initialFor(Difficulty.EASY)
         val medium = Lives.initialFor(Difficulty.MEDIUM)
         val hard = Lives.initialFor(Difficulty.HARD)
 
         // Then
-        assertEquals(Lives(8), easy)
-        assertEquals(Lives(6), medium)
-        assertEquals(Lives(4), hard)
+        easy shouldBe Lives(8)
+        medium shouldBe Lives(6)
+        hard shouldBe Lives(4)
     }
 }

@@ -12,6 +12,10 @@ jvm = "25"
 # Matches the version managed by Spring Boot 4.1.0's BOM (kotlinx-coroutines-bom).
 # Pinned here for the application module, which has no Spring dependency management.
 kotlinx-coroutines = "1.11.0"
+testballoon = "1.0.1-K2.4.0"
+kotest = "6.0.3"
+junit-platform-launcher = "1.14.4"
+mockwebserver = "4.12.0"
 
 [libraries]
 # --- Versions managed by Spring Boot's BOM (no version declared here) ---
@@ -33,6 +37,11 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
+testballoon-core = { module = "de.infix.testBalloon:testBalloon-framework-core", version.ref = "testballoon" }
+testballoon-spring = { module = "com.yonatankarp:testballoon-spring", version = "0.1.1" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform-launcher" }
+mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver" }
 
 [bundles]
 # Production Spring Boot starters used by the adapters module.
@@ -49,14 +58,16 @@ kotlinx-coroutines = [
 ]
 # Plain unit-testing stack shared by every module.
 unit-test = [
-    "kotlin-test",
+    "testballoon-core",
+    "kotest-assertions-core",
     "mockk",
+    "mockwebserver",
+    "kotlin-test",
 ]
-# Spring slice/integration testing plus the springmockk @MockkBean bridge.
+# Spring slice/integration testing plus the testballoon-spring bridge.
 spring-boot-test = [
-    "spring-boot-starter-test",
     "spring-boot-starter-webflux-test",
-    "springmockk",
+    "testballoon-spring",
 ]
 
 [plugins]
@@ -67,3 +78,4 @@ spring-dependency-management = { id = "io.spring.dependency-management", version
 openapi-contracts = { id = "com.yonatankarp.openapi.contracts", version.ref = "openapiContracts" }
 node-gradle = { id = "com.github.node-gradle.node", version.ref = "node-gradle" }
 openapi-generator = { id = "org.openapi.generator", version.ref = "openapi-generator" }
+testballoon = { id = "de.infix.testBalloon", version.ref = "testballoon" }

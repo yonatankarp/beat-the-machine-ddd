@@ -4,8 +4,11 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.testballoon)
     alias(libs.plugins.openapi.contracts)
 }
+
+extra["kotlin.version"] = libs.versions.kotlin.get()
 
 kotlin {
     jvmToolchain {
@@ -25,11 +28,21 @@ dependencies {
     implementation(libs.bundles.kotlinx.coroutines)
 
     testImplementation(libs.bundles.unit.test)
-    testImplementation(libs.bundles.spring.boot.test) {
-        exclude("org.mockito", "mockito-core")
-    }
+    testImplementation(libs.bundles.spring.boot.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":beat-the-machine-domain")))
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.junit.platform") {
+            useVersion(
+                libs.versions.junit.platform.launcher
+                    .get(),
+            )
+        }
+    }
 }
 
 tasks.bootJar {

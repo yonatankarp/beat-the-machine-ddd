@@ -8,5 +8,12 @@ plugins {
 subprojects {
     repositories {
         mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/yonatankarp/testballoon-spring")
+            credentials {
+                username = (findProperty("gpr.user") as String?) ?: System.getenv("GITHUB_ACTOR")
+                password = (findProperty("gpr.key") as String?) ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
 }

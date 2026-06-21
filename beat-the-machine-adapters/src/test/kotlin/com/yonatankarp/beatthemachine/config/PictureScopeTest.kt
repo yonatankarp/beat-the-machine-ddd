@@ -1,34 +1,22 @@
 package com.yonatankarp.beatthemachine.config
 
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
-import org.junit.jupiter.api.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
-class PictureScopeTest {
-    @Test
-    fun `is active before shutdown`() {
-        // Given
+val PictureScopeSuite by testSuite {
+    test("is active before shutdown") {
         val scope = PictureScope()
-
-        // When
-        val active = scope.isActive
-
-        // Then
-        assertTrue(active)
+        scope.isActive.shouldBeTrue()
     }
 
-    @Test
-    fun `destroy cancels the scope so no work outlives the application`() {
-        // Given
+    test("destroy cancels the scope so no work outlives the application") {
         val scope = PictureScope()
-
-        // When
         scope.destroy()
-
-        // Then
-        assertFalse(scope.isActive)
-        assertTrue(scope.coroutineContext.job.isCancelled)
+        scope.isActive.shouldBeFalse()
+        scope.coroutineContext.job.isCancelled
+            .shouldBeTrue()
     }
 }

@@ -7,7 +7,6 @@ spring-boot = "4.1.0"
 spring-dependency-management = "1.1.7"
 openapiContracts = "0.1.0"
 mockk = "1.14.11"
-springmockk = "5.0.1"
 jvm = "25"
 # Matches the version managed by Spring Boot 4.1.0's BOM (kotlinx-coroutines-bom).
 # Pinned here for the application module, which has no Spring dependency management.
@@ -32,11 +31,9 @@ kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor" }
 
 # --- Explicitly versioned (not on the BOM, or used where the BOM is absent) ---
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
 testballoon-core = { module = "de.infix.testBalloon:testBalloon-framework-core", version.ref = "testballoon" }
 testballoon-spring = { module = "com.yonatankarp:testballoon-spring", version = "0.1.1" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
@@ -62,7 +59,6 @@ unit-test = [
     "kotest-assertions-core",
     "mockk",
     "mockwebserver",
-    "kotlin-test",
 ]
 # Spring slice/integration testing plus the testballoon-spring bridge.
 spring-boot-test = [

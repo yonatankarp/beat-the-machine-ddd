@@ -1,20 +1,17 @@
 package com.yonatankarp.beatthemachine.input.web
 
-import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
+import com.yonatankarp.testballoon.spring.SpringTestConfig
+import com.yonatankarp.testballoon.spring.springTest
+import de.infix.testBalloon.framework.core.testSuite
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient
 
-class SpaForwardingRouterTest {
-    private val client =
+val SpaForwardingRouterSuite by testSuite {
+    test("the router is scoped to app and does not match other paths") {
         WebTestClient
             .bindToRouterFunction(SpaForwardingRouter().spaRoutes())
             .build()
-
-    @Test
-    fun `the router is scoped to app and does not match other paths`() {
-        client
             .get()
             .uri("/api/challenges/anything")
             .exchange()
@@ -25,28 +22,28 @@ class SpaForwardingRouterTest {
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-class SpaForwardingRouterIntegrationTest(
-    @Autowired private val client: WebTestClient,
-) {
-    @Test
-    fun `root redirects to the SPA entry`() {
-        client
-            .get()
-            .uri("/")
-            .exchange()
-            .expectStatus()
-            .isFound
-            .expectHeader()
-            .valueEquals("Location", "/app/")
-    }
+class SpaForwardingRouterIntegrationContext : SpringTestConfig()
 
-    @Test
-    fun `app deep links are served by the SPA entry point`() {
-        client
-            .get()
-            .uri("/app/some/deep/link")
-            .exchange()
-            .expectStatus()
-            .isOk
+val SpaForwardingRouterIntegrationSuite by testSuite {
+    springTest<SpaForwardingRouterIntegrationContext> {
+        test("root redirects to the SPA entry") {
+            bean<WebTestClient>()
+                .get()
+                .uri("/")
+                .exchange()
+                .expectStatus()
+                .isFound
+                .expectHeader()
+                .valueEquals("Location", "/app/")
+        }
+
+        test("app deep links are served by the SPA entry point") {
+            bean<WebTestClient>()
+                .get()
+                .uri("/app/some/deep/link")
+                .exchange()
+                .expectStatus()
+                .isOk
+        }
     }
 }

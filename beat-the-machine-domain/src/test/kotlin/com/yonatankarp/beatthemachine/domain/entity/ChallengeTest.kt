@@ -9,15 +9,13 @@ import com.yonatankarp.beatthemachine.test.dsl.asGuess
 import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotSame
-import kotlin.test.assertTrue
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 
-class ChallengeTest {
-    @Test
-    fun `a correct guess reveals the word and stays in progress`() {
+val ChallengeSuite by testSuite {
+    test("a correct guess reveals the word and stays in progress") {
         // Given
         val challenge = mediumChallenge(lives = 3.lives())
         val guess = "hello".asGuess()
@@ -26,13 +24,12 @@ class ChallengeTest {
         val (updated, outcome) = challenge.makeGuess(guess)
 
         // Then
-        assertEquals(GuessOutcome.HIT, outcome)
-        assertEquals(ChallengeStatus.IN_PROGRESS, updated.status)
-        assertEquals(3, updated.lives.remaining)
+        outcome shouldBe GuessOutcome.HIT
+        updated.status shouldBe ChallengeStatus.IN_PROGRESS
+        updated.lives.remaining shouldBe 3
     }
 
-    @Test
-    fun `a wrong guess costs a life`() {
+    test("a wrong guess costs a life") {
         // Given
         val challenge = mediumChallenge(lives = 3.lives())
         val guess = "nope".asGuess()
@@ -41,12 +38,11 @@ class ChallengeTest {
         val (updated, outcome) = challenge.makeGuess(guess)
 
         // Then
-        assertEquals(GuessOutcome.MISS, outcome)
-        assertEquals(2, updated.lives.remaining)
+        outcome shouldBe GuessOutcome.MISS
+        updated.lives.remaining shouldBe 2
     }
 
-    @Test
-    fun `guessing every word beats the machine`() {
+    test("guessing every word beats the machine") {
         // Given
         val challenge = mediumChallenge()
         val (afterFirst, _) = challenge.makeGuess("hello".asGuess())
@@ -55,12 +51,11 @@ class ChallengeTest {
         val (afterSecond, outcome) = afterFirst.makeGuess("world".asGuess())
 
         // Then
-        assertEquals(GuessOutcome.HIT, outcome)
-        assertEquals(ChallengeStatus.BEATEN, afterSecond.status)
+        outcome shouldBe GuessOutcome.HIT
+        afterSecond.status shouldBe ChallengeStatus.BEATEN
     }
 
-    @Test
-    fun `running out of lives loses the challenge`() {
+    test("running out of lives loses the challenge") {
         // Given
         val challenge = mediumChallenge(lives = 1.lives())
         val guess = "nope".asGuess()
@@ -69,11 +64,10 @@ class ChallengeTest {
         val (updated, _) = challenge.makeGuess(guess)
 
         // Then
-        assertEquals(ChallengeStatus.LOST, updated.status)
+        updated.status shouldBe ChallengeStatus.LOST
     }
 
-    @Test
-    fun `a duplicate guess is a no-op and costs no life`() {
+    test("a duplicate guess is a no-op and costs no life") {
         // Given
         val challenge = mediumChallenge(lives = 3.lives())
         val (afterFirst, _) = challenge.makeGuess("nope".asGuess())
@@ -82,12 +76,11 @@ class ChallengeTest {
         val (afterSecond, outcome) = afterFirst.makeGuess("Nope".asGuess())
 
         // Then
-        assertEquals(GuessOutcome.DUPLICATE, outcome)
-        assertEquals(2, afterSecond.lives.remaining)
+        outcome shouldBe GuessOutcome.DUPLICATE
+        afterSecond.lives.remaining shouldBe 2
     }
 
-    @Test
-    fun `makeGuess does not mutate the receiver`() {
+    test("makeGuess does not mutate the receiver") {
         // Given
         val challenge = mediumChallenge(lives = 3.lives())
         val guess = "nope".asGuess()
@@ -96,21 +89,19 @@ class ChallengeTest {
         challenge.makeGuess(guess)
 
         // Then
-        assertEquals(3, challenge.lives.remaining)
-        assertTrue(challenge.guesses.isEmpty())
+        challenge.lives.remaining shouldBe 3
+        challenge.guesses.isEmpty().shouldBeTrue()
     }
 
-    @Test
-    fun `guessing after the challenge is over is rejected`() {
+    test("guessing after the challenge is over is rejected") {
         // Given
         val (lost, _) = mediumChallenge(lives = 1.lives()).makeGuess("nope".asGuess())
 
         // When / Then
-        assertFailsWith<ChallengeAlreadyOver> { lost.makeGuess("hello".asGuess()) }
+        shouldThrow<ChallengeAlreadyOver> { lost.makeGuess("hello".asGuess()) }
     }
 
-    @Test
-    fun `forfeit reveals the prompt and loses`() {
+    test("forfeit reveals the prompt and loses") {
         // Given
         val challenge = mediumChallenge()
 
@@ -118,21 +109,23 @@ class ChallengeTest {
         val forfeited = challenge.forfeit()
 
         // Then
-        assertEquals(ChallengeStatus.LOST, forfeited.status)
-        assertTrue(forfeited.maskedPrompt().tokens.all { it is MaskedToken.Revealed })
+        forfeited.status shouldBe ChallengeStatus.LOST
+        forfeited
+            .maskedPrompt()
+            .tokens
+            .all { it is MaskedToken.Revealed }
+            .shouldBeTrue()
     }
 
-    @Test
-    fun `forfeit after the challenge is over is rejected`() {
+    test("forfeit after the challenge is over is rejected") {
         // Given
         val forfeited = mediumChallenge().forfeit()
 
         // When / Then
-        assertFailsWith<ChallengeAlreadyOver> { forfeited.forfeit() }
+        shouldThrow<ChallengeAlreadyOver> { forfeited.forfeit() }
     }
 
-    @Test
-    fun `withPicture returns an independent copy at the same version`() {
+    test("withPicture returns an independent copy at the same version") {
         // Given
         val challenge = mediumChallenge()
         val newPicture = readyPicture("https://example.com/img.png")
@@ -141,9 +134,9 @@ class ChallengeTest {
         val updated = challenge.withPicture(newPicture)
 
         // Then
-        assertEquals(newPicture, updated.picture)
-        assertEquals(challenge.version, updated.version)
-        assertEquals(Picture.Pending, challenge.picture)
-        assertNotSame(challenge, updated)
+        updated.picture shouldBe newPicture
+        updated.version shouldBe challenge.version
+        challenge.picture shouldBe Picture.Pending
+        (challenge !== updated).shouldBeTrue()
     }
 }

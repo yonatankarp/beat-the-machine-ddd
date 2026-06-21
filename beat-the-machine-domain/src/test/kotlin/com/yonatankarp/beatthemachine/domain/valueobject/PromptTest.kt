@@ -1,12 +1,11 @@
 package com.yonatankarp.beatthemachine.domain.valueobject
 
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 
-class PromptTest {
-    @Test
-    fun `splits on single space`() {
+val PromptSuite by testSuite {
+    test("splits on single space") {
         // Given
         val prompt = Prompt("hello world")
 
@@ -14,11 +13,10 @@ class PromptTest {
         val words = prompt.words()
 
         // Then
-        assertEquals(listOf("hello", "world"), words)
+        words shouldBe listOf("hello", "world")
     }
 
-    @Test
-    fun `splits on multiple whitespace characters`() {
+    test("splits on multiple whitespace characters") {
         // Given
         val prompt = Prompt("a\t b\n c")
 
@@ -26,24 +24,22 @@ class PromptTest {
         val words = prompt.words()
 
         // Then
-        assertEquals(listOf("a", "b", "c"), words)
+        words shouldBe listOf("a", "b", "c")
     }
 
-    @Test
-    fun `rejects blank text`() {
+    test("rejects blank text") {
         // Given
         val text = "   "
 
         // When / Then
-        assertFailsWith<IllegalArgumentException> { Prompt(text) }
+        shouldThrow<IllegalArgumentException> { Prompt(text) }
     }
 
-    @Test
-    fun `rejects empty text`() {
+    test("rejects empty text") {
         // Given
         val text = ""
 
         // When / Then
-        assertFailsWith<IllegalArgumentException> { Prompt(text) }
+        shouldThrow<IllegalArgumentException> { Prompt(text) }
     }
 }

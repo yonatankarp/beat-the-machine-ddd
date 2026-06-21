@@ -1,21 +1,19 @@
 package com.yonatankarp.beatthemachine.domain.valueobject
 
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 
-class PictureTest {
-    @Test
-    fun `Pending is a Picture`() {
+val PictureSuite by testSuite {
+    test("Pending is a Picture") {
         // When
         val picture = Picture.Pending
 
         // Then
-        assertIs<Picture.Pending>(picture)
+        picture.shouldBeInstanceOf<Picture.Pending>()
     }
 
-    @Test
-    fun `Ready carries url`() {
+    test("Ready carries url") {
         // Given
         val url = "https://example.com/img.png"
 
@@ -23,16 +21,15 @@ class PictureTest {
         val pic = Picture.Ready(url)
 
         // Then
-        assertIs<Picture.Ready>(pic)
-        assertEquals("https://example.com/img.png", pic.url)
+        pic.shouldBeInstanceOf<Picture.Ready>()
+        pic.url shouldBe "https://example.com/img.png"
     }
 
-    @Test
-    fun `Failed is a Picture`() {
+    test("Failed is a Picture") {
         // When
         val picture = Picture.Failed
 
         // Then
-        assertIs<Picture.Failed>(picture)
+        picture.shouldBeInstanceOf<Picture.Failed>()
     }
 }

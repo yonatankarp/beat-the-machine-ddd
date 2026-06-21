@@ -9,96 +9,64 @@ import com.yonatankarp.beatthemachine.test.dsl.lives
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.failedPicture
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 
-class SqliteStoreChallengeIT {
-    private lateinit var storeChallenge: SqliteStoreChallenge
-    private lateinit var findChallengeById: SqliteFindChallengeById
+val SqliteStoreChallengeITSuite by testSuite {
+    test("stores a fresh challenge and bumps the version") {
+        val (storeChallenge, _, _) = newSqliteAdapters()
+        val challenge = mediumChallenge(prompt = "pixel art cat".asPrompt())
 
-    @BeforeEach
-    fun setup() {
-        val jdbc = newSqliteJdbc()
-        val mapper = ChallengeRowMapper()
-        storeChallenge = SqliteStoreChallenge(jdbc, mapper)
-        findChallengeById = SqliteFindChallengeById(jdbc, mapper)
+        val saved = storeChallenge(challenge)
+
+        saved.version shouldBe 1L
     }
 
-    @Test
-    fun `stores a fresh challenge and bumps the version`() =
-        runTest {
-            // Given
-            val challenge = mediumChallenge(prompt = "pixel art cat".asPrompt())
+    test("allows sequential stores with updated versions") {
+        val (storeChallenge, _, _) = newSqliteAdapters()
+        val challenge = mediumChallenge(prompt = "sequential".asPrompt())
 
-            // When
-            val saved = storeChallenge(challenge)
+        val v1 = storeChallenge(challenge)
+        val v2 = storeChallenge(v1)
 
-            // Then
-            assertEquals(1L, saved.version)
-        }
+        v1.version shouldBe 1L
+        v2.version shouldBe 2L
+    }
 
-    @Test
-    fun `allows sequential stores with updated versions`() =
-        runTest {
-            // Given
-            val challenge = mediumChallenge(prompt = "sequential".asPrompt())
+    test("rejects a stale version on second store") {
+        val (storeChallenge, _, _) = newSqliteAdapters()
+        val c = mediumChallenge()
+        storeChallenge(c)
 
-            // When
-            val v1 = storeChallenge(challenge)
-            val v2 = storeChallenge(v1)
+        shouldThrow<OptimisticLockConflict> { storeChallenge(c) }
+    }
 
-            // Then
-            assertEquals(1L, v1.version)
-            assertEquals(2L, v2.version)
-        }
+    test("persists all difficulty levels") {
+        val (storeChallenge, findChallengeById, _) = newSqliteAdapters()
 
-    @Test
-    fun `rejects a stale version on second store`() =
-        runTest {
-            // Given
-            val c = mediumChallenge()
+        Difficulty.entries.forEach { diff ->
+            val c = Challenge.start("test prompt".asPrompt(), 2.lives(), difficulty = diff)
             storeChallenge(c)
-
-            // When / Then
-            assertFailsWith<OptimisticLockConflict> { storeChallenge(c) }
+            val found = findChallengeById(c.id)
+            found.shouldNotBeNull()
+            found.difficulty shouldBe diff
         }
+    }
 
-    @Test
-    fun `persists all difficulty levels`() =
-        runTest {
-            // Given
-            val difficulties = Difficulty.entries
+    test("persists picture states correctly") {
+        val (storeChallenge, findChallengeById, _) = newSqliteAdapters()
+        val pending = mediumChallenge(prompt = "pending pic".asPrompt())
+        val ready = mediumChallenge(prompt = "ready pic".asPrompt(), picture = readyPicture())
+        val failed = mediumChallenge(prompt = "failed pic".asPrompt(), picture = failedPicture())
 
-            // When / Then
-            difficulties.forEach { diff ->
-                val c = Challenge.start("test prompt".asPrompt(), 2.lives(), difficulty = diff)
-                storeChallenge(c)
-                val found = findChallengeById(c.id)
-                assertNotNull(found)
-                assertEquals(diff, found.difficulty)
-            }
-        }
+        storeChallenge(pending)
+        storeChallenge(ready)
+        storeChallenge(failed)
 
-    @Test
-    fun `persists picture states correctly`() =
-        runTest {
-            // Given
-            val pending = mediumChallenge(prompt = "pending pic".asPrompt())
-            val ready = mediumChallenge(prompt = "ready pic".asPrompt(), picture = readyPicture())
-            val failed = mediumChallenge(prompt = "failed pic".asPrompt(), picture = failedPicture())
-
-            // When
-            storeChallenge(pending)
-            storeChallenge(ready)
-            storeChallenge(failed)
-
-            // Then
-            assertEquals(Picture.Pending, findChallengeById(pending.id)?.picture)
-            assertEquals(Picture.Ready("https://example.com/img.png"), findChallengeById(ready.id)?.picture)
-            assertEquals(Picture.Failed, findChallengeById(failed.id)?.picture)
-        }
+        findChallengeById(pending.id)?.picture shouldBe Picture.Pending
+        findChallengeById(ready.id)?.picture shouldBe Picture.Ready("https://example.com/img.png")
+        findChallengeById(failed.id)?.picture shouldBe Picture.Failed
+    }
 }

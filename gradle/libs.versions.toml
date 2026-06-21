@@ -7,7 +7,6 @@ spring-boot = "4.1.0"
 spring-dependency-management = "1.1.7"
 openapiContracts = "0.1.0"
 mockk = "1.14.11"
-springmockk = "5.0.1"
 jvm = "25"
 # Matches the version managed by Spring Boot 4.1.0's BOM (kotlinx-coroutines-bom).
 # Pinned here for the application module, which has no Spring dependency management.
@@ -24,7 +23,6 @@ spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-s
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 spring-boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc" }
-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 spring-boot-starter-webflux-test = { module = "org.springframework.boot:spring-boot-starter-webflux-test" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
@@ -33,12 +31,10 @@ kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor" }
 
 # --- Explicitly versioned (not on the BOM, or used where the BOM is absent) ---
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver" }
-springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
 spring-ai-bom = { module = "org.springframework.ai:spring-ai-bom", version.ref = "spring-ai" }
 spring-ai-starter-model-openai = { module = "org.springframework.ai:spring-ai-starter-model-openai" }
 spring-ai-starter-model-ollama = { module = "org.springframework.ai:spring-ai-starter-model-ollama" }
@@ -64,16 +60,13 @@ kotlinx-coroutines = [
 unit-test = [
     "testballoon-core",
     "kotest-assertions-core",
-    "kotlin-test",
     "mockk",
     "mockwebserver",
 ]
-# Spring slice/integration testing plus the springmockk @MockkBean bridge.
+# Spring slice/integration testing.
 spring-boot-test = [
     "testballoon-spring",
-    "spring-boot-starter-test",
     "spring-boot-starter-webflux-test",
-    "springmockk",
 ]
 # Spring AI model starters (versions resolved by the spring-ai-bom platform).
 spring-ai-starters = [

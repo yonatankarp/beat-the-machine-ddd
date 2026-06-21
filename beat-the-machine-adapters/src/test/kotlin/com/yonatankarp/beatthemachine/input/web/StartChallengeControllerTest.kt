@@ -1,53 +1,52 @@
 package com.yonatankarp.beatthemachine.input.web
 
-import com.ninjasquad.springmockk.MockkBean
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
+import com.yonatankarp.testballoon.spring.SpringTestConfig
+import com.yonatankarp.testballoon.spring.springTest
+import de.infix.testBalloon.framework.core.testSuite
 import io.mockk.coEvery
-import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(StartChallengeController::class)
-class StartChallengeControllerTest(
-    @Autowired val client: WebTestClient,
-) {
-    @MockkBean
-    lateinit var startChallenge: StartChallenge
+class StartChallengeWebContext : SpringTestConfig()
 
-    @Test
-    fun `POST creates a challenge and never leaks the prompt`() {
-        coEvery { startChallenge(any()) } returns mediumChallenge()
+val StartChallengeControllerSuite by testSuite {
+    springTest<StartChallengeWebContext> {
+        val startChallenge = mockBean<StartChallenge>()
 
-        client
-            .post()
-            .uri("/api/challenges")
-            .exchange()
-            .expectStatus()
-            .isOk
-            .expectBody()
-            .jsonPath("$.livesRemaining")
-            .isEqualTo(6)
-            .jsonPath("$.status")
-            .isEqualTo("IN_PROGRESS")
-            .jsonPath("$.picture.status")
-            .isEqualTo("PENDING")
-            .jsonPath("$.maskedPrompt[0].revealed")
-            .isEqualTo(false)
-            .jsonPath("$.prompt")
-            .doesNotExist()
-            .jsonPath("$.secretPrompt")
-            .doesNotExist()
-    }
+        test("POST creates a challenge and never leaks the prompt") {
+            coEvery { startChallenge(any()) } returns mediumChallenge()
 
-    @Test
-    fun `invalid difficulty query param returns 422`() {
-        client
-            .post()
-            .uri("/api/challenges?difficulty=NOPE")
-            .exchange()
-            .expectStatus()
-            .isEqualTo(422)
+            bean<WebTestClient>()
+                .post()
+                .uri("/api/challenges")
+                .exchange()
+                .expectStatus()
+                .isOk
+                .expectBody()
+                .jsonPath("$.livesRemaining")
+                .isEqualTo(6)
+                .jsonPath("$.status")
+                .isEqualTo("IN_PROGRESS")
+                .jsonPath("$.picture.status")
+                .isEqualTo("PENDING")
+                .jsonPath("$.maskedPrompt[0].revealed")
+                .isEqualTo(false)
+                .jsonPath("$.prompt")
+                .doesNotExist()
+                .jsonPath("$.secretPrompt")
+                .doesNotExist()
+        }
+
+        test("invalid difficulty query param returns 422") {
+            bean<WebTestClient>()
+                .post()
+                .uri("/api/challenges?difficulty=NOPE")
+                .exchange()
+                .expectStatus()
+                .isEqualTo(422)
+        }
     }
 }

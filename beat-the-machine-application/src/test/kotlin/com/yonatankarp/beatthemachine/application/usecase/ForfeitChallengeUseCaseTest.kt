@@ -4,45 +4,29 @@ import com.yonatankarp.beatthemachine.application.exception.ChallengeNotFound
 import com.yonatankarp.beatthemachine.application.port.input.ForfeitChallenge
 import com.yonatankarp.beatthemachine.application.port.output.FindChallengeById
 import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
-import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 
-class ForfeitChallengeUseCaseTest {
-    private val store = FakeChallengeStore()
+val ForfeitChallengeUseSuite by testSuite {
+    test("forfeit loads the challenge, sets LOST, and persists it") {
+        val store = FakeChallengeStore()
+        val c = store handle StoreChallenge.Command(mediumChallenge())
+        val forfeitChallenge = ForfeitChallengeUseCase(store, store)
+        val result = forfeitChallenge handle ForfeitChallenge.Command(c.id)
+        result.status shouldBe ChallengeStatus.LOST
+        (store answer FindChallengeById.Query(c.id))?.status shouldBe ChallengeStatus.LOST
+    }
 
-    private suspend fun seed(): Challenge = store handle StoreChallenge.Command(mediumChallenge())
-
-    @Test
-    fun `forfeit loads the challenge, sets LOST, and persists it`() =
-        runTest {
-            // Given
-            val c = seed()
-            val forfeitChallenge = ForfeitChallengeUseCase(store, store)
-
-            // When
-            val result = forfeitChallenge handle ForfeitChallenge.Command(c.id)
-
-            // Then
-            assertEquals(ChallengeStatus.LOST, result.status)
-            assertEquals(ChallengeStatus.LOST, (store answer FindChallengeById.Query(c.id))?.status)
+    test("an unknown challenge throws ChallengeNotFound") {
+        val store = FakeChallengeStore()
+        val forfeitChallenge = ForfeitChallengeUseCase(store, store)
+        val unknownId = aChallengeId()
+        shouldThrow<ChallengeNotFound> {
+            forfeitChallenge handle ForfeitChallenge.Command(unknownId)
         }
-
-    @Test
-    fun `an unknown challenge throws ChallengeNotFound`() =
-        runTest {
-            // Given
-            val forfeitChallenge = ForfeitChallengeUseCase(store, store)
-            val unknownId = aChallengeId()
-
-            // When / Then
-            assertFailsWith<ChallengeNotFound> {
-                forfeitChallenge handle ForfeitChallenge.Command(unknownId)
-            }
-        }
+    }
 }

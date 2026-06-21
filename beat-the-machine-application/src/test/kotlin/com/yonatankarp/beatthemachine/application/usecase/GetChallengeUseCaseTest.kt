@@ -6,35 +6,23 @@ import com.yonatankarp.beatthemachine.application.port.output.StoreChallenge
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 
-class GetChallengeUseCaseTest {
-    private val store = FakeChallengeStore()
-    private val getChallenge = GetChallengeUseCase(store)
+val GetChallengeSuite by testSuite {
+    test("returns a challenge that exists") {
+        val store = FakeChallengeStore()
+        val getChallenge = GetChallengeUseCase(store)
+        val challenge = store handle StoreChallenge.Command(mediumChallenge(prompt = "red fox".asPrompt()))
+        val result = getChallenge answer GetChallenge.Query(challenge.id)
+        result shouldBe challenge
+    }
 
-    @Test
-    fun `returns a challenge that exists`() =
-        runTest {
-            // Given
-            val challenge = store handle StoreChallenge.Command(mediumChallenge(prompt = "red fox".asPrompt()))
-
-            // When
-            val result = getChallenge answer GetChallenge.Query(challenge.id)
-
-            // Then
-            assertEquals(challenge, result)
-        }
-
-    @Test
-    fun `throws ChallengeNotFound for an unknown id`() =
-        runTest {
-            // Given
-            val unknownId = aChallengeId()
-
-            // When / Then
-            assertFailsWith<ChallengeNotFound> { getChallenge answer GetChallenge.Query(unknownId) }
-        }
+    test("throws ChallengeNotFound for an unknown id") {
+        val store = FakeChallengeStore()
+        val getChallenge = GetChallengeUseCase(store)
+        val unknownId = aChallengeId()
+        shouldThrow<ChallengeNotFound> { getChallenge answer GetChallenge.Query(unknownId) }
+    }
 }

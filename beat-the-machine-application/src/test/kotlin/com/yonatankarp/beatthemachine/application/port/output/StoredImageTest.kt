@@ -1,58 +1,38 @@
 package com.yonatankarp.beatthemachine.application.port.output
 
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 
-class StoredImageTest {
-    @Test
-    fun `images with the same bytes and content type are equal`() {
-        // Given
+val StoredImageSuite by testSuite {
+    test("images with the same bytes and content type are equal") {
         val image = StoredImage(byteArrayOf(1, 2, 3), "image/png")
         val same = StoredImage(byteArrayOf(1, 2, 3), "image/png")
-
-        // Then
-        assertEquals(image, same)
-        assertEquals(image.hashCode(), same.hashCode())
+        image shouldBe same
+        image.hashCode() shouldBe same.hashCode()
     }
 
-    @Test
-    fun `an image equals itself`() {
-        // Given
+    test("an image equals itself") {
         val image = StoredImage(byteArrayOf(1, 2, 3), "image/png")
-
-        // Then
-        assertTrue(image.equals(image))
+        (image.equals(image)).shouldBeTrue()
     }
 
-    @Test
-    fun `an image does not equal a value of another type`() {
-        // Given
+    test("an image does not equal a value of another type") {
         val image = StoredImage(byteArrayOf(1, 2, 3), "image/png")
-
-        // Then
-        assertFalse(image.equals("image/png"))
+        (image.equals("image/png")).shouldBeFalse()
     }
 
-    @Test
-    fun `images differing in content type are not equal`() {
-        // Given
+    test("images differing in content type are not equal") {
         val image = StoredImage(byteArrayOf(1, 2, 3), "image/png")
         val other = StoredImage(byteArrayOf(1, 2, 3), "image/jpeg")
-
-        // Then
-        assertNotEquals(image, other)
+        image shouldNotBe other
     }
 
-    @Test
-    fun `images differing in bytes are not equal`() {
-        // Given
+    test("images differing in bytes are not equal") {
         val image = StoredImage(byteArrayOf(1, 2, 3), "image/png")
         val other = StoredImage(byteArrayOf(9, 9, 9), "image/png")
-
-        // Then
-        assertNotEquals(image, other)
+        image shouldNotBe other
     }
 }

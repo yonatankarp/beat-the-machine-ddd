@@ -11,63 +11,43 @@ import com.yonatankarp.beatthemachine.domain.valueobject.MaskedToken
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asGuess
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 
-class MakeGuessUseCaseTest {
-    private val store = FakeChallengeStore()
+val MakeGuessUseSuite by testSuite {
+    test("a hit is persisted") {
+        val store = FakeChallengeStore()
+        val c = store handle StoreChallenge.Command(mediumChallenge())
+        val makeGuess = MakeGuessUseCase(store, store)
+        val guess = "hello".asGuess()
+        val (updated, outcome) = makeGuess handle MakeGuess.Command(c.id, guess)
+        outcome shouldBe GuessOutcome.HIT
+        updated.maskedPrompt().tokens[0] shouldBe MaskedToken.Revealed("hello")
+        (store answer FindChallengeById.Query(c.id))?.maskedPrompt()?.tokens?.get(0) shouldBe MaskedToken.Revealed("hello")
+    }
 
-    private suspend fun seed(): Challenge = store handle StoreChallenge.Command(mediumChallenge())
-
-    @Test
-    fun `a hit is persisted`() =
-        runTest {
-            // Given
-            val c = seed()
-            val makeGuess = MakeGuessUseCase(store, store)
-            val guess = "hello".asGuess()
-
-            // When
-            val (updated, outcome) = makeGuess handle MakeGuess.Command(c.id, guess)
-
-            // Then
-            assertEquals(GuessOutcome.HIT, outcome)
-            assertEquals(MaskedToken.Revealed("hello"), updated.maskedPrompt().tokens[0])
-            assertEquals(MaskedToken.Revealed("hello"), (store answer FindChallengeById.Query(c.id))?.maskedPrompt()?.tokens?.get(0))
+    test("an unknown challenge throws ChallengeNotFound") {
+        val store = FakeChallengeStore()
+        val makeGuess = MakeGuessUseCase(store, store)
+        val unknownId = aChallengeId()
+        val guess = "hello".asGuess()
+        shouldThrow<ChallengeNotFound> {
+            makeGuess handle MakeGuess.Command(unknownId, guess)
         }
+    }
 
-    @Test
-    fun `an unknown challenge throws ChallengeNotFound`() =
-        runTest {
-            // Given
-            val makeGuess = MakeGuessUseCase(store, store)
-            val unknownId = aChallengeId()
-            val guess = "hello".asGuess()
-
-            // When / Then
-            assertFailsWith<ChallengeNotFound> {
-                makeGuess handle MakeGuess.Command(unknownId, guess)
+    test("an optimistic-lock conflict on store propagates") {
+        val store = FakeChallengeStore()
+        val c = store handle StoreChallenge.Command(mediumChallenge())
+        val conflicting =
+            object : StoreChallenge {
+                override suspend fun handle(command: StoreChallenge.Command): Challenge = throw OptimisticLockConflict(command.challenge.id)
             }
+        val makeGuess = MakeGuessUseCase(store, conflicting)
+        val guess = "hello".asGuess()
+        shouldThrow<OptimisticLockConflict> {
+            makeGuess handle MakeGuess.Command(c.id, guess)
         }
-
-    @Test
-    fun `an optimistic-lock conflict on store propagates`() =
-        runTest {
-            // Given
-            val c = seed()
-            val conflicting =
-                object : StoreChallenge {
-                    override suspend fun handle(command: StoreChallenge.Command): Challenge =
-                        throw OptimisticLockConflict(command.challenge.id)
-                }
-            val makeGuess = MakeGuessUseCase(store, conflicting)
-            val guess = "hello".asGuess()
-
-            // When / Then
-            assertFailsWith<OptimisticLockConflict> {
-                makeGuess handle MakeGuess.Command(c.id, guess)
-            }
-        }
+    }
 }

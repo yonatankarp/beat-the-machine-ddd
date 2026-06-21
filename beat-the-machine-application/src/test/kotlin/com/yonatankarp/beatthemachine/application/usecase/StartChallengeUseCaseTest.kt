@@ -9,63 +9,45 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
 
-class StartChallengeUseCaseTest {
-    private val fakePrompt = "hello world".asPrompt()
-    private val prompts = mockk<PromptSource>().also { coEvery { it answer any() } returns fakePrompt }
-    private val store = FakeChallengeStore()
+val StartChallengeUseSuite by testSuite {
+    val fakePrompt = "hello world".asPrompt()
+    val prompts = mockk<PromptSource>().also { coEvery { it answer any() } returns fakePrompt }
 
-    @Test
-    fun `starts a pending challenge and enqueues picture generation`() =
-        runTest {
-            // Given
-            val enqueued = mutableListOf<ChallengeId>()
-            val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
+    test("starts a pending challenge and enqueues picture generation") {
+        val store = FakeChallengeStore()
+        val enqueued = mutableListOf<ChallengeId>()
+        val startChallenge = StartChallengeUseCase(prompts, store) { enqueued.add(it) }
+        val challenge = startChallenge handle StartChallenge.Command(Difficulty.MEDIUM)
+        challenge.picture shouldBe Picture.Pending
+        challenge.status shouldBe ChallengeStatus.IN_PROGRESS
+        enqueued shouldBe listOf(challenge.id)
+        store.byId.containsKey(challenge.id).shouldBeTrue()
+    }
 
-            // When
-            val challenge = startChallenge handle StartChallenge.Command(Difficulty.MEDIUM)
+    test("starting lives scale with difficulty") {
+        val store = FakeChallengeStore()
+        val startChallenge = StartChallengeUseCase(prompts, store) {}
+        val easy = startChallenge handle StartChallenge.Command(Difficulty.EASY)
+        val medium = startChallenge handle StartChallenge.Command(Difficulty.MEDIUM)
+        val hard = startChallenge handle StartChallenge.Command(Difficulty.HARD)
+        easy.lives.remaining shouldBe Lives.forSecret(fakePrompt, Difficulty.EASY).remaining
+        medium.lives.remaining shouldBe Lives.forSecret(fakePrompt, Difficulty.MEDIUM).remaining
+        hard.lives.remaining shouldBe Lives.forSecret(fakePrompt, Difficulty.HARD).remaining
+    }
 
-            // Then
-            assertEquals(Picture.Pending, challenge.picture)
-            assertEquals(ChallengeStatus.IN_PROGRESS, challenge.status)
-            assertEquals(listOf(challenge.id), enqueued)
-            assertTrue(store.byId.containsKey(challenge.id))
-        }
-
-    @Test
-    fun `starting lives scale with difficulty`() =
-        runTest {
-            // Given
-            val startChallenge = StartChallengeUseCase(prompts, store) {}
-
-            // When
-            val easy = startChallenge handle StartChallenge.Command(Difficulty.EASY)
-            val medium = startChallenge handle StartChallenge.Command(Difficulty.MEDIUM)
-            val hard = startChallenge handle StartChallenge.Command(Difficulty.HARD)
-
-            // Then
-            assertEquals(Lives.forSecret(fakePrompt, Difficulty.EASY).remaining, easy.lives.remaining)
-            assertEquals(Lives.forSecret(fakePrompt, Difficulty.MEDIUM).remaining, medium.lives.remaining)
-            assertEquals(Lives.forSecret(fakePrompt, Difficulty.HARD).remaining, hard.lives.remaining)
-        }
-
-    @Test
-    fun `StoredImage equality is content-based`() {
-        // Given
+    test("StoredImage equality is content-based") {
         val a = StoredImage(byteArrayOf(1, 2, 3), "image/png")
         val b = StoredImage(byteArrayOf(1, 2, 3), "image/png")
         val c = StoredImage(byteArrayOf(9), "image/png")
-
-        // When / Then
-        assertEquals(a, b)
-        assertNotEquals(a, c)
-        assertEquals(a.hashCode(), b.hashCode())
+        a shouldBe b
+        a shouldNotBe c
+        a.hashCode() shouldBe b.hashCode()
     }
 }

@@ -5,7 +5,10 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.openapi.contracts)
+    alias(libs.plugins.testballoon)
 }
+
+extra["kotlin.version"] = libs.versions.kotlin.get()
 
 kotlin {
     jvmToolchain {
@@ -33,6 +36,18 @@ dependencies {
     }
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":beat-the-machine-domain")))
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.junit.platform") {
+            useVersion(
+                libs.versions.junit.platform.launcher
+                    .get(),
+            )
+        }
+    }
 }
 
 tasks.bootJar {

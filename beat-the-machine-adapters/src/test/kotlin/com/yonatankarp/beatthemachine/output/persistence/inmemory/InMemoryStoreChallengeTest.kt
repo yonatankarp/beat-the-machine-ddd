@@ -2,37 +2,32 @@ package com.yonatankarp.beatthemachine.output.persistence.inmemory
 
 import com.yonatankarp.beatthemachine.application.exception.OptimisticLockConflict
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 
-class InMemoryStoreChallengeTest {
-    @Test
-    fun `stores and bumps the version`() =
-        runTest {
-            // Given
-            val store = InMemoryChallengeStore()
-            val storeChallenge = InMemoryStoreChallenge(store)
-            val challenge = mediumChallenge()
+val InMemoryStoreChallengeTestSuite by testSuite {
+    test("stores and bumps the version") {
+        // Given
+        val store = InMemoryChallengeStore()
+        val storeChallenge = InMemoryStoreChallenge(store)
+        val challenge = mediumChallenge()
 
-            // When
-            val saved = storeChallenge(challenge)
+        // When
+        val saved = storeChallenge(challenge)
 
-            // Then
-            assertEquals(1L, saved.version)
-        }
+        // Then
+        saved.version shouldBe 1L
+    }
 
-    @Test
-    fun `rejects a stale version`() =
-        runTest {
-            // Given
-            val store = InMemoryChallengeStore()
-            val storeChallenge = InMemoryStoreChallenge(store)
-            val c = mediumChallenge()
-            storeChallenge(c)
+    test("rejects a stale version") {
+        // Given
+        val store = InMemoryChallengeStore()
+        val storeChallenge = InMemoryStoreChallenge(store)
+        val c = mediumChallenge()
+        storeChallenge(c)
 
-            // When / Then
-            assertFailsWith<OptimisticLockConflict> { storeChallenge(c) }
-        }
+        // When / Then
+        shouldThrow<OptimisticLockConflict> { storeChallenge(c) }
+    }
 }

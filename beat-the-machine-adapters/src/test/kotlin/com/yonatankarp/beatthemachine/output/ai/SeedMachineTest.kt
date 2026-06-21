@@ -2,36 +2,31 @@ package com.yonatankarp.beatthemachine.output.ai
 
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.shouldBe
 
-class SeedMachineTest {
-    private val machine = SeedMachine()
+val SeedMachineSuite by testSuite {
+    val machine = SeedMachine()
 
-    @Test
-    fun `returns the curated url for a known prompt`() =
-        runTest {
-            // Given
-            val (prompt, url) = SEED.first()
+    test("returns the curated url for a known prompt") {
+        // Given
+        val (prompt, url) = SEED.first()
 
-            // When
-            val result = machine.generate(prompt)
+        // When
+        val result = machine.generate(prompt)
 
-            // Then
-            assertEquals(Picture.Ready(url), result)
-        }
+        // Then
+        result shouldBe Picture.Ready(url)
+    }
 
-    @Test
-    fun `returns Failed for an unknown prompt`() =
-        runTest {
-            // Given
-            val prompt = "a prompt that is not seeded".asPrompt()
+    test("returns Failed for an unknown prompt") {
+        // Given
+        val prompt = "a prompt that is not seeded".asPrompt()
 
-            // When
-            val result = machine.generate(prompt)
+        // When
+        val result = machine.generate(prompt)
 
-            // Then
-            assertEquals(Picture.Failed, result)
-        }
+        // Then
+        result shouldBe Picture.Failed
+    }
 }

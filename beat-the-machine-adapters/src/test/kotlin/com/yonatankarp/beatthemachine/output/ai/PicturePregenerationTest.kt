@@ -12,82 +12,95 @@ import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
-import kotlinx.coroutines.CoroutineScope
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PicturePregenerationTest {
-    private val store = InMemoryChallengeStore()
-    private val storeChallenge = InMemoryStoreChallenge(store)
-    private val findById = InMemoryFindChallengeById(store)
-    private val findPending = InMemoryFindPendingChallenges(store)
-
-    @Test
-    fun `generation flips a pending picture to ready and persists it`() =
+val PicturePregenerationSuite by testSuite {
+    test("generation flips a pending picture to ready and persists it") {
         runTest {
             // Given
+            val store = InMemoryChallengeStore()
+            val storeChallenge = InMemoryStoreChallenge(store)
+            val findById = InMemoryFindChallengeById(store)
+            val findPending = InMemoryFindPendingChallenges(store)
             val machine = Machine { Picture.Ready("http://img/1.png") }
             val c = storeChallenge(mediumChallenge())
 
             // When
-            pregeneration(machine, this).enqueue(c.id)
+            PicturePregeneration(machine, findById, storeChallenge, findPending, this, 50).enqueue(c.id)
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Ready("http://img/1.png"), findById(c.id)?.picture)
+            findById(c.id)?.picture shouldBe Picture.Ready("http://img/1.png")
         }
+    }
 
-    @Test
-    fun `a failing machine persists a failed picture`() =
+    test("a failing machine persists a failed picture") {
         runTest {
             // Given
+            val store = InMemoryChallengeStore()
+            val storeChallenge = InMemoryStoreChallenge(store)
+            val findById = InMemoryFindChallengeById(store)
+            val findPending = InMemoryFindPendingChallenges(store)
             val machine = Machine { error("boom") }
             val c = storeChallenge(mediumChallenge())
 
             // When
-            pregeneration(machine, this).enqueue(c.id)
+            PicturePregeneration(machine, findById, storeChallenge, findPending, this, 50).enqueue(c.id)
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Failed, findById(c.id)?.picture)
+            findById(c.id)?.picture shouldBe Picture.Failed
         }
+    }
 
-    @Test
-    fun `enqueue for an unknown challenge is a no-op`() =
+    test("enqueue for an unknown challenge is a no-op") {
         runTest {
             // Given
+            val store = InMemoryChallengeStore()
+            val storeChallenge = InMemoryStoreChallenge(store)
+            val findById = InMemoryFindChallengeById(store)
+            val findPending = InMemoryFindPendingChallenges(store)
             val machine = Machine { Picture.Ready("http://img/1.png") }
 
             // When
-            pregeneration(machine, this).enqueue(aChallengeId())
+            PicturePregeneration(machine, findById, storeChallenge, findPending, this, 50).enqueue(aChallengeId())
             advanceUntilIdle()
         }
+    }
 
-    @Test
-    fun `retryPending re-enqueues every challenge still awaiting a picture`() =
+    test("retryPending re-enqueues every challenge still awaiting a picture") {
         runTest {
             // Given
+            val store = InMemoryChallengeStore()
+            val storeChallenge = InMemoryStoreChallenge(store)
+            val findById = InMemoryFindChallengeById(store)
+            val findPending = InMemoryFindPendingChallenges(store)
             val machine = Machine { Picture.Ready("http://img/retry.png") }
             val pending = storeChallenge(mediumChallenge())
             val done = storeChallenge(mediumChallenge(prompt = "foo bar".asPrompt()).withPicture(readyPicture("http://img/done.png")))
 
             // When
-            pregeneration(machine, this).retryPending()
+            PicturePregeneration(machine, findById, storeChallenge, findPending, this, 50).retryPending()
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Ready("http://img/retry.png"), findById(pending.id)?.picture)
-            assertEquals(Picture.Ready("http://img/done.png"), findById(done.id)?.picture)
+            findById(pending.id)?.picture shouldBe Picture.Ready("http://img/retry.png")
+            findById(done.id)?.picture shouldBe Picture.Ready("http://img/done.png")
         }
+    }
 
-    @Test
-    fun `a concurrent version bump is retried so the picture still persists`() =
+    test("a concurrent version bump is retried so the picture still persists") {
         runTest {
             // Given
+            val store = InMemoryChallengeStore()
+            val storeChallenge = InMemoryStoreChallenge(store)
+            val findById = InMemoryFindChallengeById(store)
+            val findPending = InMemoryFindPendingChallenges(store)
             val seeded = storeChallenge(mediumChallenge())
 
             var firstStore = true
@@ -103,21 +116,25 @@ class PicturePregenerationTest {
             val machine = Machine { Picture.Ready("http://img/raced.png") }
 
             // When
-            pregeneration(machine, this, racingStore).enqueue(seeded.id)
+            PicturePregeneration(machine, findById, racingStore, findPending, this, 50).enqueue(seeded.id)
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Ready("http://img/raced.png"), findById(seeded.id)?.picture)
+            findById(seeded.id)?.picture shouldBe Picture.Ready("http://img/raced.png")
         }
+    }
 
-    @Test
-    fun `enqueue sheds work once the admission bound is full`() =
+    test("enqueue sheds work once the admission bound is full") {
         runTest {
             // Given
+            val store = InMemoryChallengeStore()
+            val storeChallenge = InMemoryStoreChallenge(store)
+            val findById = InMemoryFindChallengeById(store)
+            val findPending = InMemoryFindPendingChallenges(store)
             val machine = Machine { Picture.Ready("http://img/admitted.png") }
             val admitted = storeChallenge(mediumChallenge())
             val shed = storeChallenge(mediumChallenge(prompt = "foo bar".asPrompt()))
-            val pregeneration = pregeneration(machine, this, maxQueued = 1)
+            val pregeneration = PicturePregeneration(machine, findById, storeChallenge, findPending, this, 1)
 
             // When
             pregeneration.enqueue(admitted.id)
@@ -125,14 +142,8 @@ class PicturePregenerationTest {
             advanceUntilIdle()
 
             // Then
-            assertEquals(Picture.Ready("http://img/admitted.png"), findById(admitted.id)?.picture)
-            assertEquals(Picture.Pending, findById(shed.id)?.picture)
+            findById(admitted.id)?.picture shouldBe Picture.Ready("http://img/admitted.png")
+            findById(shed.id)?.picture shouldBe Picture.Pending
         }
-
-    private fun pregeneration(
-        machine: Machine,
-        scope: CoroutineScope,
-        store: StoreChallenge = storeChallenge,
-        maxQueued: Int = 50,
-    ) = PicturePregeneration(machine, findById, store, findPending, scope, maxQueued)
+    }
 }

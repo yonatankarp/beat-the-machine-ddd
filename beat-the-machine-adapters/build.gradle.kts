@@ -29,6 +29,7 @@ dependencies {
 
     testImplementation(libs.bundles.unit.test)
     testImplementation(libs.bundles.spring.boot.test)
+    testImplementation(libs.springmockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":beat-the-machine-domain")))
     testRuntimeOnly(libs.junit.platform.launcher)

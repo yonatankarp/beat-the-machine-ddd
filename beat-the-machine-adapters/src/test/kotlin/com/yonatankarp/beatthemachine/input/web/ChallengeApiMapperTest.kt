@@ -10,14 +10,13 @@ import com.yonatankarp.beatthemachine.test.fixtures.Challenges.lostChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.failedPicture
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
-import org.junit.jupiter.api.Test
+import de.infix.testBalloon.framework.core.testSuite
+import io.kotest.matchers.shouldBe
 import java.net.URI
-import kotlin.test.assertEquals
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty as DomainDifficulty
 
-class ChallengeApiMapperTest {
-    @Test
-    fun `maps a pending picture`() {
+val ChallengeApiMapperSuite by testSuite {
+    test("maps a pending picture") {
         // Given
         val subject = mediumChallenge()
 
@@ -25,12 +24,11 @@ class ChallengeApiMapperTest {
         val response = subject.toApiResponse()
 
         // Then
-        assertEquals(PictureStatus.PENDING, response.picture.status)
-        assertEquals(null, response.picture.url)
+        response.picture.status shouldBe PictureStatus.PENDING
+        response.picture.url shouldBe null
     }
 
-    @Test
-    fun `maps a ready picture with its url`() {
+    test("maps a ready picture with its url") {
         // Given
         val subject = mediumChallenge().withPicture(readyPicture("http://img/1.png"))
 
@@ -38,12 +36,11 @@ class ChallengeApiMapperTest {
         val response = subject.toApiResponse()
 
         // Then
-        assertEquals(PictureStatus.READY, response.picture.status)
-        assertEquals(URI.create("http://img/1.png"), response.picture.url)
+        response.picture.status shouldBe PictureStatus.READY
+        response.picture.url shouldBe URI.create("http://img/1.png")
     }
 
-    @Test
-    fun `maps a failed picture`() {
+    test("maps a failed picture") {
         // Given
         val subject = mediumChallenge().withPicture(failedPicture())
 
@@ -51,12 +48,11 @@ class ChallengeApiMapperTest {
         val response = subject.toApiResponse()
 
         // Then
-        assertEquals(PictureStatus.FAILED, response.picture.status)
-        assertEquals(null, response.picture.url)
+        response.picture.status shouldBe PictureStatus.FAILED
+        response.picture.url shouldBe null
     }
 
-    @Test
-    fun `degrades a ready picture with a malformed url to FAILED`() {
+    test("degrades a ready picture with a malformed url to FAILED") {
         // Given
         val subject = mediumChallenge().withPicture(readyPicture("http:// bad url with spaces"))
 
@@ -64,12 +60,11 @@ class ChallengeApiMapperTest {
         val response = subject.toApiResponse()
 
         // Then
-        assertEquals(PictureStatus.FAILED, response.picture.status)
-        assertEquals(null, response.picture.url)
+        response.picture.status shouldBe PictureStatus.FAILED
+        response.picture.url shouldBe null
     }
 
-    @Test
-    fun `hides every word while the challenge is in progress`() {
+    test("hides every word while the challenge is in progress") {
         // Given
         val subject = mediumChallenge()
 
@@ -77,12 +72,11 @@ class ChallengeApiMapperTest {
         val response = subject.toApiResponse()
 
         // Then
-        assertEquals(listOf(MaskedToken(false, null, 5), MaskedToken(false, null, 5)), response.maskedPrompt)
-        assertEquals(ChallengeStatus.IN_PROGRESS, response.status)
+        response.maskedPrompt shouldBe listOf(MaskedToken(false, null, 5), MaskedToken(false, null, 5))
+        response.status shouldBe ChallengeStatus.IN_PROGRESS
     }
 
-    @Test
-    fun `reveals the whole prompt once the challenge is lost`() {
+    test("reveals the whole prompt once the challenge is lost") {
         // Given
         val subject = lostChallenge()
 
@@ -90,12 +84,11 @@ class ChallengeApiMapperTest {
         val response = subject.toApiResponse()
 
         // Then
-        assertEquals(listOf(MaskedToken(true, "hello", 5), MaskedToken(true, "world", 5)), response.maskedPrompt)
-        assertEquals("LOST", response.status.value)
+        response.maskedPrompt shouldBe listOf(MaskedToken(true, "hello", 5), MaskedToken(true, "world", 5))
+        response.status.value shouldBe "LOST"
     }
 
-    @Test
-    fun `reveals the whole prompt once the challenge is beaten`() {
+    test("reveals the whole prompt once the challenge is beaten") {
         // Given
         val subject = beatenChallenge()
 
@@ -103,12 +96,11 @@ class ChallengeApiMapperTest {
         val response = subject.toApiResponse()
 
         // Then
-        assertEquals(listOf(MaskedToken(true, "hello", 5), MaskedToken(true, "world", 5)), response.maskedPrompt)
-        assertEquals("BEATEN", response.status.value)
+        response.maskedPrompt shouldBe listOf(MaskedToken(true, "hello", 5), MaskedToken(true, "world", 5))
+        response.status.value shouldBe "BEATEN"
     }
 
-    @Test
-    fun `maps livesRemaining and the difficulty-derived maxLives`() {
+    test("maps livesRemaining and the difficulty-derived maxLives") {
         // Given
         val mediumChallenge = mediumChallenge()
         val easyChallenge = easyChallenge()
@@ -118,21 +110,20 @@ class ChallengeApiMapperTest {
         val easy = easyChallenge.toApiResponse()
 
         // Then
-        assertEquals(6, medium.livesRemaining)
-        assertEquals(6, medium.maxLives)
-        assertEquals(8, easy.maxLives)
+        medium.livesRemaining shouldBe 6
+        medium.maxLives shouldBe 6
+        easy.maxLives shouldBe 8
     }
 
-    @Test
-    fun `Difficulty toDomain maps each value to the same-named domain Difficulty`() {
+    test("Difficulty toDomain maps each value to the same-named domain Difficulty") {
         // When
         val easy = Difficulty.EASY.toDomain()
         val medium = Difficulty.MEDIUM.toDomain()
         val hard = Difficulty.HARD.toDomain()
 
         // Then
-        assertEquals(DomainDifficulty.EASY, easy)
-        assertEquals(DomainDifficulty.MEDIUM, medium)
-        assertEquals(DomainDifficulty.HARD, hard)
+        easy shouldBe DomainDifficulty.EASY
+        medium shouldBe DomainDifficulty.MEDIUM
+        hard shouldBe DomainDifficulty.HARD
     }
 }

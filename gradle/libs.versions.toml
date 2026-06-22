@@ -11,7 +11,7 @@ jvm = "25"
 # Matches the version managed by Spring Boot 4.1.0's BOM (kotlinx-coroutines-bom).
 # Pinned here for the application module, which has no Spring dependency management.
 kotlinx-coroutines = "1.11.0"
-mockwebserver = "4.12.0"
+mockwebserver = "5.4.0"
 spring-ai = "2.0.0"
 testballoon = "1.0.1-K2.4.0"
 kotest = "6.2.1"

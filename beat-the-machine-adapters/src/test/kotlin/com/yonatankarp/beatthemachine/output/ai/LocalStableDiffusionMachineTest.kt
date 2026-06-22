@@ -4,6 +4,9 @@ import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
+import com.yonatankarp.beatthemachine.test.dsl.given
+import com.yonatankarp.beatthemachine.test.dsl.then
+import com.yonatankarp.beatthemachine.test.dsl.whenever
 import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.aroundAll
 import de.infix.testBalloon.framework.core.testSuite
@@ -40,28 +43,36 @@ val LocalStableDiffusionMachineSuite by testSuite(
             timeout = 5.seconds,
         )
 
-    test("stores the decoded image and returns Ready") {
-        val pngBytes = byteArrayOf(1, 2, 3)
-        val b64 = Base64.getEncoder().encodeToString(pngBytes)
-        server.enqueue(
-            MockResponse()
-                .setHeader("Content-Type", "application/json")
-                .setBody("""{"images":["$b64"]}"""),
-        )
-        coEvery { storePicture handle StorePicture.Command(pngBytes, "image/png") } returns "xyz"
-        val result = machine() answer Machine.Query(Prompt("dragon eating a cookie"))
-        result shouldBe Picture.Ready("/images/xyz")
-    }
+    given("a local Stable Diffusion machine") {
+        whenever("the upstream returns a generated image") {
+            then("it stores the decoded image and returns Ready") {
+                val pngBytes = byteArrayOf(1, 2, 3)
+                val b64 = Base64.getEncoder().encodeToString(pngBytes)
+                server.enqueue(
+                    MockResponse()
+                        .setHeader("Content-Type", "application/json")
+                        .setBody("""{"images":["$b64"]}"""),
+                )
+                coEvery { storePicture handle StorePicture.Command(pngBytes, "image/png") } returns "xyz"
+                val result = machine() answer Machine.Query(Prompt("dragon eating a cookie"))
+                result shouldBe Picture.Ready("/images/xyz")
+            }
+        }
 
-    test("server error yields Failed") {
-        server.enqueue(MockResponse().setResponseCode(500))
-        machine() answer Machine.Query(Prompt("anything")) shouldBe Picture.Failed
-    }
+        whenever("the upstream returns a server error") {
+            then("it yields Failed") {
+                server.enqueue(MockResponse().setResponseCode(500))
+                machine() answer Machine.Query(Prompt("anything")) shouldBe Picture.Failed
+            }
+        }
 
-    test("empty image list yields Failed") {
-        server.enqueue(
-            MockResponse().setHeader("Content-Type", "application/json").setBody("""{"images":[]}"""),
-        )
-        machine() answer Machine.Query(Prompt("anything")) shouldBe Picture.Failed
+        whenever("the upstream returns an empty image list") {
+            then("it yields Failed") {
+                server.enqueue(
+                    MockResponse().setHeader("Content-Type", "application/json").setBody("""{"images":[]}"""),
+                )
+                machine() answer Machine.Query(Prompt("anything")) shouldBe Picture.Failed
+            }
+        }
     }
 }

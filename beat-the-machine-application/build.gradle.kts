@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":beat-the-machine-domain"))
     implementation(libs.kotlinx.coroutines.core)
 
+    testImplementation(project(":testballoon-gwt"))
     testImplementation(libs.bundles.unit.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":beat-the-machine-domain")))

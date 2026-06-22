@@ -12,8 +12,7 @@ kotlin {
 }
 
 dependencies {
-    testFixturesApi(libs.testballoon.core)
-
+    testImplementation(project(":testballoon-gwt"))
     testImplementation(libs.bundles.unit.test)
     testRuntimeOnly(libs.junit.platform.launcher)
 }

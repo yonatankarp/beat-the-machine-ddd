@@ -7,13 +7,13 @@ import com.yonatankarp.beatthemachine.domain.entity.Challenge
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
-import com.yonatankarp.beatthemachine.test.dsl.given
 import com.yonatankarp.beatthemachine.test.dsl.lives
-import com.yonatankarp.beatthemachine.test.dsl.then
-import com.yonatankarp.beatthemachine.test.dsl.whenever
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.failedPicture
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
+import com.yonatankarp.testballoon.gwt.given
+import com.yonatankarp.testballoon.gwt.then
+import com.yonatankarp.testballoon.gwt.whenever
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull

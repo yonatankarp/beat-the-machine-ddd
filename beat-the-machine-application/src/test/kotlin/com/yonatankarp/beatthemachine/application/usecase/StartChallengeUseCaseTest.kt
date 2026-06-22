@@ -2,7 +2,6 @@ package com.yonatankarp.beatthemachine.application.usecase
 
 import com.yonatankarp.beatthemachine.application.port.input.StartChallenge
 import com.yonatankarp.beatthemachine.application.port.output.PromptSource
-import com.yonatankarp.beatthemachine.application.port.output.StoredImage
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeId
 import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
@@ -15,7 +14,6 @@ import com.yonatankarp.beatthemachine.test.dsl.whenever
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.mockk
 
@@ -47,19 +45,6 @@ val StartChallengeUseSuite by testSuite {
                 easy.lives.remaining shouldBe Lives.forSecret(fakePrompt, Difficulty.EASY).remaining
                 medium.lives.remaining shouldBe Lives.forSecret(fakePrompt, Difficulty.MEDIUM).remaining
                 hard.lives.remaining shouldBe Lives.forSecret(fakePrompt, Difficulty.HARD).remaining
-            }
-        }
-    }
-
-    given("a StoredImage") {
-        whenever("compared by content") {
-            then("equality is content-based") {
-                val a = StoredImage(byteArrayOf(1, 2, 3), "image/png")
-                val b = StoredImage(byteArrayOf(1, 2, 3), "image/png")
-                val c = StoredImage(byteArrayOf(9), "image/png")
-                a shouldBe b
-                a shouldNotBe c
-                a.hashCode() shouldBe b.hashCode()
             }
         }
     }

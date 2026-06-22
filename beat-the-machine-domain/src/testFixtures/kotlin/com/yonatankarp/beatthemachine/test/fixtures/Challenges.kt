@@ -1,7 +1,9 @@
 package com.yonatankarp.beatthemachine.test.fixtures
 
 import com.yonatankarp.beatthemachine.domain.entity.Challenge
+import com.yonatankarp.beatthemachine.domain.valueobject.ChallengeStatus
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
+import com.yonatankarp.beatthemachine.domain.valueobject.Guess
 import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
@@ -20,6 +22,25 @@ object Challenges {
         lives: Lives = Lives.forSecret(prompt, Difficulty.MEDIUM),
         picture: Picture = Picture.Pending,
     ): Challenge = Challenge.start(prompt, lives, picture, Difficulty.MEDIUM)
+
+    fun mediumChallengeWithGuesses(
+        prompt: Prompt = "hello world".asPrompt(),
+        guesses: Set<Guess>,
+        lives: Lives = Lives.forSecret(prompt, Difficulty.MEDIUM),
+        status: ChallengeStatus = ChallengeStatus.IN_PROGRESS,
+        picture: Picture = Picture.Pending,
+        version: Long = 0,
+    ): Challenge =
+        Challenge.rehydrate(
+            id = mediumChallenge().id,
+            prompt = prompt,
+            guesses = guesses,
+            lives = lives,
+            status = status,
+            picture = picture,
+            difficulty = Difficulty.MEDIUM,
+            version = version,
+        )
 
     fun hardChallenge(
         prompt: Prompt = "hello world".asPrompt(),

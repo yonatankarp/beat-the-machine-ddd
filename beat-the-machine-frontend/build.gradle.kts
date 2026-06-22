@@ -1,4 +1,7 @@
+import com.github.gradle.node.npm.task.NpmTask
+
 plugins {
+    base
     alias(libs.plugins.node.gradle)
     alias(libs.plugins.openapi.generator)
 }
@@ -35,11 +38,25 @@ openApiGenerate {
 
 tasks.named("npmInstall") { dependsOn(tasks.named("openApiGenerate")) }
 
-val buildWebApp by tasks.registering(com.github.gradle.node.npm.task.NpmTask::class) {
+val buildWebApp = tasks.register<NpmTask>("buildWebApp") {
     dependsOn(tasks.named("npmInstall"))
     npmCommand.set(listOf("run", "build"))
     inputs.dir("src")
     inputs.file("package.json")
     inputs.file("vite.config.ts")
     outputs.dir(layout.projectDirectory.dir("dist"))
+}
+
+val test = tasks.register<NpmTask>("test") {
+    dependsOn(tasks.named("npmInstall"))
+    npmCommand.set(listOf("run", "test"))
+    inputs.dir("src")
+    inputs.file("package.json")
+    inputs.file("tsconfig.json")
+    inputs.file("vite.config.ts")
+    outputs.upToDateWhen { false }
+}
+
+tasks.named("check") {
+    dependsOn(test)
 }

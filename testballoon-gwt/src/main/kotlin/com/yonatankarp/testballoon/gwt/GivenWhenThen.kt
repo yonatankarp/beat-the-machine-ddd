@@ -4,11 +4,20 @@ import de.infix.testBalloon.framework.core.Test
 import de.infix.testBalloon.framework.core.TestSuiteScope
 import kotlinx.coroutines.ThreadContextElement
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.startCoroutine
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 class GivenWhenThenScope(
+    internal val testSuiteScope: TestSuiteScope,
+)
+
+class WhenScope(
     internal val testSuiteScope: TestSuiteScope,
 )
 
@@ -17,7 +26,7 @@ class ThenScope(
 )
 
 class ScenarioValue<T>(
-    private val value: () -> T,
+    private val value: suspend () -> T,
 ) : ReadOnlyProperty<Any?, T> {
     override fun getValue(
         thisRef: Any?,
@@ -28,8 +37,29 @@ class ScenarioValue<T>(
                 ?: error("Scenario value '${property.name}' was read outside a then block")
 
         @Suppress("UNCHECKED_CAST")
-        return context.values.getOrPut(this) { value() } as T
+        return context.values.getOrPut(this) { runSuspend(value, ScenarioContextElement(context)) } as T
     }
+}
+
+private fun <T> runSuspend(
+    value: suspend () -> T,
+    coroutineContext: CoroutineContext,
+): T {
+    val completed = CountDownLatch(1)
+    val resultHolder = AtomicReference<Result<T>>()
+    val wrapped: suspend () -> T = { withContext(coroutineContext) { value() } }
+    wrapped.startCoroutine(
+        object : Continuation<T> {
+            override val context: CoroutineContext = EmptyCoroutineContext
+
+            override fun resumeWith(result: Result<T>) {
+                resultHolder.set(result)
+                completed.countDown()
+            }
+        },
+    )
+    completed.await()
+    return resultHolder.get().getOrThrow()
 }
 
 private class ScenarioContext {
@@ -79,15 +109,15 @@ fun GivenWhenThenScope.given(
 
 fun GivenWhenThenScope.whenever(
     description: String,
-    content: ThenScope.() -> Unit,
+    content: WhenScope.() -> Unit,
 ): Unit =
     with(testSuiteScope) {
         testSuite("when $description") {
-            ThenScope(this).content()
+            WhenScope(this).content()
         }
     }
 
-fun ThenScope.then(
+fun WhenScope.then(
     description: String,
     action: suspend Test.ExecutionScope.() -> Unit,
 ): Unit =
@@ -100,8 +130,6 @@ fun ThenScope.then(
         }
     }
 
-fun <T> GivenWhenThenScope.setup(value: () -> T): ScenarioValue<T> = ScenarioValue(value)
+fun <T> GivenWhenThenScope.setup(value: suspend () -> T): ScenarioValue<T> = ScenarioValue(value)
 
-fun <T> ThenScope.setup(value: () -> T): ScenarioValue<T> = ScenarioValue(value)
-
-fun <T> ThenScope.action(value: () -> T): ScenarioValue<T> = ScenarioValue(value)
+fun <T> WhenScope.action(value: suspend () -> T): ScenarioValue<T> = ScenarioValue(value)

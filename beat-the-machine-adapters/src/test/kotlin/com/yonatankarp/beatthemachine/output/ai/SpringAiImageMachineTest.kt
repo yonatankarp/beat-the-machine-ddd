@@ -4,9 +4,9 @@ import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
-import com.yonatankarp.beatthemachine.test.dsl.given
-import com.yonatankarp.beatthemachine.test.dsl.then
-import com.yonatankarp.beatthemachine.test.dsl.whenever
+import com.yonatankarp.testballoon.gwt.given
+import com.yonatankarp.testballoon.gwt.then
+import com.yonatankarp.testballoon.gwt.whenever
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe

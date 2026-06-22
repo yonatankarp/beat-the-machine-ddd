@@ -2,9 +2,9 @@ package com.yonatankarp.beatthemachine.output.persistence.sqlite
 
 import com.yonatankarp.beatthemachine.application.port.output.FindPicture
 import com.yonatankarp.beatthemachine.application.port.output.StorePicture
-import com.yonatankarp.beatthemachine.test.dsl.given
-import com.yonatankarp.beatthemachine.test.dsl.then
-import com.yonatankarp.beatthemachine.test.dsl.whenever
+import com.yonatankarp.testballoon.gwt.given
+import com.yonatankarp.testballoon.gwt.then
+import com.yonatankarp.testballoon.gwt.whenever
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe

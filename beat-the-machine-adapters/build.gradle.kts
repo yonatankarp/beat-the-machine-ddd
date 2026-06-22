@@ -30,6 +30,7 @@ dependencies {
     implementation(platform(libs.spring.ai.bom))
     implementation(libs.bundles.spring.ai.starters)
 
+    testImplementation(project(":testballoon-gwt"))
     testImplementation(libs.bundles.unit.test)
     testImplementation(libs.bundles.spring.boot.test)
     testImplementation(libs.kotlinx.coroutines.test)

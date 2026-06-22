@@ -10,12 +10,14 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.test.dsl.aChallengeId
 import com.yonatankarp.beatthemachine.test.dsl.asGuess
 import com.yonatankarp.beatthemachine.test.dsl.asPrompt
-import com.yonatankarp.beatthemachine.test.dsl.given
 import com.yonatankarp.beatthemachine.test.dsl.lives
-import com.yonatankarp.beatthemachine.test.dsl.then
-import com.yonatankarp.beatthemachine.test.dsl.whenever
 import com.yonatankarp.beatthemachine.test.fixtures.Challenges.mediumChallenge
 import com.yonatankarp.beatthemachine.test.fixtures.Pictures.readyPicture
+import com.yonatankarp.testballoon.gwt.action
+import com.yonatankarp.testballoon.gwt.given
+import com.yonatankarp.testballoon.gwt.setup
+import com.yonatankarp.testballoon.gwt.then
+import com.yonatankarp.testballoon.gwt.whenever
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -23,71 +25,92 @@ import io.kotest.matchers.shouldBe
 
 val ChallengeSuite by testSuite {
     given("a medium challenge with 3 lives") {
-        val challenge = mediumChallenge(lives = 3.lives())
+        val challenge by setup { mediumChallenge(lives = 3.lives()) }
 
         whenever("a correct guess is made") {
-            val (updated, outcome) = challenge.makeGuess("hello".asGuess())
+            val result by action { challenge.makeGuess("hello".asGuess()) }
+
             then("the outcome is a hit") {
+                val (_, outcome) = result
                 outcome shouldBe GuessOutcome.HIT
             }
             then("the challenge stays in progress") {
+                val (updated, _) = result
                 updated.status shouldBe ChallengeStatus.IN_PROGRESS
             }
             then("no life is lost") {
+                val (updated, _) = result
                 updated.lives.remaining shouldBe 3
             }
         }
 
         whenever("a wrong guess is made") {
-            val (updated, outcome) = challenge.makeGuess("nope".asGuess())
+            val result by action { challenge.makeGuess("nope".asGuess()) }
+
             then("the outcome is a miss") {
+                val (_, outcome) = result
                 outcome shouldBe GuessOutcome.MISS
             }
             then("one life is lost") {
+                val (updated, _) = result
                 updated.lives.remaining shouldBe 2
             }
         }
 
         whenever("a duplicate guess is made") {
-            val (afterFirst, _) = challenge.makeGuess("nope".asGuess())
-            val (afterSecond, outcome) = afterFirst.makeGuess("Nope".asGuess())
+            val afterFirst by action { challenge.makeGuess("nope".asGuess()).first }
+            val result by action { afterFirst.makeGuess("Nope".asGuess()) }
+
             then("the outcome is a duplicate") {
+                val (_, outcome) = result
                 outcome shouldBe GuessOutcome.DUPLICATE
             }
             then("no additional life is lost") {
+                val (afterSecond, _) = result
                 afterSecond.lives.remaining shouldBe 2
             }
         }
 
         whenever("a guess is made") {
-            challenge.makeGuess("nope".asGuess())
+            val result by action { challenge.makeGuess("nope".asGuess()) }
+
             then("the receiver lives are not mutated") {
+                result
                 challenge.lives.remaining shouldBe 3
             }
             then("the receiver guesses are not mutated") {
+                result
                 challenge.guesses.isEmpty().shouldBeTrue()
             }
         }
     }
 
     given("a medium challenge with 1 life") {
+        val challenge by setup { mediumChallenge(lives = 1.lives()) }
+
         whenever("a wrong guess is made") {
-            val (updated, _) = mediumChallenge(lives = 1.lives()).makeGuess("nope".asGuess())
+            val result by action { challenge.makeGuess("nope".asGuess()) }
+
             then("status is LOST") {
+                val (updated, _) = result
                 updated.status shouldBe ChallengeStatus.LOST
             }
         }
     }
 
     given("guessing every word") {
+        val challenge by setup { mediumChallenge() }
+
         whenever("all words are guessed") {
-            val challenge = mediumChallenge()
-            val (afterFirst, _) = challenge.makeGuess("hello".asGuess())
-            val (afterSecond, outcome) = afterFirst.makeGuess("world".asGuess())
+            val afterFirst by action { challenge.makeGuess("hello".asGuess()).first }
+            val result by action { afterFirst.makeGuess("world".asGuess()) }
+
             then("the outcome is a hit") {
+                val (_, outcome) = result
                 outcome shouldBe GuessOutcome.HIT
             }
             then("the status is beaten") {
+                val (afterSecond, _) = result
                 afterSecond.status shouldBe ChallengeStatus.BEATEN
             }
         }
@@ -109,8 +132,11 @@ val ChallengeSuite by testSuite {
     }
 
     given("a medium challenge") {
+        val challenge by setup { mediumChallenge() }
+
         whenever("forfeited") {
-            val forfeited = mediumChallenge().forfeit()
+            val forfeited by action { challenge.forfeit() }
+
             then("status is LOST") {
                 forfeited.status shouldBe ChallengeStatus.LOST
             }
@@ -124,7 +150,8 @@ val ChallengeSuite by testSuite {
         }
 
         whenever("maskedPrompt after one hit") {
-            val (afterHit, _) = mediumChallenge().makeGuess("hello".asGuess())
+            val afterHit by action { challenge.makeGuess("hello".asGuess()).first }
+
             then("the first token is revealed") {
                 val masked = afterHit.maskedPrompt()
                 masked.tokens[0] shouldBe MaskedToken.Revealed("hello")
@@ -142,9 +169,9 @@ val ChallengeSuite by testSuite {
         }
 
         whenever("withPicture is called") {
-            val challenge = mediumChallenge()
-            val newPicture = readyPicture("https://example.com/img.png")
-            val updated = challenge.withPicture(newPicture)
+            val newPicture by setup { readyPicture("https://example.com/img.png") }
+            val updated by action { challenge.withPicture(newPicture) }
+
             then("the picture is updated") {
                 updated.picture shouldBe newPicture
             }
@@ -152,6 +179,7 @@ val ChallengeSuite by testSuite {
                 updated.version shouldBe challenge.version
             }
             then("the original picture is still pending") {
+                updated
                 challenge.picture shouldBe Picture.Pending
             }
             then("the updated challenge is a new instance") {
@@ -161,8 +189,9 @@ val ChallengeSuite by testSuite {
     }
 
     given("Challenge.start") {
+        val challenge by setup { Challenge.start("hello world".asPrompt(), 6.lives()) }
+
         whenever("called with a prompt and lives") {
-            val challenge = Challenge.start("hello world".asPrompt(), 6.lives())
             then("the picture defaults to pending") {
                 challenge.picture shouldBe Picture.Pending
             }
@@ -176,19 +205,21 @@ val ChallengeSuite by testSuite {
     }
 
     given("Challenge.rehydrate") {
+        val prompt by setup { "secret phrase".asPrompt() }
+        val challenge by setup {
+            Challenge.rehydrate(
+                id = aChallengeId(),
+                prompt = prompt,
+                guesses = emptySet(),
+                lives = 4.lives(),
+                status = ChallengeStatus.IN_PROGRESS,
+                picture = Picture.Failed,
+                difficulty = Difficulty.HARD,
+                version = 7L,
+            )
+        }
+
         whenever("called with full state") {
-            val prompt = "secret phrase".asPrompt()
-            val challenge =
-                Challenge.rehydrate(
-                    id = aChallengeId(),
-                    prompt = prompt,
-                    guesses = emptySet(),
-                    lives = 4.lives(),
-                    status = ChallengeStatus.IN_PROGRESS,
-                    picture = Picture.Failed,
-                    difficulty = Difficulty.HARD,
-                    version = 7L,
-                )
             then("the secret prompt is preserved") {
                 challenge.secretPrompt() shouldBe prompt
             }

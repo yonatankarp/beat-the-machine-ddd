@@ -3,9 +3,9 @@ package com.yonatankarp.beatthemachine.output.persistence.sqlite
 import com.yonatankarp.beatthemachine.application.port.output.ChallengeTemplate
 import com.yonatankarp.beatthemachine.domain.valueobject.Difficulty
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
-import com.yonatankarp.beatthemachine.test.dsl.given
-import com.yonatankarp.beatthemachine.test.dsl.then
-import com.yonatankarp.beatthemachine.test.dsl.whenever
+import com.yonatankarp.testballoon.gwt.given
+import com.yonatankarp.testballoon.gwt.then
+import com.yonatankarp.testballoon.gwt.whenever
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -20,7 +20,7 @@ val SqliteChallengeTemplatesITSuite by testSuite {
                 templates.save(ChallengeTemplate("3", Difficulty.HARD, Prompt("a b c"), "/images/c"))
                 templates.count(Difficulty.EASY) shouldBe 2
                 templates.count(Difficulty.HARD) shouldBe 1
-                templates.randomReady(Difficulty.HARD)!!.difficulty shouldBe Difficulty.HARD
+                templates.randomReady(Difficulty.HARD)?.difficulty shouldBe Difficulty.HARD
             }
         }
 

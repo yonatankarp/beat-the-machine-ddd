@@ -9,7 +9,13 @@ import com.yonatankarp.beatthemachine.domain.valueobject.Lives
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
 import com.yonatankarp.beatthemachine.domain.valueobject.Prompt
 import org.springframework.jdbc.core.RowMapper
+import java.nio.charset.StandardCharsets
+import java.util.Base64
 import java.util.UUID
+
+private const val GUESS_DELIMITER = "|"
+private val guessEncoder = Base64.getUrlEncoder().withoutPadding()
+private val guessDecoder = Base64.getUrlDecoder()
 
 class ChallengeRowMapper {
     val rowMapper: RowMapper<ChallengeRow> =
@@ -40,7 +46,7 @@ class ChallengeRowMapper {
         return ChallengeRow(
             id = challenge.id.value.toString(),
             prompt = challenge.secretPrompt().text,
-            guesses = challenge.guesses.joinToString(GUESS_DELIMITER) { it.word },
+            guesses = challenge.guesses.joinToString(GUESS_DELIMITER) { it.word.encodeGuess() },
             lives = challenge.lives.remaining,
             status = challenge.status.name,
             pictureStatus = pictureStatus,
@@ -55,16 +61,14 @@ class ChallengeRowMapper {
             when (row.pictureStatus) {
                 "READY" -> Picture.Ready(row.pictureUrl ?: throw IllegalStateException("READY picture row ${row.id} has null url"))
                 "FAILED" -> Picture.Failed
-                else -> Picture.Pending
+                "PENDING" -> Picture.Pending
+                else -> throw IllegalStateException("Unknown picture_status ${row.pictureStatus} for challenge ${row.id}")
             }
         val guesses =
             if (row.guesses.isBlank()) {
                 emptySet()
             } else {
-                row.guesses
-                    .split(GUESS_DELIMITER)
-                    .map { Guess(it) }
-                    .toSet()
+                row.guesses.decodeGuesses()
             }
         return Challenge.rehydrate(
             id = ChallengeId(UUID.fromString(row.id)),
@@ -77,8 +81,13 @@ class ChallengeRowMapper {
             version = row.version,
         )
     }
-
-    private companion object {
-        const val GUESS_DELIMITER = "|"
-    }
 }
+
+private fun String.encodeGuess(): String = guessEncoder.encodeToString(toByteArray(StandardCharsets.UTF_8))
+
+private fun String.decodeGuesses(): Set<Guess> =
+    split(GUESS_DELIMITER)
+        .map { it.decodeGuess() }
+        .toSet()
+
+private fun String.decodeGuess(): Guess = Guess(String(guessDecoder.decode(this), StandardCharsets.UTF_8))

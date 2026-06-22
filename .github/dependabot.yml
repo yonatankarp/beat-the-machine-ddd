@@ -19,5 +19,15 @@ updates:
       - "type: dependencies"
       - "relates-to: build"
 
+  # Maintain dependencies for the React frontend
+  - package-ecosystem: "npm"
+    directory: "/beat-the-machine-frontend"
+    schedule:
+      interval: "daily"
+    labels:
+      - "type: dependencies"
+      - "relates-to: frontend"
+      - "relates-to: build"
+
 # See https://docs.github.com/en/free-pro-team@latest/github/administering-a-repository/keeping-your-dependencies-updated-automatically
 # for more information about configuring Dependabot.

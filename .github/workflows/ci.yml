@@ -12,6 +12,7 @@ jobs:
   pipeline:
     permissions:
       contents: read
+      packages: read
       pull-requests: write
       checks: write
     uses: yonatankarp/github-actions/.github/workflows/ci.yml@v2

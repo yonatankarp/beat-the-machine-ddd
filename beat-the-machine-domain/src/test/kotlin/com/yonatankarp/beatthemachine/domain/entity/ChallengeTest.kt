@@ -133,6 +133,7 @@ val ChallengeSuite by testSuite {
 
     given("a medium challenge") {
         val challenge by setup { mediumChallenge() }
+        val newPicture by setup { readyPicture("https://example.com/img.png") }
 
         whenever("forfeited") {
             val forfeited by action { challenge.forfeit() }
@@ -169,7 +170,6 @@ val ChallengeSuite by testSuite {
         }
 
         whenever("withPicture is called") {
-            val newPicture by setup { readyPicture("https://example.com/img.png") }
             val updated by action { challenge.withPicture(newPicture) }
 
             then("the picture is updated") {

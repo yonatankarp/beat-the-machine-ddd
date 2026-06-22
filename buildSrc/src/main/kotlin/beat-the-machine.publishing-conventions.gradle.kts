@@ -16,7 +16,7 @@ afterEvaluate {
         repositories {
             maven {
                 name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/yonatankarp/kotlin-spring-boot-template")
+                url = uri("https://maven.pkg.github.com/yonatankarp/beat-the-machine-ddd")
                 credentials {
                     username = (project.findProperty("gpr.user") as String?) ?: System.getenv("GITHUB_ACTOR")
                     password = (project.findProperty("gpr.key") as String?) ?: System.getenv("GITHUB_TOKEN")

@@ -7,7 +7,10 @@ import org.springframework.stereotype.Component
 class PoolSweep(
     private val replenisher: ChallengePoolReplenisher,
 ) {
-    @Scheduled(fixedDelayString = "\${btm.pool.sweep-ms:60000}")
+    @Scheduled(
+        fixedDelayString = "\${btm.pool.sweep-ms:60000}",
+        initialDelayString = "\${btm.pool.sweep-ms:60000}",
+    )
     fun sweep() {
         replenisher.warmUp()
     }

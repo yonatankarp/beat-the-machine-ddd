@@ -10,6 +10,8 @@ FRONTEND     := :beat-the-machine-frontend
 UI_DIR       := beat-the-machine-frontend
 PORT         := 8080
 UI_PORT      := 5173
+DB_PATH      := beat-the-machine.db
+BTM_IMAGE_LOCAL_SD_BASE_URL ?= http://localhost:7860
 BASE_URL     := http://localhost:$(PORT)
 UI_URL       := http://localhost:$(UI_PORT)/app/
 
@@ -23,7 +25,7 @@ endef
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup build test coverage check run run-inmemory ui ui-build jar clean docker-build docker-run
+.PHONY: help setup build test coverage check seed-images seed-challenges run run-inmemory ui ui-build jar clean docker-build docker-run
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -44,6 +46,15 @@ coverage: ## Run tests and generate JaCoCo coverage reports
 
 check: ## Run the full verification (build + tests)
 	$(GRADLE) build
+
+seed-images: ## Generate the 30 bundled seed images using local Stable Diffusion
+	BTM_IMAGE_LOCAL_SD_BASE_URL=$(BTM_IMAGE_LOCAL_SD_BASE_URL) scripts/generate-seed-images-local-sd.sh
+
+seed-challenges: ## Start durable backend and seed 30 curated challenge templates
+	$(banner)
+	@printf '  Seeds:  \033[36m30 curated templates\033[0m (10 per difficulty) in SQLite\n'
+	@printf '  DB:     \033[36m%s\033[0m\n\n' '$(DB_PATH)'
+	PORT=$(PORT) BTM_DB_PATH=$(DB_PATH) BTM_PROMPT_PROVIDER=seed BTM_IMAGE_PROVIDER=seed BTM_POOL_TARGET=10 $(GRADLE) $(ADAPTERS):bootRun
 
 run: ## Run the app (default persistence)
 	$(banner)

@@ -1,6 +1,7 @@
 package com.yonatankarp.beatthemachine.output.ai
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.yonatankarp.beatthemachine.application.port.output.Machine
 import com.yonatankarp.beatthemachine.application.port.output.StorePicture
 import com.yonatankarp.beatthemachine.domain.valueobject.Picture
@@ -20,16 +21,30 @@ class LocalStableDiffusionMachine(
     private val width: Int,
     private val height: Int,
     private val timeout: Duration,
+    private val promptPrefix: String = "",
+    private val promptSuffix: String = "",
+    private val negativePrompt: String = "",
+    private val cfgScale: Double = 7.0,
 ) : Machine {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val webClient = imageWebClient(baseUrl)
 
     override suspend fun answer(query: Machine.Query): Picture =
         storePicture.renderedPicture(logger, query.prompt) {
+            val imagePrompt = "$promptPrefix${query.prompt.text}$promptSuffix"
             val response =
                 withContext(Dispatchers.IO) {
                     withTimeout(timeout) {
-                        webClient.textToImage(Txt2ImgRequest(query.prompt.text, steps, width, height))
+                        webClient.textToImage(
+                            Txt2ImgRequest(
+                                prompt = imagePrompt,
+                                negativePrompt = negativePrompt,
+                                steps = steps,
+                                width = width,
+                                height = height,
+                                cfgScale = cfgScale,
+                            ),
+                        )
                     }
                 }
             val b64 = response.images.firstOrNull() ?: return@renderedPicture null
@@ -45,9 +60,13 @@ class LocalStableDiffusionMachine(
 
     private data class Txt2ImgRequest(
         val prompt: String,
+        @JsonProperty("negative_prompt")
+        val negativePrompt: String,
         val steps: Int,
         val width: Int,
         val height: Int,
+        @JsonProperty("cfg_scale")
+        val cfgScale: Double,
     )
 
     @JsonIgnoreProperties(ignoreUnknown = true)

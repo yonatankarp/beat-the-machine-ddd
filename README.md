@@ -60,6 +60,11 @@ make seed-images
 
 Use `BTM_IMAGE_LOCAL_SD_BASE_URL=http://host:7860` if your local SD API is not
 at `http://localhost:7860`.
+The image size, prompt wrapper, negative prompt, steps, CFG scale, and timeout
+are shared by the app and the seed script through
+`beat-the-machine-adapters/src/main/resources/local-stable-diffusion.yml`.
+See [`docs/local-stable-diffusion-seeding.md`](docs/local-stable-diffusion-seeding.md)
+for subset generation, overrides, and capacity planning.
 
 To create or refresh that seed pool in the durable SQLite backend, run:
 

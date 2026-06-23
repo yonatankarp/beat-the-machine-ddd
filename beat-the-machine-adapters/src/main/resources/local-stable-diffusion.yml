@@ -1,0 +1,12 @@
+btm:
+  image:
+    local-sd:
+      base-url: http://localhost:7860
+      steps: 10
+      width: 384
+      height: 384
+      timeout-seconds: 300
+      cfg-scale: 7.0
+      prompt-prefix: "clear centered subject: "
+      prompt-suffix: ", simple colorful storybook illustration, single main object or character, recognizable silhouette, clean background, full object visible, sharp focus"
+      negative-prompt: "abstract, blurry, distorted, duplicated, collage, pattern, grid, text, watermark, cropped, low contrast, noisy"

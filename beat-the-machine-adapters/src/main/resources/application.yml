@@ -2,6 +2,8 @@ server:
   port: ${PORT:80}
 
 spring:
+  config:
+    import: classpath:local-stable-diffusion.yml
   ai:
     model:
       chat: ${SPRING_AI_MODEL_CHAT:none}
@@ -28,12 +30,6 @@ btm:
     provider: ${BTM_PROMPT_PROVIDER:seed}
   image:
     provider: ${BTM_IMAGE_PROVIDER:seed}
-    local-sd:
-      base-url: ${BTM_IMAGE_LOCAL_SD_BASE_URL:http://localhost:7860}
-      steps: ${BTM_IMAGE_LOCAL_SD_STEPS:8}
-      width: ${BTM_IMAGE_LOCAL_SD_WIDTH:512}
-      height: ${BTM_IMAGE_LOCAL_SD_HEIGHT:512}
-      timeout-seconds: ${BTM_IMAGE_LOCAL_SD_TIMEOUT_SECONDS:120}
 
 management:
   endpoints:

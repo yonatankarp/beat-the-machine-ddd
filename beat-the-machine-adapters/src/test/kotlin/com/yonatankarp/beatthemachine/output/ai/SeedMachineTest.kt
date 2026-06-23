@@ -15,7 +15,9 @@ val SeedMachineSuite by testSuite {
     given("a seed machine") {
         whenever("answering a known seeded prompt") {
             then("it returns the curated url") {
-                val (prompt, url) = SEED.first()
+                val seed = SEED.first()
+                val prompt = seed.prompt
+                val url = seed.pictureUrl
                 val result = machine answer Machine.Query(prompt)
                 result shouldBe Picture.Ready(url)
             }

@@ -28,7 +28,10 @@ export default defineConfig({
   plugins: [devRedirectRootToApp(), react(), tailwindcss()],
   server: {
     // Matches `make run` / `make run-inmemory`, which start the backend on 8080.
-    proxy: { '/api': 'http://localhost:8080' },
+    proxy: {
+      '/api': 'http://localhost:8080',
+      '/seed': 'http://localhost:8080',
+    },
   },
   test: {
     globals: true,

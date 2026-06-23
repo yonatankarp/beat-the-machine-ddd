@@ -62,20 +62,29 @@ services:
   # Run with: docker compose --profile sd-cpu up
   stable-diffusion-cpu:
     image: universonic/stable-diffusion-webui:latest
-    # Apple Silicon: no arm64 image; force amd64 emulation (even slower):
-    # platform: linux/amd64
+    # Apple Silicon: no arm64 image; force amd64 emulation (even slower).
+    platform: linux/amd64
     profiles: ["sd-cpu"]
     ports:
       - "7860:7860"
+    environment:
+      PIP_CONSTRAINT: /tmp/pip-constraints.txt
+      STABLE_DIFFUSION_REPO: https://github.com/embodyme/Stability-AI-stablediffusion.git
+    entrypoint:
+      - /bin/bash
+      - -lc
     command:
-      - "--api"
-      - "--listen"
-      - "--skip-torch-cuda-test"
-      - "--use-cpu"
-      - "all"
-      - "--no-half"
-      - "--precision"
-      - "full"
+      - >
+        echo 'setuptools<81' > /tmp/pip-constraints.txt &&
+        cd /app/stable-diffusion-webui &&
+        python3 -m venv venv &&
+        . venv/bin/activate &&
+        python -m pip install 'setuptools<81' &&
+        python -m pip install tqdm &&
+        rm -rf venv/lib/python3.10/site-packages/taming venv/lib/python3.10/site-packages/taming_transformers* &&
+        git clone https://github.com/CompVis/taming-transformers.git repositories/taming-transformers || git -C repositories/taming-transformers pull --ff-only &&
+        ln -s /app/stable-diffusion-webui/repositories/taming-transformers/taming venv/lib/python3.10/site-packages/taming &&
+        exec /app/entrypoint.sh --api --listen --port 7860 --skip-torch-cuda-test --use-cpu all --no-half --precision full
     networks:
       default:
         aliases:

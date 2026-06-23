@@ -47,7 +47,39 @@ it. The secret prompt is never serialized while a challenge is
 ## Running with real generation
 
 By default the app uses seed (static) prompts and seed images, so it boots
-with no API keys or GPU. The sections below enable live AI generation.
+with no API keys or GPU. The bundled catalog contains 30 ready challenge
+templates: 10 easy, 10 medium, and 10 hard. Those templates expect bundled
+images under `beat-the-machine-adapters/src/main/resources/static/seed/images`.
+
+To generate the bundled seed images from a local Stable Diffusion API, first
+start Automatic1111 with `--api` on port 7860, then run:
+
+```shell
+make seed-images
+```
+
+Use `BTM_IMAGE_LOCAL_SD_BASE_URL=http://host:7860` if your local SD API is not
+at `http://localhost:7860`.
+
+To create or refresh that seed pool in the durable SQLite backend, run:
+
+```shell
+make seed-challenges
+```
+
+The command starts the backend with seed prompts, seed images, and
+`BTM_POOL_TARGET=10`. Once the app has started, the template pool is available
+from SQLite and new games can be served immediately from ready pictures.
+Stop the process with `Ctrl-C` when you are done.
+
+Use `DB_PATH=/path/to/file.db` or `PORT=18080` to override the database file or
+HTTP port, for example:
+
+```shell
+make seed-challenges DB_PATH=/tmp/beat-the-machine-seed.db PORT=18080
+```
+
+The sections below enable live AI generation.
 
 ### One-command local (Ollama + seed images)
 

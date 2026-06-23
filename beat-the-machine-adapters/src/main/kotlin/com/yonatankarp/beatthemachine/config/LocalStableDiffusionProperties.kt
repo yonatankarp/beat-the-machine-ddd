@@ -9,4 +9,8 @@ data class LocalStableDiffusionProperties(
     val width: Int = 512,
     val height: Int = 512,
     val timeoutSeconds: Long = 120,
+    val cfgScale: Double = 7.0,
+    val promptPrefix: String = "",
+    val promptSuffix: String = "",
+    val negativePrompt: String = "",
 )

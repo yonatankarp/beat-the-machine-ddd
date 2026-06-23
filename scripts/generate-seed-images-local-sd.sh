@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_url="${BTM_IMAGE_LOCAL_SD_BASE_URL:-http://localhost:7860}"
+config_file="${BTM_LOCAL_SD_CONFIG:-beat-the-machine-adapters/src/main/resources/local-stable-diffusion.yml}"
+
+config_value() {
+  ruby -ryaml -e \
+    'value = ARGV[1].split(".").reduce(YAML.load_file(ARGV[0])) { |node, key| node.fetch(key) }; puts value' \
+    "$config_file" "$1"
+}
+
+base_url="${BTM_IMAGE_LOCAL_SD_BASE_URL:-$(config_value btm.image.local-sd.base-url)}"
 out_dir="${BTM_SEED_IMAGE_DIR:-beat-the-machine-adapters/src/main/resources/static/seed/images}"
-steps="${BTM_IMAGE_LOCAL_SD_STEPS:-10}"
-width="${BTM_IMAGE_LOCAL_SD_WIDTH:-384}"
-height="${BTM_IMAGE_LOCAL_SD_HEIGHT:-384}"
-cfg_scale="${BTM_IMAGE_LOCAL_SD_CFG_SCALE:-7}"
+steps="${BTM_IMAGE_LOCAL_SD_STEPS:-$(config_value btm.image.local-sd.steps)}"
+width="${BTM_IMAGE_LOCAL_SD_WIDTH:-$(config_value btm.image.local-sd.width)}"
+height="${BTM_IMAGE_LOCAL_SD_HEIGHT:-$(config_value btm.image.local-sd.height)}"
+cfg_scale="${BTM_IMAGE_LOCAL_SD_CFG_SCALE:-$(config_value btm.image.local-sd.cfg-scale)}"
 selected_ids="${BTM_SEED_IMAGE_IDS:-}"
-prompt_prefix="${BTM_SEED_IMAGE_PROMPT_PREFIX:-clear centered subject: }"
-prompt_suffix="${BTM_SEED_IMAGE_PROMPT_SUFFIX:-, simple colorful storybook illustration, single main object or character, recognizable silhouette, clean background, full object visible, sharp focus}"
-negative_prompt="${BTM_SEED_IMAGE_NEGATIVE_PROMPT:-abstract, blurry, distorted, duplicated, collage, pattern, grid, text, watermark, cropped, low contrast, noisy}"
+prompt_prefix="${BTM_SEED_IMAGE_PROMPT_PREFIX:-${BTM_IMAGE_LOCAL_SD_PROMPT_PREFIX:-$(config_value btm.image.local-sd.prompt-prefix)}}"
+prompt_suffix="${BTM_SEED_IMAGE_PROMPT_SUFFIX:-${BTM_IMAGE_LOCAL_SD_PROMPT_SUFFIX:-$(config_value btm.image.local-sd.prompt-suffix)}}"
+negative_prompt="${BTM_SEED_IMAGE_NEGATIVE_PROMPT:-${BTM_IMAGE_LOCAL_SD_NEGATIVE_PROMPT:-$(config_value btm.image.local-sd.negative-prompt)}}"
 
 mkdir -p "$out_dir"
 

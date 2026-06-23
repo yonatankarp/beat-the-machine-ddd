@@ -32,6 +32,10 @@ class MachineConfig {
             properties.width,
             properties.height,
             properties.timeoutSeconds.seconds,
+            properties.promptPrefix,
+            properties.promptSuffix,
+            properties.negativePrompt,
+            properties.cfgScale,
         )
 
     @Bean

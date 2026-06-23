@@ -9,14 +9,41 @@ import com.yonatankarp.testballoon.gwt.whenever
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.context.annotation.Bean
 
-private val runner = ApplicationContextRunner().withUserConfiguration(MachineConfig::class.java)
+private val runner =
+    ApplicationContextRunner()
+        .withInitializer(ConfigDataApplicationContextInitializer())
+        .withUserConfiguration(MachineConfig::class.java)
 
 val MachineConfigSuite by testSuite {
     given("the machine config") {
+        whenever("using default local stable diffusion settings") {
+            then("the checked-in application config matches the seed image generation policy") {
+                runner.run { ctx ->
+                    ctx.getBean(LocalStableDiffusionProperties::class.java) shouldBe
+                        LocalStableDiffusionProperties(
+                            baseUrl = "http://localhost:7860",
+                            steps = 10,
+                            width = 384,
+                            height = 384,
+                            timeoutSeconds = 300,
+                            cfgScale = 7.0,
+                            promptPrefix = "clear centered subject: ",
+                            promptSuffix =
+                                ", simple colorful storybook illustration, single main object or character, " +
+                                    "recognizable silhouette, clean background, full object visible, sharp focus",
+                            negativePrompt =
+                                "abstract, blurry, distorted, duplicated, collage, pattern, grid, text, " +
+                                    "watermark, cropped, low contrast, noisy",
+                        )
+                }
+            }
+        }
+
         whenever("no image provider is configured") {
             then("it defaults to the seed machine") {
                 runner.run { ctx -> ctx.getBean(Machine::class.java).shouldBeInstanceOf<SeedMachine>() }

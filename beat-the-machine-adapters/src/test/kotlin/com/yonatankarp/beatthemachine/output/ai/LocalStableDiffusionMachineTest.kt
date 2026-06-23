@@ -11,6 +11,7 @@ import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.aroundAll
 import de.infix.testBalloon.framework.core.testSuite
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.coEvery
 import io.mockk.mockk
 import okhttp3.mockwebserver.MockResponse
@@ -43,6 +44,20 @@ val LocalStableDiffusionMachineSuite by testSuite(
             timeout = 5.seconds,
         )
 
+    fun styledMachine(): LocalStableDiffusionMachine =
+        LocalStableDiffusionMachine(
+            server.url("/").toString(),
+            storePicture,
+            steps = 10,
+            width = 384,
+            height = 384,
+            timeout = 5.seconds,
+            promptPrefix = "clear centered subject: ",
+            promptSuffix = ", simple colorful storybook illustration",
+            negativePrompt = "abstract, blurry",
+            cfgScale = 7.0,
+        )
+
     given("a local Stable Diffusion machine") {
         whenever("the upstream returns a generated image") {
             then("it stores the decoded image and returns Ready") {
@@ -56,6 +71,30 @@ val LocalStableDiffusionMachineSuite by testSuite(
                 coEvery { storePicture handle StorePicture.Command(pngBytes, "image/png") } returns "xyz"
                 val result = machine() answer Machine.Query(Prompt("dragon eating a cookie"))
                 result shouldBe Picture.Ready("/images/xyz")
+                server.takeRequest()
+            }
+        }
+
+        whenever("calling the upstream txt2img API") {
+            then("it applies local seed-image prompt settings to the request") {
+                val pngBytes = byteArrayOf(1, 2, 3)
+                val b64 = Base64.getEncoder().encodeToString(pngBytes)
+                server.enqueue(
+                    MockResponse()
+                        .setHeader("Content-Type", "application/json")
+                        .setBody("""{"images":["$b64"]}"""),
+                )
+                coEvery { storePicture handle StorePicture.Command(pngBytes, "image/png") } returns "styled"
+
+                styledMachine() answer Machine.Query(Prompt("red robot"))
+
+                val body = server.takeRequest().body.readUtf8()
+                body shouldContain """"prompt":"clear centered subject: red robot, simple colorful storybook illustration""""
+                body shouldContain """"negative_prompt":"abstract, blurry""""
+                body shouldContain """"steps":10"""
+                body shouldContain """"width":384"""
+                body shouldContain """"height":384"""
+                body shouldContain """"cfg_scale":7.0"""
             }
         }
 

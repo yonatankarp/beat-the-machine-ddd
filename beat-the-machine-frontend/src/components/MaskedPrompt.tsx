@@ -22,7 +22,7 @@ export default function MaskedPrompt({ tokens }: { tokens: MaskedToken[] }) {
               animate={
                 reduceMotion
                   ? { opacity: 1, scale: 1 }
-                  : { opacity: 1, scale: [0.5, 1.18, 1], y: 0 }
+                  : { opacity: 1, scale: 1, y: 0 }
               }
               transition={
                 reduceMotion

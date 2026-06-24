@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { motion, useReducedMotion } from 'motion/react'
+import { motion, useReducedMotion, type Variants } from 'motion/react'
 import { useChallenge } from '../hooks/useChallenge'
 import { useHeadingFocus } from '../hooks/useHeadingFocus'
 import { clearChallengeId } from '../api/challengeStore'
@@ -78,7 +78,7 @@ export default function ResultScreen() {
         variants: {
           hidden: { opacity: 0, y: 18 },
           show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 320, damping: 26 } },
-        },
+        } satisfies Variants,
       }
 
   return (

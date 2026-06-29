@@ -15,7 +15,7 @@ mockwebserver = "5.4.0"
 spring-ai = "2.0.0"
 testballoon = "1.0.1-K2.4.0"
 kotest = "6.2.1"
-junit-platform-launcher = "6.1.0"
+junit-platform-launcher = "6.1.1"
 
 [libraries]
 # --- Versions managed by Spring Boot's BOM (no version declared here) ---

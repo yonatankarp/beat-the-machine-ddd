@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.4.10"
 node-gradle = "7.1.0"
-openapi-generator = "7.23.0"
+openapi-generator = "7.24.0"
 node = "22.12.0"
 spring-boot = "4.1.0"
 spring-dependency-management = "1.1.7"

@@ -12,7 +12,7 @@ jvm = "25"
 # Pinned here for the application module, which has no Spring dependency management.
 kotlinx-coroutines = "1.11.0"
 mockwebserver = "5.5.0"
-spring-ai = "2.0.0"
+spring-ai = "2.0.1"
 testballoon = "1.0.1-K2.4.0"
 kotest = "6.2.4"
 junit-platform-launcher = "6.1.3"

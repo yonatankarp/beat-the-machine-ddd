@@ -6,7 +6,7 @@ node = "22.23.4"
 spring-boot = "4.1.2"
 spring-dependency-management = "1.1.7"
 openapiContracts = "0.1.0"
-mockk = "1.14.11"
+mockk = "1.14.12"
 jvm = "25"
 # Matches the version managed by Spring Boot 4.1.0's BOM (kotlinx-coroutines-bom).
 # Pinned here for the application module, which has no Spring dependency management.

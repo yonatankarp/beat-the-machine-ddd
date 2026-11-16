@@ -14,7 +14,7 @@ kotlinx-coroutines = "1.11.0"
 mockwebserver = "5.5.1"
 spring-ai = "2.0.2"
 testballoon = "1.0.1-K2.4.0"
-kotest = "6.2.6"
+kotest = "6.2.7"
 junit-platform-launcher = "6.1.3"
 
 [libraries]
